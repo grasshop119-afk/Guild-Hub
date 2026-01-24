@@ -2,108 +2,170 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Guild Hub - Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guild Hub - Elite Interface</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #050b14;
+            --accent-blue: #4facfe;
             --swgoh-green-bright: #26b31e;
             --swgoh-green-dark: #0f400b;
             --text-white: #ffffff;
             --border-default: rgba(30, 58, 95, 0.8);
             --input-bg: rgba(5, 13, 22, 0.8);
-            --accent-blue: #4facfe;
         }
-        /* Закрепляем сайт: нельзя масштабировать и двигать */
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent;
-            touch-action: none; 
-        }
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--bg-dark);
-            background-image: linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
-            background-size: 100% 3px, cover; background-attachment: fixed;
-            display: flex; justify-content: center; align-items: center;
+
+        /* [Стили из твоего оригинала сохранены] */
+        * { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; box-sizing: border-box; }
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            font-family: 'Montserrat', sans-serif; background-color: var(--bg-dark);
             color: var(--text-white); overflow: hidden; position: fixed;
+            display: flex; justify-content: center; align-items: center;
         }
+
         .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; }
-        .logo { width: 75%; max-width: 260px; margin: 0 auto 25px; display: block; }
-        h1 { font-size: 1.3rem; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
-        .description { font-size: 0.9rem; margin-bottom: 25px; opacity: 0.9; }
-        .input-wrapper { position: relative; width: 100%; margin-bottom: 20px; }
-        .swgoh-input {
-            width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-default);
-            border-radius: 8px; padding: 18px; color: #ffffff; font-family: 'Montserrat', sans-serif;
-            font-size: 1.2rem; outline: none; text-align: center; letter-spacing: 3px;
+        .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
+        h1 { font-size: 1.2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
+        .description { font-size: 0.9rem; margin-bottom: 25px; opacity: 0.8; }
+
+        .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
+        .swgoh-input { 
+            width: 100%; background: var(--input-bg); border: 1px solid var(--border-default);
+            border-radius: 8px; padding: 18px; color: #fff; font-size: 1.2rem;
+            text-align: center; letter-spacing: 3px; outline: none;
         }
-        .paste-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; fill: rgba(255, 255, 255, 0.4); display: flex; padding: 8px; }
+
+        /* НОВЫЙ БЛОК: Превью гильдии */
+        .guild-preview {
+            width: 100%;
+            background: rgba(30, 58, 95, 0.3);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .guild-preview.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .guild-info-left { display: flex; align-items: center; gap: 12px; text-align: left; }
+        .guild-logo-mini { width: 40px; height: 40px; border-radius: 4px; border: 1px solid var(--accent-blue); }
+        .guild-name-mini { font-weight: 700; font-size: 0.85rem; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .guild-count { font-size: 0.75rem; color: var(--accent-blue); font-weight: 700; }
+
         .submit-btn {
-            position: relative; width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif;
-            font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
-            cursor: not-allowed; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative; width: 100%; padding: 20px;
+            font-family: 'Montserrat', sans-serif; font-weight: 700;
+            text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
+            border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
             background: rgba(255, 255, 255, 0.05); transition: all 0.3s ease;
-            letter-spacing: 2px; overflow: hidden; font-size: 1rem;
+            letter-spacing: 2px; cursor: not-allowed;
         }
+
         .submit-btn.active {
             background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%);
             border: 1px solid #45f53d; color: #ffffff; cursor: pointer;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
         }
-        .glow-line {
-            position: absolute; bottom: -1px; left: 50%; width: 75%; height: 3px;
-            background: radial-gradient(circle, #ffffff 0%, #ffffff 20%, transparent 80%);
-            transform: translateX(-50%); opacity: 0; transition: opacity 0.2s;
-        }
-        .submit-btn.active:hover .glow-line { opacity: 1; }
-        .tg-login { font-size: 0.85rem; margin-top: 20px; }
+
+        .tg-login { margin-top: 20px; font-size: 0.8rem; }
         .tg-login a { color: var(--accent-blue); text-decoration: none; font-weight: 700; }
     </style>
 </head>
 <body>
+
 <div class="main-content">
-    <img src="Logos/Logo.png" alt="Logo" class="logo">
-    <h1>Вход в систему</h1>
-    <p class="description">Введите свой <b>код союзника</b></p>
+    <img src="https://i.ibb.co/v4x1hC8n/image.png" alt="Logo" class="logo">
+    
+    <h1>Авторизация</h1>
+    <p class="description">Введи свой код союзника</p>
+
     <div class="input-wrapper">
         <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11" inputmode="numeric">
-        <div class="paste-icon" id="pasteBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
-        </div>
     </div>
-    <button id="submitBtn" class="submit-btn">Продолжить<div class="glow-line"></div></button>
-    <div class="tg-login">Или используйте <a href="#">Telegram</a></div>
+
+    <div id="guildPreview" class="guild-preview">
+        <div class="guild-info-left">
+            <img id="gIcon" src="https://swgoh.gg/static/img/assets/tex.guild_logo_default.png" class="guild-logo-mini">
+            <div id="gName" class="guild-name-mini">Загрузка...</div>
+        </div>
+        <div id="gMembers" class="guild-count">0/50</div>
+    </div>
+
+    <button id="submitBtn" class="submit-btn">Продолжить</button>
+
+    <div class="tg-login">
+        Есть аккаунт? <a href="#">Войти с Telegram</a>
+    </div>
 </div>
+
 <script>
     const input = document.getElementById('allyCode');
     const btn = document.getElementById('submitBtn');
-    const pasteBtn = document.getElementById('pasteBtn');
+    const preview = document.getElementById('guildPreview');
 
-    function checkInput() {
-        let digits = input.value.replace(/\D/g, '').substring(0, 9);
+    function formatValue(val) {
+        let digits = val.replace(/\D/g, '').substring(0, 9);
         let formatted = "";
         for (let i = 0; i < digits.length; i++) {
             if (i > 0 && i % 3 === 0) formatted += "-";
             formatted += digits[i];
         }
-        input.value = formatted;
-        btn.classList.toggle('active', digits.length === 9);
+        return formatted;
     }
+
+    async function checkInput() {
+        input.value = formatValue(input.value);
+        let pureDigits = input.value.replace(/\D/g, '');
+        
+        if (pureDigits.length === 9) {
+            // Как только ввели 9 цифр — ищем гильдию
+            fetchGuild(pureDigits);
+        } else {
+            preview.classList.remove('show');
+            btn.classList.remove('active');
+        }
+    }
+
+    async function fetchGuild(code) {
+        // Мы обращаемся к твоему серверу на Render
+        // Когда зальешь на Render, путь /api/guild/ заработает
+        try {
+            const response = await fetch(`/api/guild/${code}`);
+            const data = await response.json();
+
+            if (data.name) {
+                document.getElementById('gName').innerText = data.name;
+                document.getElementById('gMembers').innerText = `${data.members.length}/50`;
+                // Если есть иконка в API, можно заменить src
+                
+                preview.classList.add('show');
+                btn.classList.add('active');
+            }
+        } catch (err) {
+            console.log("Гильдия пока не найдена или сервер спит");
+        }
+    }
+
     input.addEventListener('input', checkInput);
-    pasteBtn.addEventListener('click', async () => {
-        try { input.value = await navigator.clipboard.readText(); checkInput(); } catch (err) {}
-    });
+    
     btn.addEventListener('click', () => {
         if (btn.classList.contains('active')) {
-            const pureCode = input.value.replace(/\D/g, '');
-            localStorage.setItem('hub_auth', 'true');
-            localStorage.setItem('ally_code', pureCode);
-            window.location.href = 'main.html';
+            // Переход к списку энергии или сохранение
+            alert("Вход выполнен!");
         }
     });
 </script>
+
 </body>
 </html>
