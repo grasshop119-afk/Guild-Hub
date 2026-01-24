@@ -2,112 +2,105 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Guild Hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #050b14;
-            --accent-blue: #4facfe;
+            --accent: #4facfe;
+            --green: #26b31e;
             --border: rgba(30, 58, 95, 0.8);
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            margin: 0; font-family: 'Montserrat', sans-serif; 
+        body {
+            margin: 0; font-family: 'Montserrat', sans-serif;
             background: var(--bg-dark); color: white;
             background-image: radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
-            height: 100vh; display: flex; align-items: center; justify-content: center;
+            display: flex; justify-content: center; align-items: center; height: 100vh;
         }
-
-        .main-content { width: 90%; max-width: 360px; text-align: center; }
-        .logo { width: 200px; margin-bottom: 25px; }
-        h1 { font-size: 1.3rem; text-transform: uppercase; margin-bottom: 10px; }
-        
-        /* Инпут */
-        .input-wrapper { position: relative; margin-bottom: 15px; }
-        .swgoh-input {
+        .container { width: 90%; max-width: 360px; text-align: center; }
+        .logo { width: 180px; margin-bottom: 25px; }
+        .input-box {
             width: 100%; background: rgba(5, 13, 22, 0.8); border: 1px solid var(--border);
-            border-radius: 8px; padding: 18px; color: white; font-size: 1.2rem;
-            text-align: center; letter-spacing: 2px; outline: none;
+            border-radius: 10px; padding: 18px; color: white; font-size: 1.2rem;
+            text-align: center; letter-spacing: 2px; outline: none; margin-bottom: 15px;
         }
-
-        /* Плашка гильдии */
-        #guildCard {
-            display: none; background: rgba(30, 58, 95, 0.2); border: 1px solid var(--accent-blue);
-            border-radius: 8px; padding: 12px; margin-top: 15px; align-items: center; text-align: left;
-            animation: fadeIn 0.3s ease;
+        .guild-card {
+            display: none; background: rgba(30, 58, 95, 0.2); border: 1px solid var(--border);
+            border-radius: 10px; padding: 15px; margin-bottom: 20px; align-items: center; text-align: left;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .guild-avatar {
-            width: 45px; height: 45px; background: #1a2a3a; border-radius: 6px;
-            margin-right: 12px; border: 1px solid rgba(255,255,255,0.1);
-            background-size: cover; background-position: center;
+        .guild-img { width: 45px; height: 45px; border-radius: 6px; margin-right: 15px; background-size: cover; border: 1px solid rgba(255,255,255,0.1); }
+        .guild-info { overflow: hidden; }
+        .g-name { font-weight: 700; color: var(--accent); font-size: 1rem; display: block; }
+        .p-name { font-size: 0.8rem; opacity: 0.6; }
+        .btn {
+            width: 100%; padding: 20px; border-radius: 10px; border: none;
+            background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.2);
+            font-weight: 700; text-transform: uppercase; cursor: not-allowed; transition: 0.3s;
         }
-        .guild-info { display: flex; flex-direction: column; }
-        .guild-name { font-weight: 700; color: var(--accent-blue); font-size: 0.95rem; }
-        .player-name { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+        .btn.active { background: linear-gradient(to top, var(--green), #0f400b); color: white; cursor: pointer; border: 1px solid #45f53d; }
     </style>
 </head>
 <body>
 
-<div class="main-content">
-    <img src="https://i.ibb.co/v4x1hC8n/image.png" alt="Logo" class="logo">
-    <h1>Добро пожаловать!</h1>
-    
-    <div class="input-wrapper">
-        <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11">
-    </div>
+<div class="container">
+    <img src="https://i.ibb.co/v4x1hC8n/image.png" class="logo">
+    <input type="text" id="codeInp" class="input-box" placeholder="000-000-000" maxlength="11">
 
-    <div id="guildCard">
-        <div id="avatar" class="guild-avatar"></div>
+    <div id="guildCard" class="guild-card">
+        <div id="gImg" class="guild-img"></div>
         <div class="guild-info">
-            <span id="gName" class="guild-name">Поиск...</span>
-            <span id="pName" class="player-name">Загрузка данных</span>
+            <span id="gName" class="g-name">...</span>
+            <span id="pName" class="p-name">...</span>
         </div>
     </div>
+
+    <button id="mainBtn" class="btn">Продолжить</button>
 </div>
 
 <script>
-    const input = document.getElementById('allyCode');
+    const inp = document.getElementById('codeInp');
+    const btn = document.getElementById('mainBtn');
     const card = document.getElementById('guildCard');
-    const gName = document.getElementById('gName');
-    const pName = document.getElementById('pName');
-    const avatar = document.getElementById('avatar');
 
-    input.addEventListener('input', async (e) => {
-        let val = e.target.value.replace(/\D/g, '');
-        
-        // Форматирование 000-000-000
-        let formatted = "";
-        for(let i=0; i<val.length && i<9; i++) {
-            if(i>0 && i%3===0) formatted += "-";
-            formatted += val[i];
+    inp.addEventListener('input', (e) => {
+        let val = e.target.value.replace(/\D/g, '').substring(0, 9);
+        let fmt = "";
+        for (let i = 0; i < val.length; i++) {
+            if (i > 0 && i % 3 === 0) fmt += "-";
+            fmt += val[i];
         }
-        input.value = formatted;
+        e.target.value = fmt;
 
         if (val.length === 9) {
-            card.style.display = 'flex';
-            gName.innerText = "Ищу...";
-            pName.innerText = "Связь с сервером";
-            avatar.style.backgroundImage = "none";
-
-            try {
-                const res = await fetch(`/api/check/${val}`);
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-
-                gName.innerText = data.guildName;
-                pName.innerText = `Игрок: ${data.name}`;
-                avatar.style.backgroundImage = `url('https://game-assets.swgoh.gg/tex.gui_portraits_${data.portraitId}.png')`;
-            } catch (err) {
-                gName.innerText = "Ошибка";
-                pName.innerText = "Код не найден";
-            }
+            fetchData(val);
         } else {
             card.style.display = 'none';
+            btn.classList.remove('active');
         }
     });
+
+    async function fetchData(code) {
+        card.style.display = 'flex';
+        document.getElementById('gName').innerText = "Поиск...";
+        document.getElementById('pName').innerText = "Синхронизация данных";
+        
+        try {
+            const r = await fetch(`/api/check/${code}`);
+            if (!r.ok) throw new Error();
+            const d = await r.json();
+
+            document.getElementById('gName').innerText = d.guildName;
+            document.getElementById('pName').innerText = `Игрок: ${d.playerName}`;
+            document.getElementById('gImg').style.backgroundImage = `url('${d.guildBanner}')`;
+            btn.classList.add('active');
+        } catch (e) {
+            document.getElementById('gName').innerText = "Не найдено";
+            document.getElementById('pName').innerText = "Проверь код союзника";
+            btn.classList.remove('active');
+        }
+    }
 </script>
 </body>
 </html>
