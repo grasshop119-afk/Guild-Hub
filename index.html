@@ -57,14 +57,14 @@
         }
         .paste-icon:hover { fill: var(--accent-blue); }
 
-        /* Плашка гильдии в стиле строки списка */
+        /* Плашка гильдии */
         .guild-preview {
             display: none; 
             background: rgba(30, 58, 95, 0.2); 
             border: 1px solid var(--border-default);
             border-radius: 8px; 
             margin-bottom: 20px; 
-            padding: 10px 14px; 
+            padding: 12px 14px; 
             align-items: center; 
             text-align: left;
             animation: fadeIn 0.4s ease;
@@ -76,7 +76,7 @@
         }
 
         .guild-icon-box {
-            width: 40px; height: 40px; 
+            width: 36px; height: 36px; 
             background: rgba(0, 0, 0, 0.3); 
             border-radius: 6px;
             margin-right: 12px; flex-shrink: 0; 
@@ -89,11 +89,10 @@
             display: flex; flex-direction: column; justify-content: center; flex-grow: 1;
         }
         .guild-name-display { 
-            font-weight: 700; font-size: 0.85rem; color: var(--accent-blue); 
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; 
+            font-weight: 700; font-size: 0.9rem; color: var(--accent-blue); 
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; 
         }
-        .guild-status-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2px; }
-        .guild-members-count { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+        .guild-sub-text { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 1px; }
 
         /* Кнопка */
         .submit-btn {
@@ -126,8 +125,8 @@
 
 <div class="main-content">
     <img src="https://i.ibb.co/v4x1hC8n/image.png" alt="Logo" class="logo">
-    <h1>Авторизация</h1>
-    <p class="description">Введи <b>код союзника</b> для входа</p>
+    <h1>Добро пожаловать!</h1>
+    <p class="description">Введи свой <b>код союзника</b> для входа</p>
 
     <div class="input-wrapper">
         <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11" inputmode="numeric">
@@ -139,23 +138,20 @@
     <div id="guildPreview" class="guild-preview">
         <div class="guild-icon-box">
             <img id="guildImg" class="guild-icon-img" src="" style="display:none;">
-            <span id="guildEmoji" style="font-size: 18px;">⏳</span>
+            <span id="guildEmoji" style="font-size: 16px;">⏳</span>
         </div>
         <div class="guild-info-wrapper">
-            <span id="guildNameDisplay" class="guild-name-display">Загрузка данных...</span>
-            <div class="guild-status-row">
-                <span id="guildMembersCount" class="guild-members-count">Проверка профиля</span>
-                <span style="font-size: 0.65rem; color: var(--swgoh-green-bright); font-weight: 700;">ONLINE</span>
-            </div>
+            <span id="guildNameDisplay" class="guild-name-display">Ищу твою гильдию...</span>
+            <span id="guildSubText" class="guild-sub-text">Пожалуйста, подожди</span>
         </div>
     </div>
 
-    <button id="submitBtn" class="submit-btn">Войти
+    <button id="submitBtn" class="submit-btn">Продолжить
         <div class="glow-line"></div>
     </button>
 
     <div class="tg-login">
-        Есть аккаунт? <a href="#">Telegram вход</a>
+        Есть аккаунт? <a href="#">Войти с Telegram</a>
     </div>
 </div>
 
@@ -167,7 +163,7 @@
     const guildImg = document.getElementById('guildImg');
     const guildEmoji = document.getElementById('guildEmoji');
     const guildNameDisplay = document.getElementById('guildNameDisplay');
-    const guildMembersCount = document.getElementById('guildMembersCount');
+    const guildSubText = document.getElementById('guildSubText');
 
     function formatValue(val) {
         let digits = val.replace(/\D/g, '').substring(0, 9);
@@ -181,8 +177,8 @@
 
     async function findGuild(code) {
         guildPreview.style.display = 'flex';
-        guildNameDisplay.innerText = 'Поиск гильдии...';
-        guildMembersCount.innerText = 'Связь с сервером...';
+        guildNameDisplay.innerText = 'Ищу твою гильдию...';
+        guildSubText.innerText = 'Пожалуйста, подожди';
         guildEmoji.innerText = '⏳';
         guildImg.style.display = 'none';
         btn.classList.remove('active');
@@ -190,41 +186,39 @@
         const proxy = "https://corsproxy.io/?";
 
         try {
-            // Первый запрос к игроку
             const pResp = await fetch(`${proxy}https://swgoh.gg/api/player/${code}/`);
             if (!pResp.ok) throw new Error();
             const pData = await pResp.json();
             
             const gId = pData.data.guild_id;
+            const playerName = pData.data.name;
+
             if (!gId) {
-                guildNameDisplay.innerText = 'Без гильдии';
-                guildMembersCount.innerText = pData.data.name;
+                guildNameDisplay.innerText = playerName;
+                guildSubText.innerText = 'Ты пока без гильдии';
                 guildEmoji.innerText = '👤';
-                btn.classList.add('active'); // Можно войти и без гильдии
+                btn.classList.add('active');
                 return;
             }
 
-            // Второй запрос к гильдии
             const gResp = await fetch(`${proxy}https://swgoh.gg/api/guild-profile/${gId}/`);
             const gData = await gResp.json();
 
             guildNameDisplay.innerText = gData.data.name;
-            guildMembersCount.innerText = `Участников: ${gData.data.members.length}/50`;
+            guildSubText.innerText = `Игрок: ${playerName}`;
             
-            // Ставим иконку (по умолчанию заглушка, так как API guild-profile не всегда дает иконку сразу)
             guildImg.src = "https://game-assets.swgoh.gg/tex.guild_avatar_mon_calamari_01.png";
             guildImg.style.display = 'block';
             guildEmoji.innerText = '';
             
-            // Сохраняем данные для перехода
             localStorage.setItem('ally_code', code);
             localStorage.setItem('hub_auth', 'true');
             
             btn.classList.add('active');
         } catch (err) {
             guildNameDisplay.innerText = 'Код не найден';
+            guildSubText.innerText = 'Проверь его ещё раз';
             guildEmoji.innerText = '❌';
-            guildMembersCount.innerText = 'Проверьте правильность';
             btn.classList.remove('active');
         }
     }
@@ -254,7 +248,6 @@
         }
     });
 
-    // Автофокус при загрузке
     setTimeout(() => input.focus(), 300);
 </script>
 </body>
