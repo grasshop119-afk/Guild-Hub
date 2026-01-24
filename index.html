@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Guild Hub - Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -15,7 +15,11 @@
             --input-bg: rgba(5, 13, 22, 0.8);
             --accent-blue: #4facfe;
         }
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
+            touch-action: none; /* Полная блокировка движений на экране входа */
+        }
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: 'Montserrat', sans-serif;
@@ -26,9 +30,9 @@
             color: var(--text-white); overflow: hidden; position: fixed;
         }
         .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; }
-        .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
+        .logo { width: 75%; max-width: 260px; margin: 0 auto 25px; display: block; }
         h1 { font-size: clamp(1.2rem, 5vw, 1.4rem); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
-        .description { font-size: 0.9rem; margin-bottom: 25px; }
+        .description { font-size: 0.9rem; margin-bottom: 25px; opacity: 0.9; }
         .input-wrapper { position: relative; width: 100%; margin-bottom: 20px; }
         .swgoh-input {
             width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-default);
@@ -94,7 +98,9 @@
     });
     btn.addEventListener('click', () => {
         if (btn.classList.contains('active')) {
+            const code = input.value.replace(/\D/g, '');
             localStorage.setItem('hub_auth', 'true');
+            localStorage.setItem('ally_code', code);
             window.location.href = 'main.html';
         }
     });
