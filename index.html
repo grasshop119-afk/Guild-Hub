@@ -59,7 +59,17 @@
             margin-right: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 24px;
         }
         .guild-icon-img { width: 100%; height: 100%; object-fit: contain; border-radius: 6px; }
-        .guild-name-display { display: block; font-weight: 700; font-size: 0.9rem; color: var(--accent-blue); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+        
+        .guild-info-wrapper {
+            display: flex; justify-content: space-between; align-items: center; width: 100%;
+        }
+        .guild-name-display { 
+            font-weight: 700; font-size: 0.9rem; color: var(--accent-blue); 
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; 
+        }
+        .guild-members-count {
+            font-size: 0.75rem; color: rgba(255,255,255,0.6); font-weight: 400;
+        }
 
         .submit-btn {
             position: relative; width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif;
@@ -74,15 +84,6 @@
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 15px rgba(0,0,0,0.4);
         }
 
-        /* Кнопка Share: не темнеет */
-        .share-btn { 
-            margin-top: 20px; background: var(--accent-blue); width: 100%; border: none; 
-            padding: 15px; color: white; border-radius: 8px; font-weight: bold; cursor: pointer;
-        }
-        .share-btn:hover, .share-btn:active, .share-btn:focus { 
-            background: var(--accent-blue) !important; filter: none !important; opacity: 1 !important; outline: none !important;
-        }
-
         .glow-line {
             position: absolute; bottom: -1.5px; left: 50%; width: 70%; height: 3px;
             background: radial-gradient(circle, #ffffff 0%, #ffffff 20%, transparent 80%);
@@ -90,7 +91,7 @@
         }
         .submit-btn.active:hover .glow-line { opacity: 1; }
 
-        .tg-login { font-size: clamp(0.75rem, 3vw, 0.85rem); margin-top: 15px; }
+        .tg-login { font-size: clamp(0.75rem, 3vw, 0.85rem); margin-top: 25px; }
         .tg-login a { color: var(--accent-blue); text-decoration: none; font-weight: 700; }
     </style>
 </head>
@@ -113,16 +114,15 @@
             <img id="guildImg" class="guild-icon-img" src="" style="display:none;">
             <span id="guildEmoji">⏳</span>
         </div>
-        <div class="guild-info-text">
+        <div class="guild-info-wrapper">
             <span id="guildNameDisplay" class="guild-name-display">Поиск...</span>
+            <span id="guildMembersCount" class="guild-members-count"></span>
         </div>
     </div>
 
     <button id="submitBtn" class="submit-btn">Продолжить
         <div class="glow-line"></div>
     </button>
-
-    <button class="share-btn" onclick="alert('Функция в разработке')">ПОДЕЛИТЬСЯ</button>
 
     <div class="tg-login">
         Есть аккаунт? <a href="#">Войти с Telegram</a>
@@ -137,6 +137,7 @@
     const guildImg = document.getElementById('guildImg');
     const guildEmoji = document.getElementById('guildEmoji');
     const guildNameDisplay = document.getElementById('guildNameDisplay');
+    const guildMembersCount = document.getElementById('guildMembersCount');
 
     function formatValue(val) {
         let digits = val.replace(/\D/g, '').substring(0, 9);
@@ -151,6 +152,7 @@
     async function findGuild(code) {
         guildPreview.style.display = 'flex';
         guildNameDisplay.innerText = 'Поиск...';
+        guildMembersCount.innerText = '';
         guildEmoji.innerText = '⏳';
         guildImg.style.display = 'none';
         
@@ -168,6 +170,7 @@
             const gData = await gResp.json();
 
             guildNameDisplay.innerText = gData.data.name;
+            guildMembersCount.innerText = `${gData.data.members.length}/50`;
             guildImg.src = "https://swgoh.gg/static/img/assets/tex.guild_avatar_mon_calamari_01.png";
             guildImg.style.display = 'block';
             guildEmoji.innerText = '';
@@ -175,6 +178,7 @@
         } catch (err) {
             guildNameDisplay.innerText = 'Гильдия не найдена';
             guildEmoji.innerText = '🤔';
+            guildMembersCount.innerText = '';
             guildImg.style.display = 'none';
             btn.classList.remove('active');
         }
