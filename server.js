@@ -2,54 +2,32 @@ const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
 const path = require('path');
-
 const app = express();
 
-// 1. Разрешаем CORS
 app.use(cors());
-
-// 2. Указываем серверу, где лежат твои файлы (HTML, CSS, картинки)
 app.use(express.static(__dirname));
 
-const HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
-};
+const HEADERS = { 'User-Agent': 'Mozilla/5.0' };
 
-// 3. Главная страница (чтобы по ссылке открывался index.html)
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// 4. API для поиска игрока и гильдии
-app.get('/api/player/:allyCode', async (req, res) => {
-    const code = req.params.allyCode;
+app.get('/api/check/:code', async (req, res) => {
     try {
-        const response = await fetch(`https://swgoh.gg/api/player/${code}/`, { headers: HEADERS });
+        const code = req.params.code.replace(/\D/g, '');
+        const pResp = await fetch(`https://swgoh.gg/api/player/${code}/`, { headers: HEADERS });
+        if (!pResp.ok) return res.status(404).json({ error: 'Player not found' });
+        const pData = await pResp.json();
         
-        if (!response.ok) {
-            return res.status(404).json({ error: 'Player not found' });
-        }
-
-        const data = await response.json();
-        res.json(data);
-    } catch (error) {
-        console.error('Ошибка API:', error);
-        res.status(500).json({ error: 'Server Error' });
+        // Отдаем только то, что нужно: имя, гильдию и ID аватара
+        res.json({
+            name: pData.data.name,
+            guildName: pData.data.guild_name || "Без гильдии",
+            portraitId: pData.data.portrait_id || 1
+        });
+    } catch (e) {
+        res.status(500).json({ error: 'Server error' });
     }
 });
 
-// 5. API для списка гильдии
-app.get('/api/guild/:guildId', async (req, res) => {
-    try {
-        const response = await fetch(`https://swgoh.gg/api/guild-profile/${req.params.guildId}/`, { headers: HEADERS });
-        const data = await response.json();
-        res.json(data);
-    } catch (error) {
-        res.status(500).json({ error: 'Guild Error' });
-    }
-});
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-    console.log(`Сервер запущен на порту ${PORT}`);
-});
+app.listen(PORT, () => console.log('Server is running'));
