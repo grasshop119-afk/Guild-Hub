@@ -3,246 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Guild Hub - Elite Interface</title>
+    <title>Guild Hub - Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #050b14;
-            --accent-blue: #4facfe;
             --swgoh-green-bright: #26b31e;
             --swgoh-green-dark: #0f400b;
             --text-white: #ffffff;
             --border-default: rgba(30, 58, 95, 0.8);
             --input-bg: rgba(5, 13, 22, 0.8);
+            --accent-blue: #4facfe;
         }
-
-        * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-        }
-
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+            margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: 'Montserrat', sans-serif;
             background-color: var(--bg-dark);
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), 
-                radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
-            background-size: 100% 3px, cover;
-            background-attachment: fixed;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-white);
-            overflow: hidden;
-            position: fixed;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
+            background-size: 100% 3px, cover; background-attachment: fixed;
+            display: flex; justify-content: center; align-items: center;
+            color: var(--text-white); overflow: hidden; position: fixed;
         }
-
-        .main-content {
-            text-align: center;
-            width: 90%;
-            max-width: 360px;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .logo {
-            width: 70%;
-            max-width: 240px;
-            margin: 0 auto 25px;
-            display: block;
-        }
-
-        h1 {
-            font-size: clamp(1.2rem, 5vw, 1.4rem);
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            letter-spacing: 1.5px;
-        }
-
-        .description {
-            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
-            margin-bottom: 25px;
-            padding: 0 10px;
-        }
-
-        .input-wrapper {
-            position: relative;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
+        .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; }
+        .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
+        h1 { font-size: clamp(1.2rem, 5vw, 1.4rem); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
+        .description { font-size: clamp(0.8rem, 3.5vw, 0.9rem); margin-bottom: 25px; }
+        .input-wrapper { position: relative; width: 100%; margin-bottom: 20px; }
         .swgoh-input {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-default);
-            border-radius: 8px;
-            padding: 18px 50px 18px 18px;
-            color: #ffffff;
-            font-family: 'Montserrat', sans-serif;
-            font-size: clamp(1.1rem, 4vw, 1.2rem);
-            outline: none;
-            box-sizing: border-box;
-            text-align: center;
-            letter-spacing: 3px;
-            -webkit-appearance: none;
-            appearance: none;
+            width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-default);
+            border-radius: 8px; padding: 18px; color: #ffffff; font-family: 'Montserrat', sans-serif;
+            font-size: 1.2rem; outline: none; text-align: center; letter-spacing: 3px;
         }
-
         .paste-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            fill: rgba(255, 255, 255, 0.4);
-            display: flex;
-            align-items: center;
-            pointer-events: auto;
-            padding: 8px;
-            touch-action: manipulation;
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; fill: rgba(255, 255, 255, 0.4); display: flex; padding: 8px;
         }
-
         .submit-btn {
-            position: relative;
-            width: 100%;
-            padding: 20px;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.3);
-            cursor: not-allowed;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            overflow: hidden;
-            font-size: clamp(0.9rem, 4vw, 1rem);
-            -webkit-appearance: none;
-            appearance: none;
-            touch-action: manipulation;
+            position: relative; width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif;
+            font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05); transition: all 0.3s ease;
+            letter-spacing: 2px; overflow: hidden; font-size: 1rem;
         }
-
         .submit-btn.active {
             background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%);
-            border: 1px solid #45f53d;
-            color: #ffffff;
-            cursor: pointer;
+            border: 1px solid #45f53d; color: #ffffff; cursor: pointer;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 15px rgba(0,0,0,0.4);
         }
-
         .glow-line {
-            position: absolute;
-            bottom: -1.5px;
-            left: 50%;
-            width: 70%;
-            height: 3px;
+            position: absolute; bottom: -1.5px; left: 50%; width: 75%; height: 3px;
             background: radial-gradient(circle, #ffffff 0%, #ffffff 20%, transparent 80%);
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.2s;
-            filter: blur(0.5px);
+            transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; filter: blur(0.5px);
         }
-
-        .submit-btn.active:hover .glow-line,
-        .submit-btn.active:active .glow-line {
-            opacity: 1;
-        }
-
-        .tg-login {
-            font-size: clamp(0.75rem, 3vw, 0.85rem);
-            padding: 0 10px;
-        }
-
-        .tg-login a {
-            color: var(--accent-blue);
-            text-decoration: none;
-            font-weight: 700;
-        }
-
-        @media (max-height: 600px) {
-            .main-content { padding: 10px; }
-            .logo { margin-bottom: 15px; width: 60%; }
-            .description { margin-bottom: 15px; }
-            .submit-btn { padding: 16px; margin-bottom: 15px; }
-        }
+        .submit-btn.active:hover .glow-line { opacity: 1; }
+        .tg-login { font-size: 0.85rem; margin-top: 20px; }
+        .tg-login a { color: var(--accent-blue); text-decoration: none; font-weight: 700; }
     </style>
 </head>
 <body>
-
 <div class="main-content">
     <img src="Logos/Logo.png" alt="Logo" class="logo">
-    
     <h1>Добро пожаловать!</h1>
     <p class="description">Введи свой <b>код союзника</b> для авторизации.</p>
-
     <div class="input-wrapper">
         <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11" inputmode="numeric">
         <div class="paste-icon" id="pasteBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24">
-                <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/>
-            </svg>
+            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
         </div>
     </div>
-
-    <button id="submitBtn" class="submit-btn">Продолжить
-        <div class="glow-line"></div>
-    </button>
-
-    <div class="tg-login">
-        Есть аккаунт? <a href="#">Войти с Telegram</a>
-    </div>
+    <button id="submitBtn" class="submit-btn">Продолжить<div class="glow-line"></div></button>
+    <div class="tg-login">Есть аккаунт? <a href="#">Войти с Telegram</a></div>
 </div>
-
 <script>
     const input = document.getElementById('allyCode');
     const btn = document.getElementById('submitBtn');
     const pasteBtn = document.getElementById('pasteBtn');
 
-    function formatValue(val) {
-        let digits = val.replace(/\D/g, '').substring(0, 9);
+    function checkInput() {
+        let digits = input.value.replace(/\D/g, '').substring(0, 9);
         let formatted = "";
         for (let i = 0; i < digits.length; i++) {
             if (i > 0 && i % 3 === 0) formatted += "-";
             formatted += digits[i];
         }
-        return formatted;
-    }
-
-    function checkInput() {
-        input.value = formatValue(input.value);
-        let pureDigits = input.value.replace(/\D/g, '');
-        btn.classList.toggle('active', pureDigits.length === 9);
+        input.value = formatted;
+        btn.classList.toggle('active', digits.length === 9);
     }
 
     input.addEventListener('input', checkInput);
-
     pasteBtn.addEventListener('click', async () => {
         try {
-            const text = await navigator.clipboard.readText();
-            input.value = text;
+            input.value = await navigator.clipboard.readText();
             checkInput();
-            input.focus();
         } catch (err) {}
     });
 
     btn.addEventListener('click', () => {
-        if (!btn.classList.contains('active')) return;
-        
-        let pureDigits = input.value.replace(/\D/g, '');
-        if (pureDigits.length === 9) {
+        if (btn.classList.contains('active')) {
+            localStorage.setItem('hub_auth', 'true');
             window.location.href = 'main.html';
         }
     });
-
-    setTimeout(() => input.focus(), 300);
 </script>
-
 </body>
 </html>
