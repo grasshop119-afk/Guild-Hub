@@ -57,7 +57,6 @@
         }
         .paste-icon:hover { fill: var(--accent-blue); }
 
-        /* Плашка гильдии */
         .guild-preview {
             display: none; 
             background: rgba(30, 58, 95, 0.2); 
@@ -94,7 +93,6 @@
         }
         .guild-sub-text { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 1px; }
 
-        /* Кнопка */
         .submit-btn {
             position: relative; width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif;
             font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
@@ -183,28 +181,16 @@
         guildImg.style.display = 'none';
         btn.classList.remove('active');
         
-        const proxy = "https://corsproxy.io/?";
-
         try {
-            const pResp = await fetch(`${proxy}https://swgoh.gg/api/player/${code}/`);
-            if (!pResp.ok) throw new Error();
-            const pData = await pResp.json();
+            // Теперь стучимся на твой собственный сервер на Render
+            const response = await fetch(`/api/player/${code}`);
+            if (!response.ok) throw new Error();
+            const pData = await response.json();
             
-            const gId = pData.data.guild_id;
+            const gName = pData.data.guild_name || "Без гильдии";
             const playerName = pData.data.name;
 
-            if (!gId) {
-                guildNameDisplay.innerText = playerName;
-                guildSubText.innerText = 'Ты пока без гильдии';
-                guildEmoji.innerText = '👤';
-                btn.classList.add('active');
-                return;
-            }
-
-            const gResp = await fetch(`${proxy}https://swgoh.gg/api/guild-profile/${gId}/`);
-            const gData = await gResp.json();
-
-            guildNameDisplay.innerText = gData.data.name;
+            guildNameDisplay.innerText = gName;
             guildSubText.innerText = `Игрок: ${playerName}`;
             
             guildImg.src = "https://game-assets.swgoh.gg/tex.guild_avatar_mon_calamari_01.png";
@@ -213,7 +199,6 @@
             
             localStorage.setItem('ally_code', code);
             localStorage.setItem('hub_auth', 'true');
-            
             btn.classList.add('active');
         } catch (err) {
             guildNameDisplay.innerText = 'Код не найден';
