@@ -21,14 +21,14 @@
         * { 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
-            touch-action: pan-y; /* Только вертикальная прокрутка контента */
+            touch-action: pan-y; 
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: var(--bg-dark); color: var(--text-white);
             font-family: 'Montserrat', sans-serif; 
-            overflow: hidden; /* Запрещаем двигать само окно браузера */
+            overflow: hidden; 
             position: fixed;
         }
 
@@ -65,7 +65,6 @@
         .section { width: 100%; max-width: 400px; }
         h2 { font-size: 1.1rem; font-weight: 700; margin: 20px 0 15px; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Окно рейтинга */
         .rating-wrapper { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-default); }
         .rating-wrapper::before, .rating-wrapper::after {
             content: ''; position: absolute; left: 0; right: 0; height: 40px; z-index: 2; pointer-events: none;
@@ -85,12 +84,10 @@
         .val.low { color: var(--red); }
         .val.ok { color: var(--green); }
 
-        /* Футер рейтинга с иконкой молнии */
         .rating-footer { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 15px 0 30px; }
         .center-link { color: var(--accent-blue-bright); font-size: 0.8rem; font-weight: 700; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
         .energy-ico { width: 16px; height: 16px; filter: invert(65%) sepia(90%) saturate(1500%) hue-rotate(180deg); }
 
-        /* Синяя кнопка со свечением */
         .blue-btn {
             position: relative; background: linear-gradient(to top, var(--accent-blue-bright) 0%, var(--accent-blue-dark) 100%);
             border: 1px solid var(--accent-blue-bright); color: #ffffff; padding: 8px 16px; border-radius: 6px;
@@ -100,7 +97,6 @@
         .glow-line { position: absolute; bottom: -1px; left: 50%; width: 80%; height: 2px; background: radial-gradient(circle, #ffffff 0%, #ffffff 30%, transparent 80%); transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; }
         .blue-btn:hover .glow-line { opacity: 1; }
 
-        /* Компактные стикеры */
         .sticker-scroll { display: flex; overflow-x: auto; gap: 10px; padding: 10px 0; }
         .sticker { min-width: 80px; height: 80px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-default); border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: rgba(255,255,255,0.4); text-align: center; }
         .sticker-promo { background: rgba(79, 172, 254, 0.1); border: 1px dashed var(--accent-blue-bright); color: var(--accent-blue-bright); font-weight: 700; text-transform: uppercase; }
@@ -152,40 +148,42 @@
 
     async function fetchGuildData() {
         try {
-            // Запрос к твоему API (API должен отдавать JSON с именами, кодами и билетами)
-            const response = await fetch(`/api/guild/${allyCode}`);
+            // Используй полный URL если бэкенд на другом домене, например:
+            // https://my-backend.onrender.com/api/guild/${allyCode}
+            const apiUrl = `/api/guild/${allyCode}`; 
+            
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
+            
             const data = await response.json();
-
             if (data.error) throw new Error(data.error);
 
             document.getElementById('guildTitle').innerText = data.name || "Твоя Гильдия";
 
             let members = data.members;
-            // Сортируем по возрастанию билетов (должники сверху)
             members.sort((a, b) => (a.daily_raid_tickets || 0) - (b.daily_raid_tickets || 0));
 
             rList.innerHTML = "";
             members.forEach(m => {
                 const t = m.daily_raid_tickets ?? 0;
                 const statusClass = t < 600 ? 'low' : 'ok';
-                // Ссылка на ассеты аватаров swgoh.gg
-                const avatarImg = m.portrait_id ? `https://game-assets.swgoh.gg/tex.gui_portraits_${m.portrait_id}.png` : 'https://via.placeholder.com/32';
+                const avatarId = m.portrait_id || "1"; 
+                const avatarImg = `https://game-assets.swgoh.gg/tex.gui_portraits_${avatarId}.png`;
 
                 rList.innerHTML += `
                     <div class="row">
-                        <div class="mini-avatar" style="background-image: url('${avatarImg}')"></div>
+                        <div class="mini-avatar" style="background-image: url('${avatarImg}'), url('https://via.placeholder.com/32')"></div>
                         <div class="name">${m.player_name}</div>
                         <div class="val ${statusClass}">${t}</div>
                     </div>`;
                 
-                // Ставим аватар текущего авторизованного игрока в шапку
-                if (m.ally_code == allyCode) {
+                if (String(m.ally_code) === String(allyCode)) {
                     playerAvatar.style.backgroundImage = `url('${avatarImg}')`;
                 }
             });
 
         } catch (err) {
-            rList.innerHTML = `<div style="text-align: center; padding-top: 100px; color: var(--red); font-size: 0.8rem;">Ошибка: ${err.message}</div>`;
+            rList.innerHTML = `<div style="text-align: center; padding: 100px 20px 0; color: var(--red); font-size: 0.8rem;">${err.message}</div>`;
         }
     }
 
