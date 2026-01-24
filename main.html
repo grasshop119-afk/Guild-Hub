@@ -3,121 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Guild Hub - Main</title>
+    <title>Guild Hub - Command Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #050b14;
-            --accent-blue: rgba(79, 172, 254, 0.7);
             --accent-blue-full: #4facfe;
-            --panel-bg: rgba(3, 8, 15, 0.95);
+            --accent-blue-glass: rgba(79, 172, 254, 0.7);
+            --panel-bg: rgba(10, 25, 41, 0.8);
+            --border-default: rgba(30, 58, 95, 0.6);
             --text-white: #ffffff;
-            --border-default: rgba(30, 58, 95, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Скрываем дефолтные скроллбары, оставляя функционал */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-default);
+            border-radius: 10px;
         }
 
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
-            min-height: 100vh;
-            font-family: 'Montserrat', sans-serif;
+            height: 100%;
             background-color: var(--bg-dark);
+            color: var(--text-white);
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden; /* Фиксируем основной экран */
+        }
+
+        /* Фоновая сетка из регистрации */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-image: 
                 linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), 
                 radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
             background-size: 100% 3px, cover;
-            background-attachment: fixed;
-            color: var(--text-white);
-            overflow-x: hidden;
+            z-index: -1;
         }
 
-        /* Шапка */
         header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
-            background: rgba(5, 11, 20, 0.5);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding: 0 20px;
+            background: rgba(5, 11, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-default);
+            z-index: 1000;
         }
 
-        .header-logo {
-            height: 30px;
-            width: auto;
-        }
+        .header-logo { height: 28px; }
 
         .settings-icon {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             opacity: 0.7;
-            filter: invert(58%) sepia(87%) saturate(1914%) hue-rotate(182deg) brightness(101%) contrast(99%);
+            /* Наш голубой цвет через фильтр */
+            filter: invert(65%) sepia(90%) saturate(1500%) hue-rotate(180deg);
             cursor: pointer;
         }
 
-        .container {
-            padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
+        /* Основной скролл-контейнер */
+        main {
+            height: 100%;
+            overflow-y: auto;
+            padding: 80px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .section-wrapper {
+            width: 100%;
+            max-width: 400px;
         }
 
         h2 {
-            font-size: 1.1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 25px 0 15px;
+            color: rgba(255,255,255,0.9);
             font-weight: 700;
-            margin: 20px 0 15px;
-            text-align: left;
         }
 
-        /* Секция рейтинга */
-        .rating-panel {
+        /* Панель рейтинга */
+        .rating-container {
             background: var(--panel-bg);
             border: 1px solid var(--border-default);
             border-radius: 12px;
-            padding: 10px;
-            height: 300px;
+            height: 320px;
             overflow-y: auto;
-            margin-bottom: 10px;
+            padding: 10px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
 
-        .rating-card {
+        .rating-item {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.03);
-            margin-bottom: 8px;
-            padding: 8px 12px;
+            padding: 10px;
+            background: rgba(255,255,255,0.03);
             border-radius: 6px;
+            margin-bottom: 6px;
+            border: 1px solid transparent;
         }
 
         .avatar {
-            width: 32px;
-            height: 32px;
-            background: #1e3a5f;
-            border-radius: 4px;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(45deg, #1e3a5f, #0d1b2a);
+            border-radius: 6px;
             margin-right: 12px;
+            border: 1px solid var(--border-default);
         }
 
-        .player-name {
-            flex-grow: 1;
-            font-size: 0.9rem;
-            text-align: left;
-        }
+        .name { flex-grow: 1; font-size: 0.85rem; }
 
-        .energy-value {
+        .score {
             font-weight: 700;
             color: var(--accent-blue-full);
-            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(79, 172, 254, 0.4);
         }
 
-        .open-rating {
-            font-size: 0.75rem;
-            color: var(--accent-blue-full);
-            text-decoration: none;
+        .open-rating-btn {
             display: block;
-            margin-bottom: 30px;
-            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            margin-top: 12px;
+            color: var(--accent-blue-full);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: 1px;
         }
 
         /* Новости и Стикеры */
@@ -125,106 +162,100 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            width: 100%;
         }
 
         .add-btn {
             background: transparent;
             border: 1px solid var(--accent-blue-full);
             color: var(--accent-blue-full);
-            padding: 5px 15px;
+            font-size: 0.65rem;
+            padding: 4px 12px;
             border-radius: 4px;
-            font-size: 0.7rem;
             text-transform: uppercase;
             font-weight: 700;
-            cursor: pointer;
         }
 
-        .sticker-scroll {
+        .sticker-row {
             display: flex;
             overflow-x: auto;
             gap: 12px;
-            padding-bottom: 15px;
-            scrollbar-width: thin;
-            scrollbar-color: var(--border-default) transparent;
-        }
-
-        .sticker-scroll::-webkit-scrollbar {
-            height: 4px;
-        }
-
-        .sticker-scroll::-webkit-scrollbar-thumb {
-            background: var(--border-default);
-            border-radius: 10px;
+            padding: 5px 0 15px;
+            width: 100%;
         }
 
         .sticker {
-            min-width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
+            min-width: 110px;
+            height: 110px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-default);
+            border-radius: 10px;
             flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            padding: 10px;
-            box-sizing: border-box;
-            font-size: 0.65rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
         }
 
+        /* Тот самый 8-й стикер */
         .sticker-promo {
-            background: rgba(79, 172, 254, 0.15);
+            background: rgba(79, 172, 254, 0.1);
             border: 1px dashed var(--accent-blue-full);
             color: var(--accent-blue-full);
+            text-align: center;
+            padding: 12px;
+            line-height: 1.3;
+            font-weight: 700;
+            text-transform: none;
         }
     </style>
 </head>
 <body>
+
+    <div class="bg-grid"></div>
 
     <header>
         <img src="Logos/Logo.png" alt="Logo" class="header-logo">
         <img src="https://img.icons8.com/?size=100&id=9110&format=png&color=000000" alt="Settings" class="settings-icon">
     </header>
 
-    <div class="container">
-        <h2>Рейтинг энергии</h2>
-        
-        <div class="rating-panel" id="ratingList">
+    <main>
+        <div class="section-wrapper">
+            <h2>Рейтинг энергии</h2>
+            <div class="rating-container" id="ratingList">
+                </div>
+            <a href="#" class="open-rating-btn">Открыть рейтинг</a>
+
+            <div class="news-header">
+                <h2>Те, кто в тени</h2>
+                <button class="add-btn">Добавить</button>
             </div>
-        
-        <a class="open-rating">Открыть рейтинг</a>
 
-        <div class="news-header">
-            <h2 style="margin: 0;">Те кто в тени</h2>
-            <button class="add-btn">Добавить</button>
+            <div class="sticker-row">
+                <div class="sticker">Sticker 1</div>
+                <div class="sticker">Sticker 2</div>
+                <div class="sticker">Sticker 3</div>
+                <div class="sticker">Sticker 4</div>
+                <div class="sticker">Sticker 5</div>
+                <div class="sticker">Sticker 6</div>
+                <div class="sticker">Sticker 7</div>
+                <div class="sticker sticker-promo">Чтобы посмотреть все стикеры, добавь этот стикерпак.</div>
+            </div>
         </div>
-
-        <div class="sticker-scroll">
-            <div class="sticker">Sticker 1</div>
-            <div class="sticker">Sticker 2</div>
-            <div class="sticker">Sticker 3</div>
-            <div class="sticker">Sticker 4</div>
-            <div class="sticker">Sticker 5</div>
-            <div class="sticker">Sticker 6</div>
-            <div class="sticker">Sticker 7</div>
-            <div class="sticker sticker-promo">Чтобы посмотреть все стикеры, добавь этот стикерпак.</div>
-        </div>
-    </div>
+    </main>
 
     <script>
-        // Генерация 50 мест рейтинга для шоукейса
         const ratingList = document.getElementById('ratingList');
         for (let i = 1; i <= 50; i++) {
-            const card = document.createElement('div');
-            card.className = 'rating-card';
-            card.innerHTML = `
+            const item = document.createElement('div');
+            item.className = 'rating-item';
+            item.innerHTML = `
                 <div class="avatar"></div>
-                <div class="player-name">Игрок #${i}</div>
-                <div class="energy-value">750</div>
+                <div class="name">Player Name ${i}</div>
+                <div class="score">${(1000 - i * 5)}</div>
             `;
-            ratingList.appendChild(card);
+            ratingList.appendChild(item);
         }
     </script>
 </body>
