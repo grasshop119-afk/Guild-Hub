@@ -177,7 +177,7 @@
 <body>
 
 <div class="main-content">
-    <img src="Logos/logo.png" alt="Logo" class="logo">
+    <img src="Logos/Logo.png" alt="Logo" class="logo">
     
     <h1>Добро пожаловать!</h1>
     <p class="description">Введи свой <b>код союзника</b> для авторизации.</p>
@@ -234,6 +234,7 @@
 
     btn.addEventListener('click', () => {
         if (!btn.classList.contains('active')) return;
+        
         let pureDigits = input.value.replace(/\D/g, '');
         if (pureDigits.length === 9) {
             window.location.href = 'main.html';
