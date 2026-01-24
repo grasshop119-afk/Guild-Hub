@@ -107,9 +107,9 @@
             touch-action: manipulation;
         }
 
-        /* --- НОВЫЙ БЛОК ГИЛЬДИИ --- */
+        /* Прямоугольник гильдии (без анимации появления) */
         .guild-preview {
-            display: none; /* Скрыт по умолчанию */
+            display: none; 
             background: rgba(15, 27, 42, 0.9);
             border: 1px solid var(--accent-blue);
             border-radius: 8px;
@@ -117,22 +117,26 @@
             padding: 12px;
             align-items: center;
             text-align: left;
-            animation: slideUp 0.3s ease-out;
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .guild-icon {
+        .guild-icon-box {
             width: 45px;
             height: 45px;
             background: #1a2a3a;
             border-radius: 6px;
             margin-right: 12px;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .guild-icon-img {
+            width: 100%;
+            height: 100%;
             object-fit: contain;
+            border-radius: 6px;
         }
 
         .guild-info-text {
@@ -147,7 +151,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 160px;
+            max-width: 180px;
         }
 
         .guild-members-count {
@@ -155,8 +159,6 @@
             font-size: 0.75rem;
             color: rgba(255,255,255,0.6);
         }
-
-        /* -------------------------- */
 
         .submit-btn {
             position: relative;
@@ -188,24 +190,6 @@
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 15px rgba(0,0,0,0.4);
         }
 
-        /* Share кнопка (по инструкции не темнеет) */
-        .share-btn {
-            background: var(--accent-blue);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 8px;
-            width: 100%;
-            font-weight: 700;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-        .share-btn:hover, .share-btn:active, .share-btn:focus { 
-            background: var(--accent-blue) !important; 
-            filter: none !important; 
-            opacity: 1 !important;
-        }
-
         .glow-line {
             position: absolute;
             bottom: -1.5px;
@@ -219,8 +203,7 @@
             filter: blur(0.5px);
         }
 
-        .submit-btn.active:hover .glow-line,
-        .submit-btn.active:active .glow-line {
+        .submit-btn.active:hover .glow-line {
             opacity: 1;
         }
 
@@ -238,8 +221,6 @@
         @media (max-height: 600px) {
             .main-content { padding: 10px; }
             .logo { margin-bottom: 15px; width: 60%; }
-            .description { margin-bottom: 15px; }
-            .submit-btn { padding: 16px; margin-bottom: 15px; }
         }
     </style>
 </head>
@@ -253,7 +234,7 @@
 
     <div class="input-wrapper">
         <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11" inputmode="numeric">
-        <div class="paste-icon" id="pasteBtn" title="Вставить">
+        <div class="paste-icon" id="pasteBtn">
             <svg width="20" height="20" viewBox="0 0 24 24">
                 <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/>
             </svg>
@@ -261,10 +242,13 @@
     </div>
 
     <div id="guildPreview" class="guild-preview">
-        <img id="guildImg" src="https://swgoh.gg/static/img/assets/tex.guild_avatar_mon_calamari_01.png" class="guild-icon">
+        <div id="guildIconBox" class="guild-icon-box">
+            <img id="guildImg" class="guild-icon-img" src="" style="display:none;">
+            <span id="guildEmoji">⏳</span>
+        </div>
         <div class="guild-info-text">
-            <span id="guildNameDisplay" class="guild-name-display">Загрузка...</span>
-            <span id="guildMembersCount" class="guild-members-count">Участников: --</span>
+            <span id="guildNameDisplay" class="guild-name-display">Поиск...</span>
+            <span id="guildMembersCount" class="guild-members-count" style="display:none;">Участников: --</span>
         </div>
     </div>
 
@@ -282,6 +266,10 @@
     const btn = document.getElementById('submitBtn');
     const pasteBtn = document.getElementById('pasteBtn');
     const guildPreview = document.getElementById('guildPreview');
+    const guildImg = document.getElementById('guildImg');
+    const guildEmoji = document.getElementById('guildEmoji');
+    const guildNameDisplay = document.getElementById('guildNameDisplay');
+    const guildMembersCount = document.getElementById('guildMembersCount');
 
     function formatValue(val) {
         let digits = val.replace(/\D/g, '').substring(0, 9);
@@ -294,24 +282,42 @@
     }
 
     async function findGuild(code) {
+        // Показываем плашку сразу без анимации
         guildPreview.style.display = 'flex';
-        document.getElementById('guildNameDisplay').innerText = 'Поиск гильдии...';
+        guildNameDisplay.innerText = 'Поиск гильдии...';
+        guildEmoji.innerText = '⏳';
+        guildImg.style.display = 'none';
+        guildMembersCount.style.display = 'none';
+        
+        const proxy = "https://api.allorigins.win/raw?url=";
         
         try {
-            // Запрос к твоему серверу на Render
-            const response = await fetch(`/api/guild/${code}`);
-            const data = await response.json();
+            const pResp = await fetch(proxy + encodeURIComponent(`https://swgoh.gg/api/player/${code}/`));
+            const pData = await pResp.json();
+            const gId = pData.data.guild_id;
 
-            if (data.name) {
-                document.getElementById('guildNameDisplay').innerText = data.name;
-                document.getElementById('guildMembersCount').innerText = `Участников: ${data.members.length}/50`;
-                // Если есть иконка в API, можно подставить её
-                btn.classList.add('active');
-            } else {
-                throw new Error();
-            }
+            if (!gId) throw new Error();
+
+            const gResp = await fetch(proxy + encodeURIComponent(`https://swgoh.gg/api/guild-profile/${gId}/`));
+            const gData = await gResp.json();
+
+            // Если нашли
+            guildNameDisplay.innerText = gData.data.name;
+            guildMembersCount.innerText = `Участников: ${gData.data.members.length}/50`;
+            guildMembersCount.style.display = 'block';
+            
+            // Ставим картинку по умолчанию (или из API если есть)
+            guildImg.src = "https://swgoh.gg/static/img/assets/tex.guild_avatar_mon_calamari_01.png";
+            guildImg.style.display = 'block';
+            guildEmoji.innerText = '';
+            
+            btn.classList.add('active');
         } catch (err) {
-            document.getElementById('guildNameDisplay').innerText = 'Гильдия не найдена';
+            // Если НЕ нашли
+            guildNameDisplay.innerText = 'Гильдия не найдена';
+            guildEmoji.innerText = '🤔';
+            guildImg.style.display = 'none';
+            guildMembersCount.style.display = 'none';
             btn.classList.remove('active');
         }
     }
@@ -336,14 +342,11 @@
             input.value = text;
             checkInput();
             input.focus();
-        } catch (err) {
-            console.error('Ошибка доступа к буферу обмена');
-        }
+        } catch (err) {}
     });
 
     btn.addEventListener('click', () => {
-        if (!btn.classList.contains('active')) return;
-        alert('Вход выполнен!');
+        if (btn.classList.contains('active')) alert('Вход разрешен!');
     });
 
     setTimeout(() => input.focus(), 300);
