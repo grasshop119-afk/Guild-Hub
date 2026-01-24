@@ -18,7 +18,7 @@
         * { 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent;
-            touch-action: none; /* Полная блокировка движений на экране входа */
+            touch-action: none; 
         }
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -98,9 +98,9 @@
     });
     btn.addEventListener('click', () => {
         if (btn.classList.contains('active')) {
-            const code = input.value.replace(/\D/g, '');
+            const pureCode = input.value.replace(/\D/g, '');
             localStorage.setItem('hub_auth', 'true');
-            localStorage.setItem('ally_code', code);
+            localStorage.setItem('ally_code', pureCode);
             window.location.href = 'main.html';
         }
     });
