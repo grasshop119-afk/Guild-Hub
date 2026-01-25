@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SWGOH Guild MiniApp</title>
+    <title>SWGOH Guild Hub</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -12,6 +12,7 @@
             --tg-theme-button-color: #3390ec;
             --tg-theme-button-text-color: #ffffff;
             --tg-theme-hint-color: #999999;
+            --tg-theme-secondary-bg-color: #f0f2f5;
         }
 
         body {
@@ -22,28 +23,36 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             min-height: 100vh;
-            text-align: center;
         }
 
         .container {
-            padding: 20px;
-            width: 90%;
+            padding: 30px 20px;
+            width: 100%;
             max-width: 400px;
+            box-sizing: border-box;
+            text-align: center;
         }
 
+        .guild-card {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none; /* Показываем только при результате */
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         .guild-avatar {
-            width: 120px;
-            height: 120px;
-            background-color: #f0f0f0;
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            display: none; 
-            background-size: cover;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 15px;
+            background-size: contain;
+            background-repeat: no-repeat;
             background-position: center;
-            border: 4px solid var(--tg-theme-button-color);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         }
 
         input {
@@ -55,7 +64,7 @@
             box-sizing: border-box;
             font-size: 16px;
             outline: none;
-            background: #fafafa;
+            text-align: center;
         }
 
         button {
@@ -68,7 +77,7 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: none; 
+            transition: none;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -77,32 +86,42 @@
             opacity: 1;
         }
 
-        #result {
-            margin-top: 15px;
-            font-weight: 800;
+        .guild-name {
             font-size: 22px;
-            color: var(--tg-theme-button-color);
+            font-weight: 800;
+            margin: 10px 0;
+            color: var(--tg-theme-text-color);
+        }
+
+        .guild-gp {
+            font-size: 16px;
+            color: var(--tg-theme-hint-color);
         }
 
         .loader {
             display: none;
-            margin-top: 10px;
-            font-size: 14px;
-            color: var(--tg-theme-hint-color);
+            margin: 20px 0;
+            color: var(--tg-theme-button-color);
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div id="guildLogo" class="guild-avatar"></div>
-        <h2 id="title">SWGOH Гильдия</h2>
+        <div id="guildCard" class="guild-card">
+            <div id="guildLogo" class="guild-avatar"></div>
+            <div id="guildName" class="guild-name"></div>
+            <div id="guildGP" class="guild-gp"></div>
+        </div>
+
+        <div id="searchSection">
+            <h2 id="mainTitle">Guild Finder</h2>
+            <input type="number" id="allyCode" placeholder="Код союзника (9 цифр)" inputmode="numeric">
+            <button id="searchBtn" onclick="getGuildData()">Найти гильдию</button>
+        </div>
         
-        <input type="number" id="allyCode" placeholder="Код союзника (9 цифр)" inputmode="numeric">
-        <button id="searchBtn" onclick="getGuildData()">Найти гильдию</button>
-        
-        <div id="loader" class="loader">Получаем данные из Голонета...</div>
-        <div id="result"></div>
+        <div id="loader" class="loader">Считывание данных из Голонета...</div>
+        <div id="errorMsg" style="color: red; margin-top: 15px;"></div>
     </div>
 
     <script>
@@ -111,21 +130,20 @@
 
         async function getGuildData() {
             const allyInput = document.getElementById('allyCode').value.trim();
-            const resultDiv = document.getElementById('result');
+            const card = document.getElementById('guildCard');
             const loader = document.getElementById('loader');
-            const logo = document.getElementById('guildLogo');
-
+            const errorMsg = document.getElementById('errorMsg');
+            
             if (allyInput.length < 9) {
-                resultDiv.innerText = "Нужно 9 цифр";
+                errorMsg.innerText = "Введите 9 цифр кода союзника";
                 return;
             }
 
-            resultDiv.innerText = "";
-            logo.style.display = "none";
-            logo.style.backgroundImage = "none";
+            // Сброс состояния
+            errorMsg.innerText = "";
+            card.style.display = "none";
             loader.style.display = "block";
 
-            // Используем corsproxy для обхода блокировок
             const targetUrl = `https://swgoh.gg/api/player/${allyInput}/`;
             const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
@@ -134,36 +152,30 @@
                 const data = await response.json();
                 
                 if (data.data && data.data.guild_name) {
-                    resultDiv.innerText = data.data.guild_name;
-
-                    // Логика иконки
-                    // API swgoh.gg возвращает ID баннера в поле guild_banner
-                    let bannerId = data.data.guild_banner;
+                    const p = data.data;
                     
-                    if (bannerId) {
-                        // Формируем URL. Обычно это tex.НАЗВАНИЕ
-                        const iconUrl = `https://game-assets.swgoh.gg/static/img/assets/tex.${bannerId}.png`;
-                        
-                        // Предзагрузка изображения, чтобы не было мигания
-                        const img = new Image();
-                        img.onload = function() {
-                            logo.style.backgroundImage = `url('${iconUrl}')`;
-                            logo.style.display = "block";
-                        };
-                        img.onerror = function() {
-                            // Если картинка не найдена, пробуем без префикса "tex."
-                            const altUrl = `https://game-assets.swgoh.gg/static/img/assets/${bannerId}.png`;
-                            logo.style.backgroundImage = `url('${altUrl}')`;
-                            logo.style.display = "block";
-                        };
-                        img.src = iconUrl;
+                    document.getElementById('guildName').innerText = p.guild_name;
+                    
+                    // Форматирование ГМ гильдии (если есть в API игрока)
+                    // Иногда API игрока не отдает ГМ всей гильдии, тогда выведем ГМ игрока
+                    const gp = p.galactic_power ? (p.galactic_power / 1000000).toFixed(1) + "M GP" : "";
+                    document.getElementById('guildGP').innerText = `Игрок: ${gp}`;
+
+                    // Работа с аватаром
+                    if (p.guild_banner) {
+                        const logoDiv = document.getElementById('guildLogo');
+                        // Пробуем основной путь к ассетам
+                        const bannerUrl = `https://game-assets.swgoh.gg/static/img/assets/tex.${p.guild_banner}.png`;
+                        logoDiv.style.backgroundImage = `url('${bannerUrl}')`;
                     }
+
+                    card.style.display = "block";
                 } else {
-                    resultDiv.innerText = "Игрок не в гильдии";
+                    errorMsg.innerText = "Игрок не найден или не состоит в гильдии";
                 }
 
             } catch (error) {
-                resultDiv.innerText = "Ошибка поиска";
+                errorMsg.innerText = "Ошибка API. Попробуйте позже.";
                 console.error(error);
             } finally {
                 loader.style.display = "none";
