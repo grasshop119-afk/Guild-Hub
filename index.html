@@ -60,15 +60,12 @@
             outline: none; text-align: center; letter-spacing: 3px;
         }
 
-        .swgoh-input.searching { border-color: #ff9f00; }
-        .swgoh-input.error { border-color: #ff4444; }
-        .swgoh-input.found { border-color: #26b31e; }
-
         .paste-icon {
             position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
             cursor: pointer; fill: rgba(255, 255, 255, 0.4); display: flex; align-items: center; padding: 8px;
         }
 
+        /* Плашка гильдии по твоему скрину */
         .guild-preview {
             display: none; 
             margin-bottom: 20px;
@@ -77,32 +74,30 @@
             text-align: left;
             background: rgba(10, 25, 41, 0.9);
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            border: 1px solid var(--border-default);
         }
 
         .guild-icon-box {
             width: 50px; height: 50px; margin-right: 15px; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.03);
             border-radius: 50%;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .guild-icon-img {
-            width: 100%; height: 100%; object-fit: contain;
+            width: 90%; height: 90%; object-fit: contain;
         }
 
         .guild-info-content {
             display: flex; flex-direction: column;
             gap: 2px;
-            overflow: hidden;
         }
 
         .guild-name-display { 
             font-weight: 700; 
             font-size: 1rem; 
-            color: #ff9f00; 
+            color: #ff9f00; /* Оранжевый как на скрине */
+            text-transform: none; 
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px;
         }
         
@@ -111,7 +106,7 @@
             font-size: 0.85rem; color: #ffffff;
         }
 
-        .gp-value { font-weight: 700; color: #ffffff; }
+        .gp-value { font-weight: 700; }
         .members-label { color: rgba(255,255,255,0.6); }
 
         .submit-btn {
@@ -142,7 +137,7 @@
 <body>
 
 <div class="main-content">
-    <img src="Logos/Logo.png" alt="Logo" class="logo">
+    <img src="https://i.ibb.co/v4x1hC8n/image.png" alt="Logo" class="logo">
     <h1>Добро пожаловать!</h1>
     <p class="description">Введи свой код союзника для авторизации.</p>
 
@@ -172,7 +167,7 @@
     </button>
 
     <div class="credits">
-        by <a href="https://t.me/temkazavr" target="_blank">@temkazavr</a>
+        Создан <a href="https://t.me/temkazavr" target="_blank">@temkazavr</a>
     </div>
 </div>
 
@@ -193,9 +188,6 @@
     }
 
     async function findGuild(code) {
-        input.classList.remove('searching', 'error', 'found');
-        input.classList.add('searching');
-        
         guildPreview.style.display = 'flex';
         guildNameDisplay.innerText = 'ПОИСК...';
         guildGP.innerText = '';
@@ -238,28 +230,25 @@
                 guildGP.innerText = formatGP(guild.galactic_power);
                 guildMembersCount.innerText = `${guild.members.length} Members`;
                 
-                // Проверяем название гильдии для выбора иконки
-                let iconName = 'NoShield.png';
-                if (guild.name.toLowerCase().includes('those who are in the shadows')) {
-                    iconName = 'ShadeShield.png';
+                if (guild.banner_logo) {
+                    // ТЯНЕМ ИЗ GITHUB (Самый надежный способ без блокировок)
+                    const asset = guild.banner_logo.startsWith('tex.') ? guild.banner_logo : `tex.${guild.banner_logo}`;
+                    
+                    // Этот репозиторий содержит все иконки гильдий
+                    guildImg.src = `https://raw.githubusercontent.com/pm360/swgoh-images/master/banners/${asset}.png`;
+                    
+                    guildImg.onload = () => {
+                        guildImg.style.display = 'block';
+                        guildLoader.style.display = 'none';
+                    };
+                    guildImg.onerror = () => {
+                        // Запасной вариант с другого репозитория
+                        guildImg.src = `https://game-assets.swgoh.events/${asset}.png`;
+                        guildImg.onerror = () => {
+                            guildLoader.innerText = '🛡️';
+                        };
+                    };
                 }
-                
-                // Загружаем локальную иконку из папки Logos
-                guildImg.src = `Logos/${iconName}`;
-                
-                guildImg.onload = () => {
-                    guildImg.style.display = 'block';
-                    guildLoader.style.display = 'none';
-                    input.classList.remove('searching');
-                    input.classList.add('found');
-                };
-                guildImg.onerror = () => {
-                    guildImg.style.display = 'none';
-                    guildLoader.innerText = '🛡️';
-                    guildLoader.style.display = 'block';
-                    input.classList.remove('searching');
-                    input.classList.add('found');
-                };
 
                 btn.classList.add('active');
             } else throw new Error();
@@ -267,15 +256,12 @@
     }
 
     function showError() {
-        guildNameDisplay.innerText = 'Гильдия не найдена';
+        guildNameDisplay.innerText = 'ГИЛЬДИЯ НЕ НАЙДЕНА';
         guildGP.innerText = '';
         guildMembersCount.innerText = '';
         guildImg.style.display = 'none';
         guildLoader.innerText = '!';
-        guildLoader.style.display = 'block';
         btn.classList.remove('active');
-        input.classList.remove('searching');
-        input.classList.add('error');
     }
 
     input.addEventListener('input', () => {
@@ -287,13 +273,8 @@
         }
         input.value = formatted;
         
-        if (val.length === 9) {
-            findGuild(val);
-        } else { 
-            guildPreview.style.display = 'none'; 
-            btn.classList.remove('active');
-            input.classList.remove('searching', 'error', 'found');
-        }
+        if (val.length === 9) findGuild(val);
+        else { guildPreview.style.display = 'none'; btn.classList.remove('active'); }
     });
 
     pasteBtn.addEventListener('click', async () => {
