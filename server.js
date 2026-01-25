@@ -1,44 +1,43 @@
 const express = require('express');
-const cors = require('cors');
-const fetch = require('node-fetch');
+const axios = require('axios');
 const path = require('path');
 const app = express();
+const port = process.env.PORT || 3000;
 
-app.use(cors());
+// Разрешаем серверу отдавать статические файлы (html, картинки, css) из текущей папки
 app.use(express.static(__dirname));
 
-const HEADERS = { 'User-Agent': 'Mozilla/5.0' };
-
-app.get('/api/check/:code', async (req, res) => {
+// API Точка входа: ищем игрока по коду
+app.get('/api/player/:allyCode', async (req, res) => {
     try {
-        const cleanCode = req.params.code.replace(/\D/g, '');
-        const pResp = await fetch(`https://swgoh.gg/api/player/${cleanCode}/`, { headers: HEADERS });
+        const { allyCode } = req.params;
         
-        if (!pResp.ok) return res.status(404).json({ error: 'Player not found' });
+        // Стучимся в публичный API swgoh.gg
+        const response = await axios.get(`https://swgoh.gg/api/player/${allyCode}/`);
         
-        const pData = await pResp.json();
-        const gId = pData.data.guild_id;
-
-        if (!gId) {
-            return res.json({ playerName: pData.data.name, guildName: "Без гильдии", members: 0 });
+        // Если игрок найден, swgoh.gg возвращает JSON с полем data
+        if (response.data && response.data.data) {
+            res.json({
+                data: {
+                    name: response.data.data.name,
+                    guild_name: response.data.data.guild_name || "Без гильдии",
+                    // Можно добавить другие поля, если нужно (например, GP)
+                }
+            });
+        } else {
+            res.status(404).json({ error: "Игрок не найден" });
         }
-
-        const gResp = await fetch(`https://swgoh.gg/api/guild-profile/${gId}/`, { headers: HEADERS });
-        const gData = await gResp.json();
-
-        res.json({
-            playerName: pData.data.name,
-            guildName: gData.data.name,
-            members: gData.data.members.length
-        });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
+    } catch (error) {
+        console.error("Ошибка при запросе к swgoh.gg:", error.message);
+        res.status(500).json({ error: "Ошибка сервера или неверный код" });
     }
 });
 
+// На любой другой запрос отдаем главную страницу
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log('Server is running'));
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
