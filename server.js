@@ -8,36 +8,31 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.static(__dirname));
 
+// API для получения данных игрока и его гильдии
 app.get('/api/player/:allyCode', async (req, res) => {
-    const { allyCode } = req.params;
-    const cleanCode = allyCode.replace(/-/g, '');
-
+    const allyCode = req.params.allyCode.replace(/-/g, '');
     try {
-        console.log(`Searching for: ${cleanCode}`);
-        
-        // Добавляем заголовки, чтобы имитировать браузер
-        const response = await axios.get(`https://swgoh.gg/api/player/${cleanCode}/`, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            },
-            timeout: 10000
+        // Получаем данные игрока
+        const playerRes = await axios.get(`https://swgoh.gg/api/player/${allyCode}/`, {
+            headers: { 'User-Agent': 'Mozilla/5.0' }
         });
 
-        if (response.data && response.data.data) {
-            const p = response.data.data;
+        if (playerRes.data && playerRes.data.data) {
+            const p = playerRes.data.data;
             res.json({
                 success: true,
                 data: {
                     name: p.name,
-                    guild_name: p.guild_name || "Без гильдии"
+                    guild_name: p.guild_name || "Без гильдии",
+                    guild_id: p.guild_id
                 }
             });
         } else {
-            res.status(404).json({ success: false, error: "Not found" });
+            res.status(404).json({ success: false, error: "Игрок не найден" });
         }
     } catch (error) {
-        console.error("Fetch error:", error.message);
-        res.status(500).json({ success: false, error: "API Error" });
+        console.error("Ошибка сервера:", error.message);
+        res.status(500).json({ success: false, error: "Ошибка API или неверный код" });
     }
 });
 
@@ -46,5 +41,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    console.log(`Сервер: http://localhost:${port}`);
 });
