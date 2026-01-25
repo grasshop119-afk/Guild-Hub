@@ -60,6 +60,10 @@
             outline: none; text-align: center; letter-spacing: 3px;
         }
 
+        .swgoh-input.searching { border-color: #ff9f00; }
+        .swgoh-input.error { border-color: #ff4444; }
+        .swgoh-input.found { border-color: #26b31e; }
+
         .paste-icon {
             position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
             cursor: pointer; fill: rgba(255, 255, 255, 0.4); display: flex; align-items: center; padding: 8px;
@@ -100,12 +104,6 @@
             font-size: 1rem; 
             color: #ff9f00; 
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px;
-        }
-
-        /* Стиль для текста в процессе поиска */
-        .guild-name-display.searching {
-            color: transparent;
-            -webkit-text-stroke: 1px rgba(255, 159, 0, 0.8);
         }
         
         .guild-stats-row {
@@ -195,9 +193,11 @@
     }
 
     async function findGuild(code) {
+        input.classList.remove('searching', 'error', 'found');
+        input.classList.add('searching');
+        
         guildPreview.style.display = 'flex';
         guildNameDisplay.innerText = 'ПОИСК...';
-        guildNameDisplay.classList.add('searching');
         guildGP.innerText = '';
         guildMembersCount.innerText = '';
         guildImg.style.display = 'none';
@@ -234,23 +234,31 @@
             
             if (gData?.data) {
                 const guild = gData.data;
-                guildNameDisplay.classList.remove('searching');
                 guildNameDisplay.innerText = guild.name;
                 guildGP.innerText = formatGP(guild.galactic_power);
                 guildMembersCount.innerText = `${guild.members.length} Members`;
                 
-                // Логика выбора иконки
-                const iconName = (guild.name === "Those who are in the shadows") ? "ShadeShield.png" : "NoShield.png";
-                guildImg.src = "Logos/" + iconName;
+                // Проверяем название гильдии для выбора иконки
+                let iconName = 'NoShield.png';
+                if (guild.name.toLowerCase().includes('those who are in the shadows')) {
+                    iconName = 'ShadeShield.png';
+                }
+                
+                // Загружаем локальную иконку из папки Logos
+                guildImg.src = `Logos/${iconName}`;
                 
                 guildImg.onload = () => {
                     guildImg.style.display = 'block';
                     guildLoader.style.display = 'none';
+                    input.classList.remove('searching');
+                    input.classList.add('found');
                 };
                 guildImg.onerror = () => {
                     guildImg.style.display = 'none';
                     guildLoader.innerText = '🛡️';
                     guildLoader.style.display = 'block';
+                    input.classList.remove('searching');
+                    input.classList.add('found');
                 };
 
                 btn.classList.add('active');
@@ -259,7 +267,6 @@
     }
 
     function showError() {
-        guildNameDisplay.classList.remove('searching');
         guildNameDisplay.innerText = 'Гильдия не найдена';
         guildGP.innerText = '';
         guildMembersCount.innerText = '';
@@ -267,6 +274,8 @@
         guildLoader.innerText = '!';
         guildLoader.style.display = 'block';
         btn.classList.remove('active');
+        input.classList.remove('searching');
+        input.classList.add('error');
     }
 
     input.addEventListener('input', () => {
@@ -278,22 +287,20 @@
         }
         input.value = formatted;
         
-        if (val.length === 9) findGuild(val);
-        else { 
+        if (val.length === 9) {
+            findGuild(val);
+        } else { 
             guildPreview.style.display = 'none'; 
-            btn.classList.remove('active'); 
+            btn.classList.remove('active');
+            input.classList.remove('searching', 'error', 'found');
         }
     });
 
     pasteBtn.addEventListener('click', async () => {
         try {
             const text = await navigator.clipboard.readText();
-            // Очищаем вставленный текст от лишних символов перед обработкой
-            const cleanText = text.replace(/\D/g, '').substring(0, 9);
-            if (cleanText) {
-                input.value = cleanText;
-                input.dispatchEvent(new Event('input'));
-            }
+            input.value = text;
+            input.dispatchEvent(new Event('input'));
         } catch (err) {}
     });
 
