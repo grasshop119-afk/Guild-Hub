@@ -1,7 +1,7 @@
 {
-  "name": "guild-hub",
+  "name": "swgoh-guild-hub",
   "version": "1.0.0",
-  "description": "SWGOH Tool",
+  "description": "SWGoH Player Lookup",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -9,6 +9,6 @@
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
-    "node-fetch": "^2.6.10"
+    "axios": "^1.6.2"
   }
 }
