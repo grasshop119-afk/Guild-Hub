@@ -54,27 +54,22 @@
             cursor: pointer; fill: rgba(255, 255, 255, 0.4); display: flex; align-items: center; padding: 8px;
         }
 
+        /* Обновленная плашка: теперь высота и стиль совпадают с инпутом */
         .guild-preview {
             display: none; 
-            margin-bottom: 20px;
+            margin-bottom: 20px; /* Равноудаленно от кнопки */
             padding: 0 18px; 
-            height: 62px; 
+            height: 62px; /* Совпадает с высотой инпута */
             align-items: center; 
             text-align: left;
             position: relative;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .guild-icon-box {
-            width: 40px; height: 40px; background: rgba(26, 42, 58, 0.5); border-radius: 6px;
-            margin-right: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden;
+            width: 36px; height: 36px; background: rgba(26, 42, 58, 0.5); border-radius: 6px;
+            margin-right: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px;
         }
-        .guild-icon-img { width: 100%; height: 100%; object-fit: contain; }
+        .guild-icon-img { width: 100%; height: 100%; object-fit: contain; border-radius: 6px; }
         
         .guild-info-wrapper {
             display: flex; justify-content: space-between; align-items: center; width: 100%;
@@ -82,7 +77,7 @@
         .guild-name-display { 
             font-weight: 700; font-size: 0.95rem; color: var(--accent-blue); 
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px; 
-            text-transform: uppercase;
+            text-transform: uppercase; letter-spacing: 1px;
         }
         .guild-members-count {
             font-size: 0.8rem; color: rgba(255,255,255,0.6); font-weight: 400;
@@ -171,7 +166,6 @@
         guildNameDisplay.innerText = 'Поиск...';
         guildMembersCount.innerText = '';
         guildEmoji.innerText = '⏳';
-        guildEmoji.style.display = 'block';
         guildImg.style.display = 'none';
         btn.classList.remove('active');
 
@@ -204,26 +198,9 @@
                 guildNameDisplay.innerText = gData.data.name;
                 guildMembersCount.innerText = `${gData.data.members.length}/50`;
                 
-                // Динамическое получение герба гильдии
-                if (gData.data.banner_logo) {
-                    const bannerName = gData.data.banner_logo;
-                    // Формируем ссылку на официальный ассет swgoh.gg
-                    guildImg.src = `https://static-swgoh.game-host.org/assets/tex.${bannerName}.png`;
-                    
-                    guildImg.onload = () => {
-                        guildImg.style.display = 'block';
-                        guildEmoji.style.display = 'none';
-                    };
-                    guildImg.onerror = () => {
-                        // Если картинка не прогрузилась, ставим дефолтную иконку гильдии
-                        guildEmoji.innerText = '🛡️';
-                        guildEmoji.style.display = 'block';
-                        guildImg.style.display = 'none';
-                    };
-                } else {
-                    guildEmoji.innerText = '🛡️';
-                }
-
+                guildImg.src = "Logos/Guild_Logo.png";
+                guildImg.style.display = 'block';
+                guildEmoji.innerText = '';
                 btn.classList.add('active');
             } else throw new Error();
         } catch (e) { showError(); }
@@ -232,7 +209,6 @@
     function showError() {
         guildNameDisplay.innerText = 'Гильдия не найдена';
         guildEmoji.innerText = '🤔';
-        guildEmoji.style.display = 'block';
         guildMembersCount.innerText = '';
         guildImg.style.display = 'none';
         btn.classList.remove('active');
