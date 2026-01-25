@@ -16,7 +16,6 @@
             --input-bg: rgba(5, 13, 22, 0.8);
         }
 
-        /* Системный шрифт для всего, кроме заголовка */
         * { 
             -webkit-tap-highlight-color: transparent; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
@@ -38,7 +37,6 @@
         .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; }
         .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
         
-        /* Только этот шрифт Montserrat */
         h1 { 
             font-family: 'Montserrat', sans-serif; 
             font-size: clamp(1.2rem, 5vw, 1.4rem); 
@@ -68,20 +66,15 @@
             cursor: pointer; fill: rgba(255, 255, 255, 0.4); display: flex; align-items: center; padding: 8px;
         }
 
-        /* Плашка гильдии в стиле инпута */
         .guild-preview {
-            display: none; margin-bottom: 15px; padding: 12px; align-items: center;
+            display: none; margin-bottom: 15px; padding: 15px; align-items: center; justify-content: space-between;
         }
         
-        .guild-icon-box {
-            width: 40px; height: 40px; margin-right: 12px; flex-shrink: 0; 
-            display: flex; align-items: center; justify-content: center;
-        }
-        .guild-icon-img { width: 100%; height: 100%; object-fit: contain; }
+        .guild-left-side { display: flex; align-items: center; gap: 12px; }
+        .guild-icon-img { width: 35px; height: 35px; object-fit: contain; }
         
-        .guild-info { display: flex; justify-content: space-between; width: 100%; align-items: center; }
-        .guild-name-display { font-weight: 700; font-size: 0.9rem; color: var(--accent-blue); }
-        .guild-members-count { font-size: 0.8rem; opacity: 0.7; }
+        .guild-name-display { font-weight: 700; font-size: 0.95rem; color: var(--accent-blue); }
+        .guild-members-count { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
 
         .submit-btn {
             position: relative; width: 100%; padding: 20px;
@@ -97,7 +90,7 @@
         }
 
         .credits { font-size: 0.85rem; margin-top: 25px; color: rgba(255,255,255,0.6); }
-        .credits a { color: var(--accent-blue); text-decoration: none; font-weight: 700; }
+        .credits a { color: var(--accent-blue); text-decoration: none; font-weight: 700; border: none; }
     </style>
 </head>
 <body>
@@ -115,14 +108,11 @@
     </div>
 
     <div id="guildPreview" class="guild-preview">
-        <div class="guild-icon-box" id="gIconBox">
+        <div class="guild-left-side">
             <img src="Logos/Guild_Logo.png" class="guild-icon-img" id="gImg" style="display:none;">
-            <span id="gStatus"></span>
-        </div>
-        <div class="guild-info">
             <span id="gName" class="guild-name-display">Поиск...</span>
-            <span id="gCount" class="guild-members-count"></span>
         </div>
+        <span id="gCount" class="guild-members-count"></span>
     </div>
 
     <button id="submitBtn" class="submit-btn">Продолжить</button>
@@ -139,7 +129,6 @@
     const gName = document.getElementById('gName');
     const gCount = document.getElementById('gCount');
     const gImg = document.getElementById('gImg');
-    const gStatus = document.getElementById('gStatus');
     const pasteBtn = document.getElementById('pasteBtn');
 
     function formatValue(val) {
@@ -152,48 +141,66 @@
         return formatted;
     }
 
-    async function checkGuild(code) {
+    async function fetchWithRetry(code) {
         preview.style.display = 'flex';
         gName.innerText = 'Поиск...';
         gCount.innerText = '';
         gImg.style.display = 'none';
-        gStatus.innerText = '⏳';
         btn.classList.remove('active');
 
+        // Метод 1: AllOrigins
         try {
-            // Используем логику через AllOrigins / CORSProxy
             const url = `https://api.allorigins.win/get?url=${encodeURIComponent('https://swgoh.gg/api/player/' + code + '/')}`;
-            const response = await fetch(url);
-            const json = await response.json();
-            
+            const res = await fetch(url);
+            const json = await res.json();
             if (json.contents) {
-                const pData = JSON.parse(json.contents).data;
-                const gId = pData.guild_id;
-
-                const gResp = await fetch(`https://corsproxy.io/?${encodeURIComponent('https://swgoh.gg/api/guild-profile/' + gId + '/')}`);
-                const gData = await gResp.json();
-
-                if (gData && gData.data) {
-                    gName.innerText = gData.data.name;
-                    gCount.innerText = `${gData.data.members.length}/50`;
-                    gImg.style.display = 'block';
-                    gStatus.innerText = '';
-                    btn.classList.add('active');
-                } else throw new Error();
+                const data = JSON.parse(json.contents).data;
+                await updateGuildUI(data.guild_id);
             } else throw new Error();
         } catch (e) {
-            gName.innerText = 'Гильдия не найдена';
-            gStatus.innerText = '🤔';
-            gImg.style.display = 'none';
-            btn.classList.remove('active');
+            // Метод 2: CORSProxy
+            try {
+                const res2 = await fetch(`https://corsproxy.io/?${encodeURIComponent('https://swgoh.gg/api/player/' + code + '/')}`);
+                const data2 = await res2.json();
+                if (data2?.data) await updateGuildUI(data2.data.guild_id);
+                else throw new Error();
+            } catch (e2) {
+                showError();
+            }
         }
+    }
+
+    async function updateGuildUI(gId) {
+        if (!gId) { showError(); return; }
+        try {
+            const gUrl = `https://corsproxy.io/?${encodeURIComponent('https://swgoh.gg/api/guild-profile/' + gId + '/')}`;
+            const res = await fetch(gUrl);
+            const gData = await res.json();
+            if (gData?.data) {
+                gName.innerText = gData.data.name;
+                gCount.innerText = `${gData.data.members.length}/50`;
+                gImg.style.display = 'block';
+                btn.classList.add('active');
+            } else throw new Error();
+        } catch (e) {
+            // Если профиль гильдии не грузится, но ID есть, хотя бы покажем это
+            gName.innerText = 'Гильдия найдена';
+            btn.classList.add('active');
+        }
+    }
+
+    function showError() {
+        gName.innerText = 'Гильдия не найдена';
+        gCount.innerText = '';
+        gImg.style.display = 'none';
+        btn.classList.remove('active');
     }
 
     input.addEventListener('input', () => {
         input.value = formatValue(input.value);
         let pureDigits = input.value.replace(/\D/g, '');
         if (pureDigits.length === 9) {
-            checkGuild(pureDigits);
+            fetchWithRetry(pureDigits);
         } else {
             preview.style.display = 'none';
             btn.classList.remove('active');
