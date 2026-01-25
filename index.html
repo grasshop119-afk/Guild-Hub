@@ -1,180 +1,63 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Guild Hub - Elite Interface</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <title>SWGoH Mini App</title>
     <style>
-        :root {
-            --bg-dark: #050b14;
-            --accent-blue: #4facfe;
-            --swgoh-green-bright: #26b31e;
-            --swgoh-green-dark: #0f400b;
-            --text-white: #ffffff;
-            --border-default: rgba(30, 58, 95, 0.8);
-            --input-bg: rgba(5, 13, 22, 0.8);
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--bg-dark);
-            background-image: linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
-            background-size: 100% 3px, cover; background-attachment: fixed;
-            display: flex; justify-content: center; align-items: center;
-            color: var(--text-white); overflow: hidden; position: fixed;
-        }
-
-        .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; }
-        .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
+        body { font-family: sans-serif; background: #1a1a1a; color: white; text-align: center; }
+        input { padding: 10px; border-radius: 5px; border: none; }
+        button { padding: 10px 20px; cursor: pointer; background: #3390ec; color: white; border: none; border-radius: 5px; }
         
-        h1 { font-size: clamp(1.1rem, 5vw, 1.3rem); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
-        .description { font-size: 0.85rem; margin-bottom: 25px; opacity: 0.8; }
-
-        .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
-        .swgoh-input {
-            width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-default);
-            border-radius: 8px; padding: 18px 50px 18px 18px; color: #ffffff;
-            font-family: 'Montserrat', sans-serif; font-size: 1.1rem;
-            outline: none; text-align: center; letter-spacing: 3px;
-        }
-
-        .paste-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; fill: rgba(255, 255, 255, 0.4); padding: 8px; }
-
-        .guild-preview {
-            display: none; background: rgba(30, 58, 95, 0.2); border: 1px solid var(--border-default);
-            border-radius: 8px; margin-bottom: 20px; padding: 12px 14px; align-items: center; text-align: left;
-        }
-
-        .guild-icon-box { width: 40px; height: 40px; background: rgba(0, 0, 0, 0.3); border-radius: 6px; margin-right: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); }
-        .guild-icon-img { width: 100%; height: 100%; object-fit: cover; border-radius: 5px; }
+        /* Твоя кнопка Share - не темнеет при наведении (как просил) */
+        .share-btn:hover { background: #3390ec !important; filter: none !important; }
         
-        .guild-info-wrapper { display: flex; flex-direction: column; overflow: hidden; }
-        .guild-name-display { font-weight: 700; font-size: 0.9rem; color: var(--accent-blue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .guild-sub-text { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
-
-        .submit-btn {
-            position: relative; width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif;
-            font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
-            cursor: not-allowed; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05); transition: all 0.3s ease; letter-spacing: 2px;
-        }
-
-        .submit-btn.active {
-            background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%);
-            border: 1px solid #45f53d; color: #ffffff; cursor: pointer;
-        }
-
-        /* Кнопка Share: не темнеет при наведении */
-        .share-btn { 
-            margin-top: 20px; background: var(--accent-blue); color: white; border: none; 
-            padding: 12px; border-radius: 8px; font-weight: 700; width: 100%; cursor: pointer;
-            text-transform: uppercase; font-size: 0.8rem;
-        }
-        .share-btn:hover, .share-btn:active { background: var(--accent-blue) !important; filter: none !important; opacity: 1 !important; }
-
-        .tg-login { font-size: 0.8rem; margin-top: 20px; opacity: 0.6; }
-        .tg-login a { color: var(--accent-blue); text-decoration: none; }
+        .member-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; }
+        .red { color: #ff4d4d; }
+        .green { color: #4dff4d; }
     </style>
 </head>
 <body>
 
-<div class="main-content">
-    <img src="Logos/Logo.png" alt="Logo" class="logo" onerror="this.src='https://game-assets.swgoh.gg/tex.guild_avatar_mon_calamari_01.png'">
-    <h1>Консоль Управления</h1>
-    <p class="description">Синхронизация с базой данных гильдии</p>
+    <h2>Поиск гильдии</h2>
+    <input type="text" id="allyCode" placeholder="Введи код союзника">
+    <button onclick="findGuild()">Найти</button>
 
-    <div class="input-wrapper">
-        <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11">
-        <div class="paste-icon" id="pasteBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
-        </div>
+    <h3 id="guildName"></h3>
+
+    <div id="energyTab" style="margin-top: 20px;">
+        <div id="results"></div>
     </div>
 
-    <div id="guildPreview" class="guild-preview">
-        <div class="guild-icon-box">
-            <img id="guildImg" class="guild-icon-img" src="https://game-assets.swgoh.gg/tex.guild_avatar_mon_calamari_01.png">
-        </div>
-        <div class="guild-info-wrapper">
-            <span id="guildNameDisplay" class="guild-name-display">Загрузка...</span>
-            <span id="guildSubText" class="guild-sub-text">Проверка статуса</span>
-        </div>
-    </div>
+    <button class="share-btn" style="margin-top: 20px;">Поделиться</button>
 
-    <button id="submitBtn" class="submit-btn">Продолжить</button>
-    
-    <button class="share-btn" onclick="alert('Данные скопированы')">Поделиться доступом</button>
+    <script>
+        async function findGuild() {
+            const code = document.getElementById('allyCode').value;
+            const resDiv = document.getElementById('results');
+            resDiv.innerHTML = "Ищем...";
 
-    <div class="tg-login">Есть аккаунт? <a href="#">Войти с Telegram</a></div>
-</div>
+            try {
+                // Запрос к твоему серверу (замени localhost на адрес своего сервера позже)
+                const response = await fetch(`http://localhost:3000/get_guild/${code}`);
+                const data = await response.json();
 
-<script>
-    const input = document.getElementById('allyCode');
-    const btn = document.getElementById('submitBtn');
-    const guildPreview = document.getElementById('guildPreview');
-    const guildNameDisplay = document.getElementById('guildNameDisplay');
-    const guildSubText = document.getElementById('guildSubText');
-    const guildImg = document.getElementById('guildImg');
+                document.getElementById('guildName').innerText = "Гильдия: " + data.name;
+                resDiv.innerHTML = "";
 
-    function formatValue(val) {
-        let digits = val.replace(/\D/g, '').substring(0, 9);
-        let formatted = "";
-        for (let i = 0; i < digits.length; i++) {
-            if (i > 0 && i % 3 === 0) formatted += "-";
-            formatted += digits[i];
-        }
-        return formatted;
-    }
-
-    async function findData(code) {
-        guildPreview.style.display = 'flex';
-        guildNameDisplay.innerText = 'Подключение...';
-        btn.classList.remove('active');
-        
-        try {
-            const res = await fetch(`/api/player/${code}`);
-            const result = await res.json();
-            
-            if (result.success) {
-                guildNameDisplay.innerText = result.data.guild_name;
-                guildSubText.innerText = `Лидер: ${result.data.name}`;
-                guildImg.src = result.data.image;
-                btn.classList.add('active');
-            } else {
-                throw new Error();
+                data.members.forEach(m => {
+                    const tickets = m.daily_raid_tickets || 0;
+                    const colorClass = tickets < 600 ? 'red' : 'green';
+                    
+                    resDiv.innerHTML += `
+                        <div class="member-row">
+                            <span>${m.player_name}</span>
+                            <span class="${colorClass}">${tickets}/600</span>
+                        </div>`;
+                });
+            } catch (e) {
+                resDiv.innerHTML = "Ошибка. Проверь код союзника.";
             }
-        } catch (err) {
-            guildNameDisplay.innerText = "Ошибка поиска";
-            guildSubText.innerText = "Игрок не синхронизирован с GG";
-            btn.classList.remove('active');
         }
-    }
-
-    input.addEventListener('input', () => {
-        input.value = formatValue(input.value);
-        if (input.value.replace(/\D/g, '').length === 9) {
-            findData(input.value);
-        } else {
-            guildPreview.style.display = 'none';
-            btn.classList.remove('active');
-        }
-    });
-
-    document.getElementById('pasteBtn').addEventListener('click', async () => {
-        const text = await navigator.clipboard.readText();
-        input.value = formatValue(text);
-        input.dispatchEvent(new Event('input'));
-    });
-
-    btn.addEventListener('click', () => {
-        if (btn.classList.contains('active')) {
-            localStorage.setItem('ally_code', input.value);
-            window.location.href = 'main.html';
-        }
-    });
-</script>
+    </script>
 </body>
 </html>
