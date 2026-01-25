@@ -98,8 +98,10 @@
         .guild-name-display { 
             font-weight: 700; 
             font-size: 1rem; 
-            color: #ff9f00; 
+            color: #ff9f00;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px;
+            text-shadow: 0 0 8px currentColor;
+            letter-spacing: 0.5px;
         }
         
         .guild-stats-row {
@@ -138,7 +140,7 @@
 <body>
 
 <div class="main-content">
-    <img src="https://i.ibb.co/v4x1hC8n/image.png" alt="Logo" class="logo">
+    <img src="Logos/Logo.png" alt="Logo" class="logo">
     <h1>Добро пожаловать!</h1>
     <p class="description">Введи свой код союзника для авторизации.</p>
 
@@ -168,7 +170,7 @@
     </button>
 
     <div class="credits">
-        Создан <a href="https://t.me/temkazavr" target="_blank">@temkazavr</a>
+        by <a href="https://t.me/temkazavr" target="_blank">@temkazavr</a>
     </div>
 </div>
 
@@ -186,6 +188,36 @@
     function formatGP(num) {
         if (num >= 1000000) return (num / 1000000).toFixed(0) + 'M GP';
         return num.toLocaleString();
+    }
+
+    // Функция для определения цвета текста и иконки гильдии
+    function getGuildStyle(guildName) {
+        const name = guildName.toLowerCase();
+        let textColor = '#ff9f00'; // оранжевый по умолчанию
+        let iconName = 'NoShield.png'; // иконка по умолчанию
+        
+        // Определяем цвет текста
+        if (name.includes('shadow') || name.includes('shade') || name.includes('тьма') || name.includes('тень')) {
+            textColor = '#9370DB'; // фиолетовый для теневых гильдий
+        } else if (name.includes('rebel') || name.includes('повстан')) {
+            textColor = '#FF6B6B'; // красный для повстанцев
+        } else if (name.includes('empire') || name.includes('импер')) {
+            textColor = '#4A90E2'; // синий для империи
+        } else if (name.includes('jedi') || name.includes('джеда')) {
+            textColor = '#32CD32'; // зеленый для джедаев
+        } else if (name.includes('sith') || name.includes('ситх')) {
+            textColor = '#DC143C'; // темно-красный для ситхов
+        }
+        
+        // Определяем иконку
+        if (name.includes('those who are in the shadows') || 
+            name.includes('те, кто в тени') || 
+            name.includes('shadows') || 
+            name.includes('shadow guild')) {
+            iconName = 'ShadeShield.png';
+        }
+        
+        return { textColor, iconName };
     }
 
     async function findGuild(code) {
@@ -227,28 +259,32 @@
             
             if (gData?.data) {
                 const guild = gData.data;
-                guildNameDisplay.innerText = guild.name;
+                const guildName = guild.name;
+                
+                // Получаем стиль для гильдии
+                const { textColor, iconName } = getGuildStyle(guildName);
+                
+                // Устанавливаем текст и цвет
+                guildNameDisplay.innerText = guildName;
+                guildNameDisplay.style.color = textColor;
+                guildNameDisplay.style.textShadow = `0 0 8px ${textColor}`;
+                
                 guildGP.innerText = formatGP(guild.galactic_power);
                 guildMembersCount.innerText = `${guild.members.length} Members`;
                 
-                if (guild.banner_logo) {
-                    const asset = guild.banner_logo.startsWith('tex.') ? guild.banner_logo : `tex.${guild.banner_logo}`;
-                    
-                    // Самый прямой путь: берем с домена swgoh.gg через weserv (чтобы обойти CORS и реферер)
-                    const finalImgUrl = `https://images.weserv.nl/?url=static.swgoh.gg/assets/${asset}.png&default=https://swgoh.gg/static/img/assets/${asset}.png`;
-                    
-                    guildImg.src = finalImgUrl;
-                    
-                    guildImg.onload = () => {
-                        guildImg.style.display = 'block';
-                        guildLoader.style.display = 'none';
-                    };
-                    guildImg.onerror = () => {
-                        guildImg.style.display = 'none';
-                        guildLoader.innerText = '🛡️';
-                        guildLoader.style.display = 'block';
-                    };
-                }
+                // Загружаем иконку из локальной папки
+                guildImg.src = `Logos/${iconName}`;
+                
+                guildImg.onload = () => {
+                    guildImg.style.display = 'block';
+                    guildLoader.style.display = 'none';
+                };
+                guildImg.onerror = () => {
+                    // Если иконка не загрузилась, показываем запасной вариант
+                    guildImg.style.display = 'none';
+                    guildLoader.innerText = '🛡️';
+                    guildLoader.style.display = 'block';
+                };
 
                 btn.classList.add('active');
             } else throw new Error();
@@ -256,11 +292,13 @@
     }
 
     function showError() {
-        guildNameDisplay.innerText = 'ГИЛЬДИЯ НЕ НАЙДЕНА';
+        guildNameDisplay.innerText = 'Гильдия не найдена';
+        guildNameDisplay.style.color = '#ff6b6b'; // красный для ошибки
+        guildNameDisplay.style.textShadow = '0 0 8px #ff6b6b';
         guildGP.innerText = '';
         guildMembersCount.innerText = '';
         guildImg.style.display = 'none';
-        guildLoader.innerText = '!';
+        guildLoader.innerText = '❌';
         guildLoader.style.display = 'block';
         btn.classList.remove('active');
     }
