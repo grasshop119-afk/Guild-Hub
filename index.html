@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SWGOH Ultimate Analyzer</title>
+    <title>SWGOH Render Portal</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -26,22 +26,18 @@
         input {
             width: 100%; padding: 16px; border-radius: 15px; border: 2px solid #ddd;
             margin-bottom: 15px; font-size: 17px; text-align: center; box-sizing: border-box;
-            background: #fafafa; outline: none;
+            outline: none;
         }
 
-        /* Кнопка: не темнеет при нажатии */
+        /* Кнопка: не темнеет */
         .btn-main {
             width: 100%; padding: 16px;
             background-color: var(--tg-theme-button-color) !important;
             color: #ffffff !important; border: none; border-radius: 15px;
             font-size: 17px; font-weight: bold; cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            transition: none !important;
+            -webkit-tap-highlight-color: transparent; transition: none !important;
         }
-        .btn-main:active, .btn-main:focus {
-            opacity: 1 !important;
-            background-color: var(--tg-theme-button-color) !important;
-        }
+        .btn-main:active { opacity: 1 !important; }
 
         .card {
             background: var(--tg-theme-secondary-bg-color);
@@ -49,44 +45,36 @@
             display: none; border: 1px solid rgba(0,0,0,0.05); text-align: left;
         }
 
-        .nick { font-size: 26px; font-weight: 900; color: var(--tg-theme-button-color); text-align: center; display: block; }
-        
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .stat-box { background: #fff; padding: 12px; border-radius: 12px; text-align: center; }
-        .label { font-size: 10px; color: #888; text-transform: uppercase; display: block; font-weight: bold; }
-        .val { font-size: 16px; font-weight: 800; }
+        .stat-box {
+            background: #fff; padding: 12px; border-radius: 12px;
+            display: flex; justify-content: space-between; margin-bottom: 8px;
+        }
+        .label { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; }
+        .val { font-size: 16px; font-weight: 800; color: #222; }
 
-        .loader { display: none; margin-top: 20px; font-weight: bold; color: #888; }
-        .status-msg { font-size: 12px; color: #999; margin-top: 5px; }
+        .loader { display: none; margin-top: 20px; color: var(--tg-theme-button-color); font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>SWGOH Анализатор</h2>
-        <input type="number" id="allyCode" placeholder="Код союзника (9 цифр)" inputmode="numeric">
-        <button class="btn-main" onclick="runAnalysis()">АНАЛИЗИРОВАТЬ</button>
+        <h2 style="margin-bottom: 20px;">SWGOH Анализ (Render)</h2>
+        <input type="number" id="allyCode" placeholder="Код союзника" inputmode="numeric">
+        <button class="btn-main" onclick="fetchThroughRender()">ПОЛУЧИТЬ ДАННЫЕ</button>
 
-        <div id="loader" class="loader">
-            Поиск данных...
-            <div id="status" class="status-msg">Попытка 1/3...</div>
-        </div>
+        <div id="loader" class="loader">Запрос через Render мост...</div>
 
         <div id="result" class="card">
-            <span id="resNick" class="nick"></span>
-            <span id="resTitle" style="font-size:12px; display:block; text-align:center; opacity:0.6; font-weight:bold; margin-bottom:10px;"></span>
+            <div id="pName" style="font-size: 26px; font-weight: 900; color: var(--tg-theme-button-color); text-align: center; margin-bottom: 15px;"></div>
+            
+            <div class="stat-box"><span class="label">Реликты (R1+)</span><span id="pRelics" class="val">-</span></div>
+            <div class="stat-box"><span class="label">Купоны</span><span id="pTix" class="val">- / 600</span></div>
+            <div class="stat-box"><span class="label">Открыто юнитов</span><span id="pUnits" class="val">-</span></div>
+            <div class="stat-box"><span class="label">Мощность ГМ</span><span id="pGP" class="val">-</span></div>
 
-            <div class="stat-grid">
-                <div class="stat-box"><span class="label">Мощность</span><span id="resGP" class="val"></span></div>
-                <div class="stat-box"><span class="label">Уровень</span><span id="resLvl" class="val"></span></div>
-                <div class="stat-box"><span class="label">Персонажи</span><span id="resUnits" class="val"></span></div>
-                <div class="stat-box"><span class="label">Корабли</span><span id="resShips" class="val"></span></div>
-            </div>
-
-            <div style="background:#fff; padding:15px; border-radius:15px;">
-                <span class="label">Гильдия</span>
-                <span id="resGName" style="font-weight: 800; font-size: 14px;"></span><br>
-                <small id="resGId" style="color:#aaa; font-family: monospace; font-size: 10px; word-break: break-all;"></small>
+            <div style="margin-top: 15px; padding: 10px; background: #fff; border-radius: 10px;">
+                <b style="font-size: 11px; color: #3390ec;">ГИЛЬДИЯ:</b><br>
+                <span id="pGuild" style="font-weight: 800;"></span>
             </div>
         </div>
     </div>
@@ -95,10 +83,9 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        async function runAnalysis() {
+        async function fetchThroughRender() {
             const ally = document.getElementById('allyCode').value.trim();
             const loader = document.getElementById('loader');
-            const status = document.getElementById('status');
             const result = document.getElementById('result');
             
             if (ally.length < 9) return;
@@ -106,60 +93,57 @@
             loader.style.display = "block";
             result.style.display = "none";
 
-            // Очередь прокси-серверов
-            const proxyQueue = [
-                u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-                u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
-                u => `https://thingproxy.freeboard.io/fetch/${u}`
-            ];
+            // МЫ ПРОБУЕМ ТВОЙ RENDER КАК ПРОКСИ
+            // Если на твоем Render стоит стандартный CORS Anywhere или аналогичный прокси
+            const renderProxy = "https://guild-hub-y1vg.onrender.com/";
+            const targetUrl = `https://swgoh.gg/api/player/${ally}/`;
 
-            let data = null;
-
-            for (let i = 0; i < proxyQueue.length; i++) {
-                try {
-                    status.innerText = `Использование канала ${i + 1}...`;
-                    const targetUrl = `https://swgoh.gg/api/player/${ally}/`;
-                    const response = await fetch(proxyQueue[i](targetUrl));
-                    
-                    if (!response.ok) throw new Error();
-
-                    const res = await response.json();
-                    // Обработка разных форматов ответа прокси
-                    const content = res.contents ? JSON.parse(res.contents) : res;
-
-                    if (content && content.data) {
-                        data = content.data;
-                        break; 
-                    }
-                } catch (e) {
-                    console.log(`Proxy ${i+1} failed`);
-                }
-            }
-
-            if (data) {
-                document.getElementById('resNick').innerText = data.name;
-                document.getElementById('resTitle').innerText = data.title || "";
-                document.getElementById('resGP').innerText = (data.galactic_power / 1000000).toFixed(2) + "M";
-                document.getElementById('resLvl').innerText = data.level || "85";
-                document.getElementById('resGName').innerText = data.guild_name || "---";
-                document.getElementById('resGId').innerText = data.guild_id || "";
-
-                if (data.units && Array.isArray(data.units)) {
-                    const chars = data.units.filter(u => u.data && u.data.combat_type === 1).length;
-                    const ships = data.units.filter(u => u.data && u.data.combat_type === 2).length;
-                    document.getElementById('resUnits').innerText = chars;
-                    document.getElementById('resShips').innerText = ships;
+            try {
+                // Попытка №1: Через твой Render
+                const response = await fetch(renderProxy + targetUrl);
+                const data = await response.json();
+                
+                const p = data.data;
+                if (p) {
+                    renderPlayer(p);
                 } else {
-                    document.getElementById('resUnits').innerText = "0";
-                    document.getElementById('resShips').innerText = "0";
+                    throw new Error("No data");
                 }
 
-                loader.style.display = "none";
-                result.style.display = "block";
-            } else {
-                status.innerText = "Все каналы заняты. Попробуйте снова.";
-                setTimeout(() => { loader.style.display = "none"; }, 2000);
+            } catch (e) {
+                console.log("Render proxy error, fallback to public...");
+                // Если твой Render не настроен как прокси, используем запасной вариант
+                try {
+                    const altResp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+                    const altJson = await altResp.json();
+                    const altData = JSON.parse(altJson.contents).data;
+                    if (altData) renderPlayer(altData);
+                } catch (e2) {
+                    loader.innerText = "Ошибка доступа. Проверьте настройки Render.";
+                }
             }
+        }
+
+        function renderPlayer(d) {
+            document.getElementById('pName').innerText = d.name;
+            document.getElementById('pGP').innerText = (d.galactic_power / 1000000).toFixed(2) + "M";
+            document.getElementById('pGuild').innerText = d.guild_name || "---";
+
+            // Реликты
+            let relics = 0;
+            if (d.units && Array.isArray(d.units)) {
+                relics = d.units.filter(u => u.data && u.data.relic_tier > 2).length;
+                document.getElementById('pUnits').innerText = d.units.length;
+            } else {
+                document.getElementById('pUnits').innerText = "N/A";
+            }
+            document.getElementById('pRelics').innerText = relics;
+
+            // Купоны
+            document.getElementById('pTix').innerText = (d.daily_raid_tickets || 0) + " / 600";
+
+            document.getElementById('loader').style.display = "none";
+            document.getElementById('result').style.display = "block";
         }
     </script>
 </body>
