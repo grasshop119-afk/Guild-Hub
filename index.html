@@ -33,7 +33,6 @@
         .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; box-sizing: border-box; }
         .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
         
-        /* Только этот текст на Montserrat */
         h1 { 
             font-family: 'Montserrat', sans-serif; 
             font-size: clamp(1.2rem, 5vw, 1.4rem); 
@@ -63,19 +62,17 @@
             cursor: pointer; fill: rgba(255, 255, 255, 0.4); display: flex; align-items: center; padding: 8px;
         }
 
+        /* Исправленная плашка гильдии */
         .guild-preview {
-            display: none; margin-bottom: 15px; padding: 12px; align-items: center; text-align: left;
+            display: none; margin-bottom: 15px; padding: 18px; align-items: center; justify-content: space-between;
         }
         
-        .guild-info-wrapper {
-            display: flex; justify-content: space-between; align-items: center; width: 100%;
-        }
         .guild-name-display { 
-            font-weight: 700; font-size: 0.9rem; color: var(--accent-blue); 
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; 
+            font-weight: 700; font-size: 1rem; color: var(--accent-blue); 
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;
         }
         .guild-members-count {
-            font-size: 0.75rem; color: rgba(255,255,255,0.6);
+            font-size: 0.9rem; color: rgba(255,255,255,0.6);
         }
 
         .submit-btn {
@@ -99,7 +96,6 @@
         .submit-btn.active:hover .glow-line { opacity: 1; }
 
         .credits { font-size: 0.85rem; margin-top: 25px; color: rgba(255,255,255,0.6); }
-        /* Убрано подчеркивание у ссылки */
         .credits a { color: var(--accent-blue); text-decoration: none; font-weight: 700; }
     </style>
 </head>
@@ -118,10 +114,8 @@
     </div>
 
     <div id="guildPreview" class="guild-preview">
-        <div class="guild-info-wrapper">
-            <span id="guildNameDisplay" class="guild-name-display">Поиск...</span>
-            <span id="guildMembersCount" class="guild-members-count"></span>
-        </div>
+        <span id="guildNameDisplay" class="guild-name-display">Поиск...</span>
+        <span id="guildMembersCount" class="guild-members-count"></span>
     </div>
 
     <button id="submitBtn" class="submit-btn">Продолжить
@@ -210,8 +204,6 @@
             input.dispatchEvent(new Event('input'));
         } catch (err) {}
     });
-
-    setTimeout(() => input.focus(), 300);
 </script>
 </body>
 </html>
