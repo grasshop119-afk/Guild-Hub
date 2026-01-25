@@ -36,23 +36,22 @@
 
         .guild-card {
             background-color: var(--tg-theme-secondary-bg-color);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            display: none; /* Показываем только при результате */
-            animation: fadeIn 0.3s ease;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .guild-avatar {
-            width: 100px;
-            height: 100px;
+            width: 110px;
+            height: 110px;
             margin: 0 auto 15px;
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+            /* Если картинка не загрузится, будет виден этот щит: */
+            background-image: url('https://img.icons8.com/color/110/000000/shield.png');
         }
 
         input {
@@ -60,7 +59,7 @@
             padding: 14px;
             margin-bottom: 15px;
             border: 1px solid #ccc;
-            border-radius: 10px;
+            border-radius: 12px;
             box-sizing: border-box;
             font-size: 16px;
             outline: none;
@@ -73,7 +72,7 @@
             background-color: var(--tg-theme-button-color);
             color: var(--tg-theme-button-text-color);
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
@@ -87,15 +86,15 @@
         }
 
         .guild-name {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 800;
-            margin: 10px 0;
-            color: var(--tg-theme-text-color);
+            margin: 5px 0;
         }
 
         .guild-gp {
             font-size: 16px;
             color: var(--tg-theme-hint-color);
+            margin-top: 5px;
         }
 
         .loader {
@@ -115,68 +114,65 @@
         </div>
 
         <div id="searchSection">
-            <h2 id="mainTitle">Guild Finder</h2>
-            <input type="number" id="allyCode" placeholder="Код союзника (9 цифр)" inputmode="numeric">
-            <button id="searchBtn" onclick="getGuildData()">Найти гильдию</button>
+            <h2>SWGOH Guild Hub</h2>
+            <input type="number" id="allyCode" placeholder="Код союзника" inputmode="numeric">
+            <button id="searchBtn" onclick="getGuildData()">Найти</button>
         </div>
         
-        <div id="loader" class="loader">Считывание данных из Голонета...</div>
+        <div id="loader" class="loader">Связь с Голонетом...</div>
         <div id="errorMsg" style="color: red; margin-top: 15px;"></div>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
         async function getGuildData() {
             const allyInput = document.getElementById('allyCode').value.trim();
             const card = document.getElementById('guildCard');
             const loader = document.getElementById('loader');
             const errorMsg = document.getElementById('errorMsg');
+            const logoDiv = document.getElementById('guildLogo');
             
             if (allyInput.length < 9) {
-                errorMsg.innerText = "Введите 9 цифр кода союзника";
+                errorMsg.innerText = "Нужно 9 цифр";
                 return;
             }
 
-            // Сброс состояния
             errorMsg.innerText = "";
             card.style.display = "none";
             loader.style.display = "block";
 
             const targetUrl = `https://swgoh.gg/api/player/${allyInput}/`;
-            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+            // Используем AllOrigins для картинок и данных, он надежнее для бинарных файлов
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
             try {
                 const response = await fetch(proxyUrl);
-                const data = await response.json();
+                const proxyData = await response.json();
+                const data = JSON.parse(proxyData.contents);
                 
                 if (data.data && data.data.guild_name) {
                     const p = data.data;
-                    
                     document.getElementById('guildName').innerText = p.guild_name;
                     
-                    // Форматирование ГМ гильдии (если есть в API игрока)
-                    // Иногда API игрока не отдает ГМ всей гильдии, тогда выведем ГМ игрока
-                    const gp = p.galactic_power ? (p.galactic_power / 1000000).toFixed(1) + "M GP" : "";
-                    document.getElementById('guildGP').innerText = `Игрок: ${gp}`;
+                    // ГМ Игрока
+                    const gp = p.galactic_power ? (p.galactic_power / 1000000).toFixed(2) + "M GP" : "0 GP";
+                    document.getElementById('guildGP').innerText = `Личная мощь: ${gp}`;
 
-                    // Работа с аватаром
+                    // Пытаемся загрузить баннер через прокси
                     if (p.guild_banner) {
-                        const logoDiv = document.getElementById('guildLogo');
-                        // Пробуем основной путь к ассетам
-                        const bannerUrl = `https://game-assets.swgoh.gg/static/img/assets/tex.${p.guild_banner}.png`;
-                        logoDiv.style.backgroundImage = `url('${bannerUrl}')`;
+                        const rawIconUrl = `https://game-assets.swgoh.gg/static/img/assets/tex.${p.guild_banner}.png`;
+                        // Мы не можем легко проксировать саму картинку в backgroundImage без доп. настроек,
+                        // поэтому используем прямой URL, но добавляем проверку:
+                        const img = new Image();
+                        img.onload = () => logoDiv.style.backgroundImage = `url('${rawIconUrl}')`;
+                        img.src = rawIconUrl;
                     }
 
                     card.style.display = "block";
                 } else {
-                    errorMsg.innerText = "Игрок не найден или не состоит в гильдии";
+                    errorMsg.innerText = "Игрок не в гильдии";
                 }
-
             } catch (error) {
-                errorMsg.innerText = "Ошибка API. Попробуйте позже.";
-                console.error(error);
+                errorMsg.innerText = "Ошибка загрузки";
             } finally {
                 loader.style.display = "none";
             }
