@@ -2,117 +2,173 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Guild Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWGOH Guild MiniApp</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-dark: #050b14;
-            --accent-blue: #4facfe;
-            --text-white: #ffffff;
-            --border-default: rgba(30, 58, 95, 0.8);
-            --input-bg: rgba(5, 13, 22, 0.8);
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-text-color: #222222;
+            --tg-theme-button-color: #3390ec;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-hint-color: #999999;
         }
 
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-white);
-            display: flex; justify-content: center; align-items: center;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
         }
 
-        .main-content { text-align: center; width: 90%; max-width: 360px; }
-
-        .swgoh-input {
-            width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-default);
-            border-radius: 8px; padding: 18px; color: #ffffff; font-size: 1.1rem;
-            outline: none; box-sizing: border-box; text-align: center; margin-bottom: 20px;
+        .container {
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
         }
 
-        .guild-preview {
-            display: none; background: rgba(15, 27, 42, 0.9); border: 1px solid var(--accent-blue);
-            border-radius: 8px; margin-bottom: 15px; padding: 12px; align-items: center;
+        .guild-avatar {
+            width: 120px;
+            height: 120px;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: none; 
+            background-size: cover;
+            background-position: center;
+            border: 4px solid var(--tg-theme-button-color);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
-        .guild-info { display: flex; justify-content: space-between; width: 100%; align-items: center; }
-        
-        .guild-icon { width: 40px; height: 40px; margin-right: 12px; font-size: 24px; display: flex; align-items: center; }
-
-        .submit-btn {
-            width: 100%; padding: 20px; font-weight: 700; text-transform: uppercase;
-            border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.3);
-            cursor: not-allowed;
+        input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            outline: none;
+            background: #fafafa;
         }
 
-        .submit-btn.active {
-            background: linear-gradient(to top, #26b31e 0%, #0f400b 100%);
-            border: 1px solid #45f53d; color: #ffffff; cursor: pointer;
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: none; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:hover, button:active {
+            background-color: var(--tg-theme-button-color);
+            opacity: 1;
+        }
+
+        #result {
+            margin-top: 15px;
+            font-weight: 800;
+            font-size: 22px;
+            color: var(--tg-theme-button-color);
+        }
+
+        .loader {
+            display: none;
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--tg-theme-hint-color);
         }
     </style>
 </head>
 <body>
 
-<div class="main-content">
-    <h1>Guild Hub</h1>
-    <input type="number" id="allyCode" class="swgoh-input" placeholder="Код союзника">
-
-    <div id="guildPreview" class="guild-preview">
-        <div class="guild-icon" id="gIcon">⏳</div>
-        <div class="guild-info">
-            <span id="gName" style="font-weight:700; color: #4facfe;">Поиск...</span>
-            <span id="gCount" style="font-size: 0.8rem; opacity: 0.7;"></span>
-        </div>
+    <div class="container">
+        <div id="guildLogo" class="guild-avatar"></div>
+        <h2 id="title">SWGOH Гильдия</h2>
+        
+        <input type="number" id="allyCode" placeholder="Код союзника (9 цифр)" inputmode="numeric">
+        <button id="searchBtn" onclick="getGuildData()">Найти гильдию</button>
+        
+        <div id="loader" class="loader">Получаем данные из Голонета...</div>
+        <div id="result"></div>
     </div>
 
-    <button id="submitBtn" class="submit-btn">Продолжить</button>
-</div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-<script>
-    const input = document.getElementById('allyCode');
-    const btn = document.getElementById('submitBtn');
-    const preview = document.getElementById('guildPreview');
-    const gName = document.getElementById('gName');
-    const gCount = document.getElementById('gCount');
-    const gIcon = document.getElementById('gIcon');
+        async function getGuildData() {
+            const allyInput = document.getElementById('allyCode').value.trim();
+            const resultDiv = document.getElementById('result');
+            const loader = document.getElementById('loader');
+            const logo = document.getElementById('guildLogo');
 
-    async function checkGuild(code) {
-        preview.style.display = 'flex';
-        gName.innerText = 'Поиск...';
-        gCount.innerText = '';
-        gIcon.innerText = '⏳';
-
-        try {
-            // Запрос идет к твоему серверу на Render
-            const res = await fetch(`/api/guild/${code}`);
-            const data = await res.json();
-
-            if (data.name) {
-                gName.innerText = data.name;
-                gCount.innerText = `${data.members.length}/50`;
-                gIcon.innerHTML = `<img src="https://swgoh.gg/static/img/assets/tex.guild_avatar_mon_calamari_01.png" width="40">`;
-                btn.classList.add('active');
-            } else {
-                throw new Error();
+            if (allyInput.length < 9) {
+                resultDiv.innerText = "Нужно 9 цифр";
+                return;
             }
-        } catch (e) {
-            gName.innerText = 'Гильдия не найдена';
-            gIcon.innerText = '🤔';
-            gCount.innerText = '';
-            btn.classList.remove('active');
-        }
-    }
 
-    input.addEventListener('input', () => {
-        if (input.value.length === 9) {
-            checkGuild(input.value);
-        } else {
-            preview.style.display = 'none';
-            btn.classList.remove('active');
-        }
-    });
-</script>
+            resultDiv.innerText = "";
+            logo.style.display = "none";
+            logo.style.backgroundImage = "none";
+            loader.style.display = "block";
 
+            // Используем corsproxy для обхода блокировок
+            const targetUrl = `https://swgoh.gg/api/player/${allyInput}/`;
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+
+            try {
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                
+                if (data.data && data.data.guild_name) {
+                    resultDiv.innerText = data.data.guild_name;
+
+                    // Логика иконки
+                    // API swgoh.gg возвращает ID баннера в поле guild_banner
+                    let bannerId = data.data.guild_banner;
+                    
+                    if (bannerId) {
+                        // Формируем URL. Обычно это tex.НАЗВАНИЕ
+                        const iconUrl = `https://game-assets.swgoh.gg/static/img/assets/tex.${bannerId}.png`;
+                        
+                        // Предзагрузка изображения, чтобы не было мигания
+                        const img = new Image();
+                        img.onload = function() {
+                            logo.style.backgroundImage = `url('${iconUrl}')`;
+                            logo.style.display = "block";
+                        };
+                        img.onerror = function() {
+                            // Если картинка не найдена, пробуем без префикса "tex."
+                            const altUrl = `https://game-assets.swgoh.gg/static/img/assets/${bannerId}.png`;
+                            logo.style.backgroundImage = `url('${altUrl}')`;
+                            logo.style.display = "block";
+                        };
+                        img.src = iconUrl;
+                    }
+                } else {
+                    resultDiv.innerText = "Игрок не в гильдии";
+                }
+
+            } catch (error) {
+                resultDiv.innerText = "Ошибка поиска";
+                console.error(error);
+            } finally {
+                loader.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>
