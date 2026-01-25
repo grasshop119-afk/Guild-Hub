@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
-    <title>SWGOH Player Portal</title>
+    <title>SWGOH HoloNet Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -25,217 +25,219 @@
         }
 
         .container {
-            padding: 20px;
-            width: 100%; max-width: 400px;
+            padding: 20px; width: 100%; max-width: 450px;
             box-sizing: border-box; text-align: center;
         }
 
-        /* Карточка профиля */
+        /* Карточка Профиля */
         .player-card {
             background-color: var(--tg-theme-secondary-bg-color);
-            border-radius: 30px;
-            padding: 30px 20px;
-            margin-bottom: 25px;
-            display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            border-radius: 25px; padding: 20px;
+            margin-bottom: 20px; display: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             border: 1px solid rgba(0,0,0,0.05);
+            animation: slideIn 0.3s ease-out;
         }
 
-        .portrait-container {
-            width: 140px; height: 140px;
-            margin: 0 auto 20px;
-            background: #fff;
-            border-radius: 50%;
-            position: relative;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border: 5px solid #fff;
+        @keyframes slideIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        .portrait-circle {
+            width: 100px; height: 100px; margin: 0 auto 15px;
+            background: linear-gradient(135deg, #3390ec, #1c6dbd);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 38px; font-weight: bold; color: #fff;
+            border: 4px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
 
-        #playerPortrait {
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            display: none; /* Покажем после загрузки */
-            z-index: 2;
+        #playerImg { width: 100%; height: 100%; object-fit: cover; display: none; }
+
+        .nick-name { font-size: 26px; font-weight: 800; margin: 0; color: #111; }
+        .p-title { font-size: 12px; color: var(--tg-theme-button-color); font-weight: 700; text-transform: uppercase; margin-bottom: 15px; display: block; }
+
+        /* Сетка статов */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .stat-item { background: #fff; padding: 12px; border-radius: 15px; text-align: center; }
+        .stat-label { font-size: 10px; color: #888; text-transform: uppercase; display: block; }
+        .stat-val { font-size: 16px; font-weight: 700; color: #222; }
+
+        /* Список Топ-Персонажей */
+        .roster-box { background: #fff; border-radius: 18px; padding: 15px; margin-top: 10px; text-align: left; }
+        .roster-box h4 { margin: 0 0 10px 0; font-size: 13px; color: #999; text-transform: uppercase; }
+        .unit-card {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid #f2f2f2;
+        }
+        .unit-card:last-child { border-bottom: none; }
+        .unit-info { font-size: 14px; font-weight: 600; color: #333; }
+        .unit-relic { 
+            background: #333; color: #f1c40f; padding: 2px 8px; 
+            border-radius: 6px; font-size: 11px; font-weight: 900;
         }
 
-        /* Заглушка, пока картинка грузится */
-        .portrait-loading {
-            position: absolute;
-            font-size: 12px; color: #999;
-            z-index: 1;
+        /* Гильдия */
+        .guild-strip {
+            background: #fff; padding: 12px 15px; border-radius: 15px;
+            margin-top: 15px; text-align: left; border-left: 5px solid #3390ec;
         }
+        .g-name { font-size: 15px; font-weight: 700; color: #111; }
 
-        .nick-name { font-size: 28px; font-weight: 800; margin: 5px 0; color: #111; }
-        .player-title { 
-            font-size: 13px; color: var(--tg-theme-button-color); 
-            font-weight: 700; text-transform: uppercase; margin-bottom: 10px; 
-        }
-
+        /* Кнопка и инпут */
         input {
-            width: 100%; padding: 16px;
-            margin-bottom: 15px;
-            border: 2px solid #e1e4e8;
-            border-radius: 15px;
-            font-size: 17px;
-            outline: none; text-align: center;
-            background: #fafafa;
-            box-sizing: border-box;
+            width: 100%; padding: 16px; margin-bottom: 15px;
+            border: 2px solid #e1e4e8; border-radius: 15px;
+            font-size: 17px; outline: none; text-align: center;
+            background: #fafafa; box-sizing: border-box;
         }
 
-        /* Кнопка Share/Поиск: СТРОГО без потемнения */
         .btn-main {
             width: 100%; padding: 16px;
             background-color: var(--tg-theme-button-color) !important;
             color: var(--tg-theme-button-text-color) !important;
             border: none; border-radius: 15px;
             font-size: 17px; font-weight: bold;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
+            cursor: pointer; -webkit-tap-highlight-color: transparent;
             transition: none !important;
-            outline: none;
-            box-shadow: none !important;
         }
 
-        .btn-main:hover, .btn-main:active, .btn-main:focus {
-            background-color: var(--tg-theme-button-color) !important;
-            opacity: 1 !important;
-            filter: none !important;
-            transform: none !important;
-        }
+        .btn-main:active { opacity: 1 !important; transform: none !important; }
 
         .loader { display: none; margin: 20px 0; color: var(--tg-theme-button-color); font-weight: bold; }
-        .error-msg { color: #d9534f; margin-top: 15px; font-weight: 600; display: none; }
-        .log-box { font-size: 9px; color: #bbb; margin-top: 20px; line-height: 1.2; text-align: left; }
+        .error-msg { color: #d9534f; margin-top: 15px; font-weight: 600; display: none; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div id="playerCard" class="player-card">
-            <div id="pTitle" class="player-title"></div>
-            <div class="portrait-container">
-                <div class="portrait-loading">Загрузка...</div>
-                <img id="playerPortrait" src="" alt="">
+            <span id="pTitle" class="p-title"></span>
+            <div class="portrait-circle" id="pCircle">
+                <span id="pInit">?</span>
+                <img id="playerImg" src="" alt="">
             </div>
-            <div id="pNick" class="nick-name"></div>
+            <h2 id="pNick" class="nick-name"></h2>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Мощность (ГМ)</span>
+                    <span class="stat-val" id="pGP">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Персонажей</span>
+                    <span class="stat-val" id="pCount">0</span>
+                </div>
+            </div>
+
+            <div class="roster-box">
+                <h4>Сильнейшие юниты</h4>
+                <div id="unitList"></div>
+            </div>
+
+            <div class="guild-strip">
+                <span class="stat-label">Гильдия</span>
+                <span class="g-name" id="gName">---</span>
+            </div>
         </div>
 
-        <div id="searchSection">
-            <h1 style="font-size: 26px; margin-bottom: 25px;">SWGOH Поиск</h1>
-            <input type="number" id="allyCode" placeholder="Код союзника (9 цифр)" inputmode="numeric">
-            <button class="btn-main" id="mainButton" onclick="getPlayerData()">Найти игрока</button>
+        <div id="searchBox">
+            <h1 style="font-size: 24px;">SWGOH Анализатор</h1>
+            <input type="number" id="allyCode" placeholder="Код союзника" inputmode="numeric">
+            <button class="btn-main" onclick="fetchPlayer()">Найти в Голонете</button>
         </div>
         
-        <div id="loader" class="loader">Считывание Голонета...</div>
-        <div id="errorMsg" class="error-msg"></div>
-        <div id="debugLog" class="log-box"></div>
+        <div id="load" class="loader">Загрузка данных...</div>
+        <div id="err" class="error-msg"></div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        async function getPlayerData() {
-            const allyInput = document.getElementById('allyCode').value.trim();
+        async function fetchPlayer() {
+            const ally = document.getElementById('allyCode').value.trim();
             const card = document.getElementById('playerCard');
-            const loader = document.getElementById('loader');
-            const portraitImg = document.getElementById('playerPortrait');
-            const errorMsg = document.getElementById('errorMsg');
-            const debugLog = document.getElementById('debugLog');
+            const loader = document.getElementById('load');
+            const err = document.getElementById('err');
             
-            if (allyInput.length < 9) {
-                errorMsg.innerText = "Нужно 9 цифр";
-                errorMsg.style.display = "block";
+            if (ally.length < 9) {
+                showError("Введите 9 цифр кода союзника");
                 return;
             }
 
-            errorMsg.style.display = "none";
+            err.style.display = "none";
             card.style.display = "none";
-            portraitImg.style.display = "none";
             loader.style.display = "block";
-            debugLog.innerText = "Debug Start:";
 
-            try {
-                // 1. Загрузка данных через прокси
-                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent('https://swgoh.gg/api/player/' + allyInput + '/')}`;
-                const response = await fetch(proxyUrl);
-                const result = await response.json();
-                const p = result.data;
+            // Список прокси для перебора
+            const proxies = [
+                (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
+            ];
 
-                if (p && p.name) {
-                    document.getElementById('pNick').innerText = p.name;
-                    document.getElementById('pTitle').innerText = p.title || "Игрок";
+            let data = null;
+            let targetUrl = `https://swgoh.gg/api/player/${ally}/`;
 
-                    // 2. Поиск портрета (Portrait)
-                    // ID обычно приходит как "charui_vader" или "charui_rey"
-                    const pid = p.portrait_id || "charui_vader";
-                    
-                    // Список источников для проверки
-                    const variants = [
-                        `https://static-swgoh.gg/main/static/assets/tex.${pid}.png`,
-                        `https://static-swgoh.gg/main/static/assets/${pid}.png`,
-                        `https://swgoh.gg/static/img/assets/tex.${pid}.png`
-                    ];
-
-                    let found = false;
-                    for (let url of variants) {
-                        if (found) break;
-
-                        // Сначала пробуем БЕЗ прокси (благодаря meta no-referrer)
-                        const success = await new Promise(resolve => {
-                            const img = new Image();
-                            img.onload = () => resolve(true);
-                            img.onerror = () => resolve(false);
-                            img.src = url;
-                            setTimeout(() => resolve(false), 2000);
-                        });
-
-                        if (success) {
-                            portraitImg.src = url;
-                            portraitImg.style.display = "block";
-                            found = true;
-                            debugLog.innerText += "\n[OK] Direct: " + url;
-                        } else {
-                            // Если не вышло, пробуем через wsrv.nl (современный weserv)
-                            const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(url)}&noproxy=1`;
-                            const proxySuccess = await new Promise(resolve => {
-                                const img = new Image();
-                                img.onload = () => resolve(true);
-                                img.onerror = () => resolve(false);
-                                img.src = proxyUrl;
-                                setTimeout(() => resolve(false), 2000);
-                            });
-
-                            if (proxySuccess) {
-                                portraitImg.src = proxyUrl;
-                                portraitImg.style.display = "block";
-                                found = true;
-                                debugLog.innerText += "\n[OK] Proxy: " + proxyUrl;
-                            }
-                        }
+            for (let getProxyUrl of proxies) {
+                try {
+                    const resp = await fetch(getProxyUrl(targetUrl));
+                    const json = await resp.json();
+                    // allorigins упаковывает результат в .contents
+                    const rawData = json.contents ? JSON.parse(json.contents) : json;
+                    if (rawData && rawData.data) {
+                        data = rawData.data;
+                        break;
                     }
+                } catch (e) { console.log("Proxy failed, trying next..."); }
+            }
 
-                    if (!found) {
-                        // Заглушка если совсем ничего не помогло
-                        portraitImg.src = "https://wsrv.nl/?url=https://swgoh.gg/static/img/assets/tex.charui_vader.png";
-                        portraitImg.style.display = "block";
-                        debugLog.innerText += "\n[FAIL] Using fallback";
-                    }
-
-                    card.style.display = "block";
-                } else {
-                    errorMsg.innerText = "Игрок не найден";
-                    errorMsg.style.display = "block";
-                }
-            } catch (e) {
-                errorMsg.innerText = "Ошибка API";
-                errorMsg.style.display = "block";
-                console.error(e);
-            } finally {
+            if (data) {
+                renderProfile(data);
+            } else {
+                showError("Ошибка: Сервер swgoh.gg отклонил запрос. Попробуйте позже.");
                 loader.style.display = "none";
             }
+        }
+
+        function renderProfile(p) {
+            document.getElementById('pNick').innerText = p.name;
+            document.getElementById('pTitle').innerText = p.title || "GALAXY OF HEROES";
+            document.getElementById('pGP').innerText = (p.galactic_power / 1000000).toFixed(2) + "M";
+            document.getElementById('pCount').innerText = p.units.length;
+            document.getElementById('gName').innerText = p.guild_name || "Частный сектор";
+            document.getElementById('pInit').innerText = p.name.charAt(0).toUpperCase();
+
+            // Топ юниты с реликтами
+            const list = document.getElementById('unitList');
+            list.innerHTML = "";
+            const top = p.units.sort((a,b) => b.data.power - a.data.power).slice(0, 4);
+
+            top.forEach(u => {
+                const rLevel = u.data.relic_tier > 2 ? `R${u.data.relic_tier - 2}` : `G${u.data.gear_level}`;
+                const div = document.createElement('div');
+                div.className = 'unit-card';
+                div.innerHTML = `<span class="unit-info">${u.data.name}</span><span class="unit-relic">${rLevel}</span>`;
+                list.appendChild(div);
+            });
+
+            // Попытка загрузить аватарку через Google Proxy
+            const img = document.getElementById('playerImg');
+            const pInit = document.getElementById('pInit');
+            const pid = p.portrait_id || "charui_vader";
+            const imgUrl = `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=https://static-swgoh.gg/main/static/assets/tex.${pid}.png`;
+            
+            img.src = imgUrl;
+            img.onload = () => { img.style.display = "block"; pInit.style.display = "none"; };
+            img.onerror = () => { img.style.display = "none"; pInit.style.display = "block"; };
+
+            document.getElementById('load').style.display = "none";
+            document.getElementById('playerCard').style.display = "block";
+        }
+
+        function showError(m) {
+            const err = document.getElementById('err');
+            err.innerText = m;
+            err.style.display = "block";
+            document.getElementById('load').style.display = "none";
         }
     </script>
 </body>
