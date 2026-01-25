@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SWGOH Guild Hub</title>
+    <meta name="referrer" content="no-referrer">
+    <title>SWGOH Player Portal</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -24,148 +25,214 @@
         }
 
         .container {
-            padding: 30px 20px;
+            padding: 20px;
             width: 100%; max-width: 400px;
             box-sizing: border-box; text-align: center;
         }
 
-        .guild-card {
+        /* Карточка профиля */
+        .player-card {
             background-color: var(--tg-theme-secondary-bg-color);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
+            border-radius: 30px;
+            padding: 30px 20px;
+            margin-bottom: 25px;
             display: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
-        .guild-avatar-container {
-            width: 120px; height: 120px;
-            margin: 0 auto 15px;
+        .portrait-container {
+            width: 140px; height: 140px;
+            margin: 0 auto 20px;
+            background: #fff;
+            border-radius: 50%;
+            position: relative;
             display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 5px solid #fff;
         }
 
-        #guildLogo {
-            max-width: 100%; max-height: 100%;
-            object-fit: contain;
-            /* Убираем "битую" картинку до загрузки */
-            display: none;
+        #playerPortrait {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            display: none; /* Покажем после загрузки */
+            z-index: 2;
+        }
+
+        /* Заглушка, пока картинка грузится */
+        .portrait-loading {
+            position: absolute;
+            font-size: 12px; color: #999;
+            z-index: 1;
+        }
+
+        .nick-name { font-size: 28px; font-weight: 800; margin: 5px 0; color: #111; }
+        .player-title { 
+            font-size: 13px; color: var(--tg-theme-button-color); 
+            font-weight: 700; text-transform: uppercase; margin-bottom: 10px; 
         }
 
         input {
-            width: 100%; padding: 14px;
+            width: 100%; padding: 16px;
             margin-bottom: 15px;
-            border: 1px solid #ccc; border-radius: 10px;
-            font-size: 16px; outline: none; text-align: center;
+            border: 2px solid #e1e4e8;
+            border-radius: 15px;
+            font-size: 17px;
+            outline: none; text-align: center;
+            background: #fafafa;
+            box-sizing: border-box;
         }
 
-        button {
-            width: 100%; padding: 14px;
-            background-color: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
-            border: none; border-radius: 10px;
-            font-size: 16px; font-weight: bold;
-            cursor: pointer; transition: none;
+        /* Кнопка Share/Поиск: СТРОГО без потемнения */
+        .btn-main {
+            width: 100%; padding: 16px;
+            background-color: var(--tg-theme-button-color) !important;
+            color: var(--tg-theme-button-text-color) !important;
+            border: none; border-radius: 15px;
+            font-size: 17px; font-weight: bold;
+            cursor: pointer;
             -webkit-tap-highlight-color: transparent;
+            transition: none !important;
+            outline: none;
+            box-shadow: none !important;
         }
 
-        button:hover, button:active {
-            background-color: var(--tg-theme-button-color);
-            opacity: 1;
+        .btn-main:hover, .btn-main:active, .btn-main:focus {
+            background-color: var(--tg-theme-button-color) !important;
+            opacity: 1 !important;
+            filter: none !important;
+            transform: none !important;
         }
 
-        .guild-name {
-            font-size: 24px; font-weight: 800;
-            margin: 10px 0;
-        }
-
-        .loader { display: none; margin: 20px 0; color: var(--tg-theme-button-color); }
+        .loader { display: none; margin: 20px 0; color: var(--tg-theme-button-color); font-weight: bold; }
+        .error-msg { color: #d9534f; margin-top: 15px; font-weight: 600; display: none; }
+        .log-box { font-size: 9px; color: #bbb; margin-top: 20px; line-height: 1.2; text-align: left; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div id="guildCard" class="guild-card">
-            <div class="guild-avatar-container">
-                <img id="guildLogo" src="" alt="Logo">
+        <div id="playerCard" class="player-card">
+            <div id="pTitle" class="player-title"></div>
+            <div class="portrait-container">
+                <div class="portrait-loading">Загрузка...</div>
+                <img id="playerPortrait" src="" alt="">
             </div>
-            <div id="guildName" class="guild-name"></div>
+            <div id="pNick" class="nick-name"></div>
         </div>
 
         <div id="searchSection">
-            <h2>SWGOH Guild Hub</h2>
-            <input type="number" id="allyCode" placeholder="Код союзника" inputmode="numeric">
-            <button id="searchBtn" onclick="getGuildData()">Найти гильдию</button>
+            <h1 style="font-size: 26px; margin-bottom: 25px;">SWGOH Поиск</h1>
+            <input type="number" id="allyCode" placeholder="Код союзника (9 цифр)" inputmode="numeric">
+            <button class="btn-main" id="mainButton" onclick="getPlayerData()">Найти игрока</button>
         </div>
         
-        <div id="loader" class="loader">Связь с сервером...</div>
-        <div id="errorMsg" style="color: red; margin-top: 15px;"></div>
+        <div id="loader" class="loader">Считывание Голонета...</div>
+        <div id="errorMsg" class="error-msg"></div>
+        <div id="debugLog" class="log-box"></div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        async function getGuildData() {
+        async function getPlayerData() {
             const allyInput = document.getElementById('allyCode').value.trim();
-            const card = document.getElementById('guildCard');
+            const card = document.getElementById('playerCard');
             const loader = document.getElementById('loader');
-            const logoImg = document.getElementById('guildLogo');
+            const portraitImg = document.getElementById('playerPortrait');
             const errorMsg = document.getElementById('errorMsg');
+            const debugLog = document.getElementById('debugLog');
             
             if (allyInput.length < 9) {
                 errorMsg.innerText = "Нужно 9 цифр";
+                errorMsg.style.display = "block";
                 return;
             }
 
-            errorMsg.innerText = "";
+            errorMsg.style.display = "none";
             card.style.display = "none";
-            logoImg.style.display = "none";
+            portraitImg.style.display = "none";
             loader.style.display = "block";
-
-            // Используем прокси для получения JSON данных
-            const targetUrl = `https://swgoh.gg/api/player/${allyInput}/`;
-            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+            debugLog.innerText = "Debug Start:";
 
             try {
+                // 1. Загрузка данных через прокси
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent('https://swgoh.gg/api/player/' + allyInput + '/')}`;
                 const response = await fetch(proxyUrl);
-                const data = await response.json();
-                
-                if (data.data && data.data.guild_id) {
-                    const p = data.data;
-                    document.getElementById('guildName').innerText = p.guild_name;
+                const result = await response.json();
+                const p = result.data;
 
-                    // САМЫЙ НАДЕЖНЫЙ СПОСОБ ДЛЯ КАРТИНКИ:
-                    // swgoh.gg хранит логотипы гильдий по их ID. 
-                    // Формат: https://static-swgoh.gg/tools/img/guilds/[ID]/logo.png 
-                    // Либо через их внутренний прокси ассетов.
+                if (p && p.name) {
+                    document.getElementById('pNick').innerText = p.name;
+                    document.getElementById('pTitle').innerText = p.title || "Игрок";
+
+                    // 2. Поиск портрета (Portrait)
+                    // ID обычно приходит как "charui_vader" или "charui_rey"
+                    const pid = p.portrait_id || "charui_vader";
                     
-                    const guildId = p.guild_id;
-                    const possibleLogoUrl = `https://swgoh.gg/static/img/assets/tex.${p.guild_banner}.png`;
-                    
-                    // Попытка загрузить картинку
-                    logoImg.src = possibleLogoUrl;
-                    logoImg.onload = () => { 
-                        logoImg.style.display = "block"; 
-                    };
-                    
-                    // Если не вышло через баннер, пробуем "сломать" кэш или альтернативный путь
-                    logoImg.onerror = () => {
-                        console.log("Первый путь не подошел, пробуем альтернативу...");
-                        logoImg.src = `https://game-assets.swgoh.gg/static/img/assets/tex.${p.guild_banner}.png`;
-                        logoImg.onerror = () => {
-                            // Если и это не вышло - ставим стандартную иконку фракции (например, Эмблему Империи)
-                            logoImg.src = "https://swgoh.gg/static/img/assets/tex.guild_banner_bg_v04.png";
-                            logoImg.style.display = "block";
+                    // Список источников для проверки
+                    const variants = [
+                        `https://static-swgoh.gg/main/static/assets/tex.${pid}.png`,
+                        `https://static-swgoh.gg/main/static/assets/${pid}.png`,
+                        `https://swgoh.gg/static/img/assets/tex.${pid}.png`
+                    ];
+
+                    let found = false;
+                    for (let url of variants) {
+                        if (found) break;
+
+                        // Сначала пробуем БЕЗ прокси (благодаря meta no-referrer)
+                        const success = await new Promise(resolve => {
+                            const img = new Image();
+                            img.onload = () => resolve(true);
+                            img.onerror = () => resolve(false);
+                            img.src = url;
+                            setTimeout(() => resolve(false), 2000);
+                        });
+
+                        if (success) {
+                            portraitImg.src = url;
+                            portraitImg.style.display = "block";
+                            found = true;
+                            debugLog.innerText += "\n[OK] Direct: " + url;
+                        } else {
+                            // Если не вышло, пробуем через wsrv.nl (современный weserv)
+                            const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(url)}&noproxy=1`;
+                            const proxySuccess = await new Promise(resolve => {
+                                const img = new Image();
+                                img.onload = () => resolve(true);
+                                img.onerror = () => resolve(false);
+                                img.src = proxyUrl;
+                                setTimeout(() => resolve(false), 2000);
+                            });
+
+                            if (proxySuccess) {
+                                portraitImg.src = proxyUrl;
+                                portraitImg.style.display = "block";
+                                found = true;
+                                debugLog.innerText += "\n[OK] Proxy: " + proxyUrl;
+                            }
                         }
-                    };
+                    }
+
+                    if (!found) {
+                        // Заглушка если совсем ничего не помогло
+                        portraitImg.src = "https://wsrv.nl/?url=https://swgoh.gg/static/img/assets/tex.charui_vader.png";
+                        portraitImg.style.display = "block";
+                        debugLog.innerText += "\n[FAIL] Using fallback";
+                    }
 
                     card.style.display = "block";
                 } else {
-                    errorMsg.innerText = "Гильдия не найдена";
+                    errorMsg.innerText = "Игрок не найден";
+                    errorMsg.style.display = "block";
                 }
-            } catch (error) {
+            } catch (e) {
                 errorMsg.innerText = "Ошибка API";
-                console.error(error);
+                errorMsg.style.display = "block";
+                console.error(e);
             } finally {
                 loader.style.display = "none";
             }
