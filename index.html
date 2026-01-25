@@ -15,31 +15,40 @@
             --border-default: rgba(30, 58, 95, 0.8);
             --input-bg: rgba(5, 13, 22, 0.8);
         }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: 'Montserrat', sans-serif;
             background-color: var(--bg-dark);
             background-image: radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
-            display: flex; justify-content: center; align-items: center; color: var(--text-white);
+            display: flex; justify-content: center; align-items: center; color: var(--text-white); overflow: hidden;
         }
-        .main-content { text-align: center; width: 90%; max-width: 360px; }
-        .logo { width: 180px; margin-bottom: 25px; display: block; margin-left: auto; margin-right: auto; }
+        .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; }
+        .logo { width: 180px; margin: 0 auto 25px; display: block; }
         .swgoh-input {
             width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-default);
             border-radius: 8px; padding: 18px; color: #ffffff; font-size: 1.2rem;
-            outline: none; text-align: center; letter-spacing: 3px; box-sizing: border-box;
+            outline: none; text-align: center; letter-spacing: 3px;
         }
         .guild-preview {
-            display: none; background-color: var(--input-bg); border: 1px solid var(--border-default);
-            border-radius: 8px; margin-top: 15px; padding: 15px; align-items: center; text-align: left;
+            display: none; background: var(--input-bg); border: 1px solid var(--border-default);
+            border-radius: 8px; margin-top: 15px; padding: 12px; align-items: center; text-align: left;
         }
-        .guild-icon-box { width: 45px; height: 45px; background: #1a2a3a; border-radius: 6px; margin-right: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); }
-        .guild-name-display { font-weight: 700; color: var(--accent-blue); }
+        .guild-icon-box {
+            width: 45px; height: 45px; background: rgba(0,0,0,0.3); border-radius: 6px;
+            margin-right: 12px; display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .guild-name-display { font-weight: 700; font-size: 0.95rem; color: var(--accent-blue); }
         .submit-btn {
             width: 100%; padding: 20px; margin-top: 20px; font-weight: 700; text-transform: uppercase;
-            border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.3);
+            border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.3); transition: 0.3s;
         }
-        .submit-btn.active { background: linear-gradient(to top, var(--swgoh-green-bright), var(--swgoh-green-dark)); color: white; cursor: pointer; border: 1px solid #45f53d; }
+        .submit-btn.active {
+            background: linear-gradient(to top, var(--swgoh-green-bright), var(--swgoh-green-dark));
+            border: 1px solid #45f53d; color: white; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -49,13 +58,12 @@
         <div id="guildPreview" class="guild-preview">
             <div class="guild-icon-box" id="gIcon">⏳</div>
             <div style="flex-grow:1">
-                <div id="guildName" class="guild-name-display">Поиск...</div>
-                <div id="guildCount" style="font-size:0.8rem; opacity:0.5"></div>
+                <div id="gName" class="guild-name-display">Поиск...</div>
+                <div id="gCount" style="font-size:0.75rem; opacity:0.5"></div>
             </div>
         </div>
         <button id="submitBtn" class="submit-btn">Продолжить</button>
     </div>
-
     <script>
         const input = document.getElementById('allyCode');
         const btn = document.getElementById('submitBtn');
@@ -72,15 +80,17 @@
 
             if (val.length === 9) {
                 preview.style.display = 'flex';
+                document.getElementById('gName').innerText = 'Ищу...';
                 try {
                     const r = await fetch('/api/check/' + val);
                     const d = await r.json();
-                    document.getElementById('guildName').innerText = d.guildName;
-                    document.getElementById('guildCount').innerText = d.members + '/50 игроков';
+                    if(d.error) throw new Error();
+                    document.getElementById('gName').innerText = d.guildName;
+                    document.getElementById('gCount').innerText = d.members + ' / 50 участников';
                     document.getElementById('gIcon').innerText = '🛡️';
                     btn.classList.add('active');
                 } catch (e) {
-                    document.getElementById('guildName').innerText = 'Ошибка';
+                    document.getElementById('gName').innerText = 'Не найдено';
                 }
             } else {
                 preview.style.display = 'none';
