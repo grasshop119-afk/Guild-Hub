@@ -98,10 +98,14 @@
         .guild-name-display { 
             font-weight: 700; 
             font-size: 1rem; 
-            color: #ff9f00;
+            color: #ff9f00; 
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px;
-            text-shadow: 0 0 8px currentColor;
-            letter-spacing: 0.5px;
+        }
+
+        /* Стиль для текста в процессе поиска */
+        .guild-name-display.searching {
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255, 159, 0, 0.8);
         }
         
         .guild-stats-row {
@@ -190,39 +194,10 @@
         return num.toLocaleString();
     }
 
-    // Функция для определения цвета текста и иконки гильдии
-    function getGuildStyle(guildName) {
-        const name = guildName.toLowerCase();
-        let textColor = '#ff9f00'; // оранжевый по умолчанию
-        let iconName = 'NoShield.png'; // иконка по умолчанию
-        
-        // Определяем цвет текста
-        if (name.includes('shadow') || name.includes('shade') || name.includes('тьма') || name.includes('тень')) {
-            textColor = '#9370DB'; // фиолетовый для теневых гильдий
-        } else if (name.includes('rebel') || name.includes('повстан')) {
-            textColor = '#FF6B6B'; // красный для повстанцев
-        } else if (name.includes('empire') || name.includes('импер')) {
-            textColor = '#4A90E2'; // синий для империи
-        } else if (name.includes('jedi') || name.includes('джеда')) {
-            textColor = '#32CD32'; // зеленый для джедаев
-        } else if (name.includes('sith') || name.includes('ситх')) {
-            textColor = '#DC143C'; // темно-красный для ситхов
-        }
-        
-        // Определяем иконку
-        if (name.includes('those who are in the shadows') || 
-            name.includes('те, кто в тени') || 
-            name.includes('shadows') || 
-            name.includes('shadow guild')) {
-            iconName = 'ShadeShield.png';
-        }
-        
-        return { textColor, iconName };
-    }
-
     async function findGuild(code) {
         guildPreview.style.display = 'flex';
         guildNameDisplay.innerText = 'ПОИСК...';
+        guildNameDisplay.classList.add('searching');
         guildGP.innerText = '';
         guildMembersCount.innerText = '';
         guildImg.style.display = 'none';
@@ -259,28 +234,20 @@
             
             if (gData?.data) {
                 const guild = gData.data;
-                const guildName = guild.name;
-                
-                // Получаем стиль для гильдии
-                const { textColor, iconName } = getGuildStyle(guildName);
-                
-                // Устанавливаем текст и цвет
-                guildNameDisplay.innerText = guildName;
-                guildNameDisplay.style.color = textColor;
-                guildNameDisplay.style.textShadow = `0 0 8px ${textColor}`;
-                
+                guildNameDisplay.classList.remove('searching');
+                guildNameDisplay.innerText = guild.name;
                 guildGP.innerText = formatGP(guild.galactic_power);
                 guildMembersCount.innerText = `${guild.members.length} Members`;
                 
-                // Загружаем иконку из локальной папки
-                guildImg.src = `Logos/${iconName}`;
+                // Логика выбора иконки
+                const iconName = (guild.name === "Those who are in the shadows") ? "ShadeShield.png" : "NoShield.png";
+                guildImg.src = "Logos/" + iconName;
                 
                 guildImg.onload = () => {
                     guildImg.style.display = 'block';
                     guildLoader.style.display = 'none';
                 };
                 guildImg.onerror = () => {
-                    // Если иконка не загрузилась, показываем запасной вариант
                     guildImg.style.display = 'none';
                     guildLoader.innerText = '🛡️';
                     guildLoader.style.display = 'block';
@@ -292,13 +259,12 @@
     }
 
     function showError() {
+        guildNameDisplay.classList.remove('searching');
         guildNameDisplay.innerText = 'Гильдия не найдена';
-        guildNameDisplay.style.color = '#ff6b6b'; // красный для ошибки
-        guildNameDisplay.style.textShadow = '0 0 8px #ff6b6b';
         guildGP.innerText = '';
         guildMembersCount.innerText = '';
         guildImg.style.display = 'none';
-        guildLoader.innerText = '❌';
+        guildLoader.innerText = '!';
         guildLoader.style.display = 'block';
         btn.classList.remove('active');
     }
@@ -322,8 +288,12 @@
     pasteBtn.addEventListener('click', async () => {
         try {
             const text = await navigator.clipboard.readText();
-            input.value = text;
-            input.dispatchEvent(new Event('input'));
+            // Очищаем вставленный текст от лишних символов перед обработкой
+            const cleanText = text.replace(/\D/g, '').substring(0, 9);
+            if (cleanText) {
+                input.value = cleanText;
+                input.dispatchEvent(new Event('input'));
+            }
         } catch (err) {}
     });
 
