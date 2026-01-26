@@ -181,40 +181,38 @@
         setTimeout(() => input.focus(), 100);
     }
 
+    // Ультимативный фетч с перебором прокси и проверкой структуры данных
     async function smartFetch(targetUrl) {
-        // Добавлен специфичный прокси для лучшей работы с iOS/CORS
         const proxies = [
             `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`,
-            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+            `https://thingproxy.freeboard.io/fetch/${targetUrl}`
         ];
 
-        for (const proxy of proxies) {
+        for (let proxy of proxies) {
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                const id = setTimeout(() => controller.abort(), 8000);
 
-                const response = await fetch(proxy, { 
-                    method: 'GET',
-                    signal: controller.signal,
-                    headers: { 'Accept': 'application/json' }
-                });
-                
-                clearTimeout(timeoutId);
+                const response = await fetch(proxy, { signal: controller.signal });
+                clearTimeout(id);
+
                 if (!response.ok) continue;
 
                 const result = await response.json();
                 
-                // Улучшенная обработка ответа AllOrigins
+                // Извлекаем чистые данные в зависимости от того, как их упаковал прокси
+                let cleanData = null;
                 if (proxy.includes('allorigins')) {
-                    if (result && result.contents) {
-                        return JSON.parse(result.contents);
-                    }
-                    continue;
+                    cleanData = typeof result.contents === 'string' ? JSON.parse(result.contents) : result.contents;
+                } else {
+                    cleanData = result;
                 }
-                
-                if (result) return result;
-            } catch (e) { 
-                console.warn("Proxy attempt failed:", e); 
+
+                // Возвращаем данные, даже если они обернуты в .data или нет
+                if (cleanData) return cleanData;
+            } catch (e) {
+                console.warn("Proxy failed, next...");
             }
         }
         return null;
@@ -230,26 +228,25 @@
         statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
 
         try {
-            const pData = await smartFetch(`https://swgoh.gg/api/player/${pureDigits}/`);
-            
-            // На iOS pData.data может быть в разной структуре в зависимости от прокси
-            const playerInfo = pData?.data || pData;
-            
-            if (playerInfo && playerInfo.guild_id) {
-                const gData = await smartFetch(`https://swgoh.gg/api/guild-profile/${playerInfo.guild_id}/`);
-                const guildInfo = gData?.data || gData;
+            const pResponse = await smartFetch(`https://swgoh.gg/api/player/${pureDigits}/`);
+            // Проверка: данные игрока могут быть в .data или в корне
+            const pData = pResponse?.data || pResponse;
 
-                if (guildInfo && guildInfo.name) {
-                    renderSuccess(guildInfo);
+            if (pData && pData.guild_id) {
+                const gResponse = await smartFetch(`https://swgoh.gg/api/guild-profile/${pData.guild_id}/`);
+                const gData = gResponse?.data || gResponse;
+
+                if (gData && gData.name) {
+                    renderSuccess(gData);
                 } else {
                     showError();
                 }
             } else {
                 showError();
             }
-        } catch (e) { 
-            console.error("Search error:", e);
-            showError(); 
+        } catch (e) {
+            console.error("Critical fetch error:", e);
+            showError();
         }
     }
 
@@ -263,17 +260,21 @@
             shieldClass = "guild-icon-img";
         }
 
-        statusVisual.innerHTML = `<img class="${shieldClass}" src="Logos/${shieldImg}" onerror="this.src='Logos/NoShield.png'">`;
+        statusVisual.innerHTML = `<img class="${shieldClass}" src="Logos/${shieldImg}" onerror="this.src='https://img.icons8.com/ios-filled/50/4facfe/shield.png'">`;
         statusText.innerText = guildName;
         statusText.classList.add('guild-name-success');
         
-        const mCount = gData.members ? (Array.isArray(gData.members) ? gData.members.length : gData.member_count) : 0;
-        membersCount.innerText = `${mCount || '?'}/50`;
+        // Находим количество участников (разные версии API могут давать массив или число)
+        let count = 0;
+        if (Array.isArray(gData.members)) count = gData.members.length;
+        else if (gData.member_count) count = gData.member_count;
+        
+        membersCount.innerText = `${count || '?'}/50`;
         btn.classList.add('active');
     }
 
     function showError() {
-        statusVisual.innerHTML = '';
+        statusVisual.innerHTML = '❌';
         statusText.innerText = 'Не найдена';
         statusText.classList.remove('guild-name-success');
         membersCount.innerText = '';
