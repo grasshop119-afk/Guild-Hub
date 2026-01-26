@@ -231,11 +231,11 @@
                 
                 // Логика выбора картинки
                 let shieldImg = "NoShield.png";
-                let shieldClass = "guild-icon-img default-shield";
+                let shieldClass = "guild-icon-img default-shield"; // с прозрачностью 0.75
                 
                 if (guildName === "Those who are in the shadows") {
                     shieldImg = "ShadeShield.png";
-                    shieldClass = "guild-icon-img"; // Без прозрачности
+                    shieldClass = "guild-icon-img"; // без прозрачности
                 }
 
                 statusVisual.innerHTML = `<img class="${shieldClass}" src="Logos/${shieldImg}">`;
