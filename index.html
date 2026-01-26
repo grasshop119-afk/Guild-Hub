@@ -35,11 +35,10 @@
             color: var(--text-white); overflow: hidden; position: fixed;
         }
 
-        .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; }
+        .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; z-index: 10; }
         .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
         
         h1 { font-size: clamp(1.2rem, 5vw, 1.4rem); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
-        
         .description { font-size: clamp(0.8rem, 3.5vw, 0.9rem); font-weight: 400; margin-bottom: 25px; opacity: 0.9; }
 
         .interactive-area { position: relative; width: 100%; height: 62px; margin-bottom: 20px; }
@@ -61,7 +60,6 @@
         }
 
         .status-plate { display: none; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 5; }
-
         .loader-box { width: 36px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 
         .swgoh-spinner {
@@ -84,7 +82,6 @@
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; text-align: center;
         }
         .guild-name-success { color: var(--accent-blue); text-transform: uppercase; letter-spacing: 1px; font-size: 0.95rem; }
-
         .members-count { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: 400; margin-top: 2px; }
 
         .reset-icon {
@@ -104,8 +101,13 @@
 
         .submit-btn.active {
             background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%);
-            border: 1px solid #45f53d; color: #ffffff; cursor: pointer;
+            border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        /* Чтобы кнопка не темнела при фокусе (согласно твоим правилам) */
+        .submit-btn.active:active, .submit-btn.active:focus {
+            filter: brightness(1);
         }
 
         .credits { font-size: 0.85rem; margin-top: 25px; color: rgba(255,255,255,0.4); font-weight: 400; }
@@ -133,7 +135,7 @@
             </div>
             
             <div class="status-info-wrapper">
-                <span id="statusText" class="status-text">Поиск...</span>
+                <span id="statusText" class="status-text">Загрузка...</span>
                 <span id="membersCount" class="members-count"></span>
             </div>
 
@@ -161,6 +163,7 @@
     const pasteBtn = document.getElementById('pasteBtn');
     const resetBtn = document.getElementById('resetBtn');
 
+    // Форматирование 000-000-000
     function formatValue(val) {
         let digits = val.replace(/\D/g, '').substring(0, 9);
         let formatted = "";
@@ -181,38 +184,38 @@
         setTimeout(() => input.focus(), 100);
     }
 
-    // Ультимативный фетч с перебором прокси и проверкой структуры данных
+    // Умный фетч с каскадом прокси
     async function smartFetch(targetUrl) {
+        // Список рабочих прокси для обхода CORS
         const proxies = [
             `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`,
             `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
             `https://thingproxy.freeboard.io/fetch/${targetUrl}`
         ];
 
-        for (let proxy of proxies) {
+        for (let proxyUrl of proxies) {
             try {
                 const controller = new AbortController();
-                const id = setTimeout(() => controller.abort(), 8000);
+                const timeoutId = setTimeout(() => controller.abort(), 7000); // 7 секунд на попытку
 
-                const response = await fetch(proxy, { signal: controller.signal });
-                clearTimeout(id);
+                const response = await fetch(proxyUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
 
                 if (!response.ok) continue;
 
                 const result = await response.json();
                 
-                // Извлекаем чистые данные в зависимости от того, как их упаковал прокси
+                // Извлекаем чистый JSON
                 let cleanData = null;
-                if (proxy.includes('allorigins')) {
+                if (proxyUrl.includes('allorigins')) {
                     cleanData = typeof result.contents === 'string' ? JSON.parse(result.contents) : result.contents;
                 } else {
                     cleanData = result;
                 }
 
-                // Возвращаем данные, даже если они обернуты в .data или нет
                 if (cleanData) return cleanData;
-            } catch (e) {
-                console.warn("Proxy failed, next...");
+            } catch (err) {
+                console.warn(`Proxy ${proxyUrl} failed, trying next...`);
             }
         }
         return null;
@@ -222,36 +225,44 @@
         const pureDigits = input.value.replace(/\D/g, '');
         if (pureDigits.length !== 9) return;
 
+        // Визуальное переключение
         inputContainer.style.display = 'none';
         statusPlate.style.display = 'flex';
         statusText.innerText = 'Связь с базой...';
         statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
 
         try {
+            // ШАГ 1: Запрашиваем данные игрока
             const pResponse = await smartFetch(`https://swgoh.gg/api/player/${pureDigits}/`);
-            // Проверка: данные игрока могут быть в .data или в корне
             const pData = pResponse?.data || pResponse;
 
             if (pData && pData.guild_id) {
-                const gResponse = await smartFetch(`https://swgoh.gg/api/guild-profile/${pData.guild_id}/`);
+                // ШАГ 2: Сразу берем название гильдии из данных игрока (это быстрее)
+                const guildId = pData.guild_id;
+                const guildName = pData.guild_name || "Unknown Guild";
+                
+                // Рендерим предварительный результат
+                renderSuccess(guildName, pData.galactic_power);
+
+                // ШАГ 3: Запрашиваем профиль гильдии для получения точного кол-ва участников
+                const gResponse = await smartFetch(`https://swgoh.gg/api/guild-profile/${guildId}/`);
                 const gData = gResponse?.data || gResponse;
 
-                if (gData && gData.name) {
-                    renderSuccess(gData);
-                } else {
-                    showError();
+                if (gData && (gData.name || gData.guild_name)) {
+                    const finalName = gData.name || gData.guild_name;
+                    const members = Array.isArray(gData.members) ? gData.members.length : (gData.member_count || "?");
+                    updateMembersCount(members);
                 }
             } else {
-                showError();
+                showError("Игрок не найден");
             }
         } catch (e) {
-            console.error("Critical fetch error:", e);
-            showError();
+            console.error("Critical error:", e);
+            showError("Ошибка сети");
         }
     }
 
-    function renderSuccess(gData) {
-        const guildName = gData.name;
+    function renderSuccess(guildName, gp) {
         let shieldImg = "NoShield.png";
         let shieldClass = "guild-icon-img default-shield";
         
@@ -264,47 +275,51 @@
         statusText.innerText = guildName;
         statusText.classList.add('guild-name-success');
         
-        // Находим количество участников (разные версии API могут давать массив или число)
-        let count = 0;
-        if (Array.isArray(gData.members)) count = gData.members.length;
-        else if (gData.member_count) count = gData.member_count;
+        if (gp) {
+            const mGP = (gp / 1000000).toFixed(2);
+            membersCount.innerText = `Твой ГМ: ${mGP}M`;
+        }
         
-        membersCount.innerText = `${count || '?'}/50`;
         btn.classList.add('active');
     }
 
-    function showError() {
+    function updateMembersCount(count) {
+        const currentText = membersCount.innerText;
+        membersCount.innerText = (currentText ? currentText + ' • ' : '') + `${count}/50`;
+    }
+
+    function showError(msg) {
         statusVisual.innerHTML = '❌';
-        statusText.innerText = 'Не найдена';
+        statusText.innerText = msg || 'Не найдена';
         statusText.classList.remove('guild-name-success');
         membersCount.innerText = '';
         btn.classList.remove('active');
     }
 
-    pasteBtn.addEventListener('click', async () => {
-        try {
-            const text = await navigator.clipboard.readText();
-            if (text) {
-                input.value = formatValue(text);
-                input.dispatchEvent(new Event('input'));
-            }
-        } catch (err) {
-            input.focus();
-            document.execCommand('paste'); 
+    // Обработка ввода
+    input.addEventListener('input', () => {
+        input.value = formatValue(input.value);
+        if (input.value.replace(/\D/g, '').length === 9) {
+            startSearch();
         }
     });
 
-    input.addEventListener('input', () => {
-        input.value = formatValue(input.value);
-        if (input.value.replace(/\D/g, '').length === 9) startSearch();
+    // Вставка из буфера
+    pasteBtn.addEventListener('click', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            input.value = formatValue(text);
+            if (input.value.replace(/\D/g, '').length === 9) startSearch();
+        } catch (err) {
+            input.focus();
+        }
     });
 
     resetBtn.addEventListener('click', resetUI);
-    
+
+    // Автофокус при загрузке (кроме мобилок, чтобы не прыгала клава)
     window.addEventListener('load', () => {
-        setTimeout(() => {
-            if (window.innerWidth > 600) input.focus();
-        }, 500);
+        if (window.innerWidth > 1024) input.focus();
     });
 </script>
 </body>
