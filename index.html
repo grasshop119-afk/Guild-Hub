@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Guild Hub - Classic</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <title>Guild Hub - Elite Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #050b14;
@@ -14,179 +14,255 @@
             --text-white: #ffffff;
             --border-default: rgba(30, 58, 95, 0.8);
             --input-bg: rgba(5, 13, 22, 0.8);
-            --font-classic: Arial, Helvetica, sans-serif;
         }
 
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        * { -webkit-tap-highlight-color: transparent; }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: var(--font-classic);
+            font-family: 'Montserrat', sans-serif;
             background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
+            background-size: 100% 3px, cover;
+            background-attachment: fixed;
             display: flex; justify-content: center; align-items: center;
             color: var(--text-white); overflow: hidden; position: fixed;
         }
 
-        .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; }
+        .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; box-sizing: border-box; }
         .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
         
-        h1 { 
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1.4rem; font-weight: 700; text-transform: uppercase; 
-            margin-bottom: 12px; letter-spacing: 1.5px; 
+        h1 { font-size: clamp(1.2rem, 5vw, 1.4rem); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
+        
+        .description { font-size: clamp(0.8rem, 3.5vw, 0.9rem); font-weight: 400; margin-bottom: 25px; padding: 0 10px; opacity: 0.9; }
+
+        .interactive-area { position: relative; width: 100%; height: 62px; margin-bottom: 20px; }
+
+        .swgoh-input, .status-plate {
+            width: 100%; height: 100%; background-color: var(--input-bg); border: 1px solid var(--border-default);
+            border-radius: 8px; box-sizing: border-box; position: absolute; top: 0; left: 0;
         }
 
-        .description { font-size: 0.9rem; margin-bottom: 25px; color: rgba(255,255,255,0.8); }
-
-        .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
-        
         .swgoh-input {
-            width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-default);
-            border-radius: 8px; padding: 18px; color: #ffffff;
-            font-family: var(--font-classic); font-size: 1.1rem;
-            outline: none; text-align: center; letter-spacing: 2px;
+            padding: 0 50px 0 18px; color: #ffffff;
+            font-family: 'Montserrat', sans-serif; font-size: clamp(1.1rem, 4vw, 1.2rem);
+            outline: none; text-align: center; letter-spacing: 3px; font-weight: 400;
         }
 
         .paste-icon {
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            cursor: pointer; fill: rgba(255, 255, 255, 0.3); padding: 5px;
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; fill: rgba(255, 255, 255, 0.4); display: flex; align-items: center; padding: 8px; z-index: 5;
         }
 
-        .guild-preview {
-            display: none; 
-            margin-bottom: 20px; padding: 15px; 
-            background: rgba(10, 25, 41, 0.9);
-            border-radius: 8px; border: 1px solid var(--border-default);
-            flex-direction: column; align-items: center; text-align: center;
+        .status-plate {
+            display: none; align-items: center; justify-content: space-between; padding: 0 15px;
         }
 
-        .guild-name-display { 
-            font-weight: 400; font-size: 1.1rem; color: #ff9f00; 
-            margin-bottom: 5px; text-transform: none;
+        .loader-box { width: 36px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+
+        .swgoh-spinner {
+            width: 22px; height: 22px; border: 2px solid rgba(79, 172, 254, 0.1);
+            border-top: 2px solid var(--accent-blue); border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Прозрачность иконок гильдий 0.75 */
+        .guild-icon-img { width: 32px; height: 32px; object-fit: contain; border-radius: 4px; opacity: 0.75; }
+
+        .status-info-wrapper {
+            flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            overflow: hidden; padding: 0 10px;
         }
         
-        .guild-stats-row { 
-            display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #ffffff;
+        .status-text { 
+            font-weight: 400; font-size: 0.9rem; color: #ffffff; 
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; text-align: center;
         }
+        .guild-name-success { color: var(--accent-blue); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.95rem; }
+
+        .members-count { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: 400; margin-top: 2px; }
+
+        .reset-icon {
+            width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            opacity: 0.6; transition: opacity 0.2s; flex-shrink: 0;
+            filter: invert(47%) sepia(17%) saturate(1295%) hue-rotate(174deg) brightness(95%) contrast(92%);
+        }
+        .reset-icon:hover { opacity: 1; }
+        .reset-icon img { width: 20px; height: 20px; }
 
         .submit-btn {
-            position: relative; width: 100%; padding: 20px; 
-            font-family: var(--font-classic); font-weight: 700; 
-            text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
+            position: relative; width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif;
+            font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
             cursor: not-allowed; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05); transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05); transition: all 0.3s ease; letter-spacing: 2px;
         }
 
         .submit-btn.active {
             background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%);
             border: 1px solid #45f53d; color: #ffffff; cursor: pointer;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 15px rgba(0,0,0,0.4);
         }
 
-        .credits { font-size: 0.8rem; margin-top: 25px; color: rgba(255,255,255,0.4); }
-        .credits a { color: var(--accent-blue); text-decoration: none; }
+        .glow-line {
+            position: absolute; bottom: -1.5px; left: 50%; width: 70%; height: 3px;
+            background: radial-gradient(circle, #ffffff 0%, #ffffff 20%, transparent 80%);
+            transform: translateX(-50%); opacity: 0; filter: blur(0.5px);
+        }
+        .submit-btn.active:hover .glow-line { opacity: 1; }
+
+        .credits { font-size: 0.85rem; margin-top: 25px; color: rgba(255,255,255,0.4); font-weight: 400; }
+        .credits a { color: var(--accent-blue); text-decoration: none; font-weight: 400; }
     </style>
 </head>
 <body>
 
 <div class="main-content">
-    <img src="https://i.ibb.co/v4x1hC8n/image.png" alt="Logo" class="logo">
+    <img src="Logos/Logo.png" alt="Logo" class="logo">
     <h1>Добро пожаловать!</h1>
     <p class="description">Введи свой код союзника для авторизации.</p>
 
-    <div class="input-wrapper">
-        <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11" inputmode="numeric">
-        <div class="paste-icon" id="pasteBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
+    <div class="interactive-area">
+        <div id="inputContainer">
+            <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11" inputmode="numeric">
+            <div class="paste-icon" id="pasteBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9(1) 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
+            </div>
+        </div>
+
+        <div id="statusPlate" class="status-plate">
+            <div id="statusVisual" class="loader-box">
+                <div class="swgoh-spinner"></div>
+            </div>
+            
+            <div class="status-info-wrapper">
+                <span id="statusText" class="status-text">Поиск...</span>
+                <span id="membersCount" class="members-count"></span>
+            </div>
+
+            <div class="reset-icon" id="resetBtn">
+                <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" alt="reset">
+            </div>
         </div>
     </div>
 
-    <div id="guildPreview" class="guild-preview">
-        <span id="guildNameDisplay" class="guild-name-display">ПОИСК...</span>
-        <div id="guildStats" class="guild-stats-row" style="display:none;">
-            <span id="guildGP"></span>
-            <span id="guildMembers"></span>
-        </div>
-    </div>
-
-    <button id="submitBtn" class="submit-btn">Продолжить</button>
+    <button id="submitBtn" class="submit-btn">Продолжить
+        <div class="glow-line"></div>
+    </button>
 
     <div class="credits">
-        Создан <a href="https://t.me/temkazavr" target="_blank">@temkazavr</a>
+        Создано <a href="https://t.me/tz_projects" target="_blank">@tz_projects</a>
     </div>
 </div>
 
 <script>
     const input = document.getElementById('allyCode');
+    const inputContainer = document.getElementById('inputContainer');
+    const statusPlate = document.getElementById('statusPlate');
+    const statusText = document.getElementById('statusText');
+    const statusVisual = document.getElementById('statusVisual');
+    const membersCount = document.getElementById('membersCount');
     const btn = document.getElementById('submitBtn');
     const pasteBtn = document.getElementById('pasteBtn');
-    const guildPreview = document.getElementById('guildPreview');
-    const guildNameDisplay = document.getElementById('guildNameDisplay');
-    const guildStats = document.getElementById('guildStats');
-    const guildGP = document.getElementById('guildGP');
-    const guildMembers = document.getElementById('guildMembers');
+    const resetBtn = document.getElementById('resetBtn');
 
-    function formatGP(num) {
-        if (num >= 1000000) return (num / 1000000).toFixed(0) + 'M GP';
-        return num.toLocaleString();
+    function formatValue(val) {
+        let digits = val.replace(/\D/g, '').substring(0, 9);
+        let formatted = "";
+        for (let i = 0; i < digits.length; i++) {
+            if (i > 0 && i % 3 === 0) formatted += "-";
+            formatted += digits[i];
+        }
+        return formatted;
     }
 
-    async function fetchData(url) {
-        const proxies = [
-            `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-            `https://corsproxy.io/?${encodeURIComponent(url)}`
-        ];
-        
-        for (let proxy of proxies) {
-            try {
-                const resp = await fetch(proxy);
-                const data = await resp.json();
-                const content = data.contents ? JSON.parse(data.contents) : data;
-                if (content) return content;
-            } catch (e) { continue; }
-        }
-        return null;
+    function resetUI() {
+        statusPlate.style.display = 'none';
+        inputContainer.style.display = 'block';
+        input.value = '';
+        btn.classList.remove('active');
+        setTimeout(() => input.focus(), 50);
+    }
+
+    async function startSearch() {
+        const pureDigits = input.value.replace(/\D/g, '');
+        if (pureDigits.length !== 9) return;
+
+        inputContainer.style.display = 'none';
+        statusPlate.style.display = 'flex';
+        statusText.innerText = 'Поиск...';
+        statusText.className = 'status-text';
+        membersCount.innerText = '';
+        statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
+        btn.classList.remove('active');
+
+        await findGuild(pureDigits);
     }
 
     async function findGuild(code) {
-        guildPreview.style.display = 'flex';
-        guildStats.style.display = 'none';
-        guildNameDisplay.innerText = 'ПОИСК...';
-        btn.classList.remove('active');
+        const url = `https://api.allorigins.win/get?url=${encodeURIComponent('https://swgoh.gg/api/player/' + code + '/')}`;
+        try {
+            const response = await fetch(url);
+            const json = await response.json();
+            if (json.contents) {
+                const pData = JSON.parse(json.contents).data;
+                await updateGuildUI(pData.guild_id);
+            } else throw new Error();
+        } catch (err) {
+            try {
+                const resp2 = await fetch(`https://corsproxy.io/?${encodeURIComponent('https://swgoh.gg/api/player/' + code + '/')}`);
+                const data2 = await resp2.json();
+                if (data2?.data) await updateGuildUI(data2.data.guild_id);
+                else throw new Error();
+            } catch (err2) { showError(); }
+        }
+    }
 
-        const playerData = await fetchData(`https://swgoh.gg/api/player/${code}/`);
-        
-        if (playerData && playerData.data && playerData.data.guild_id) {
-            const guildData = await fetchData(`https://swgoh.gg/api/guild-profile/${playerData.data.guild_id}/`);
-            if (guildData && guildData.data) {
-                const g = guildData.data;
-                guildNameDisplay.innerText = g.name;
-                guildGP.innerText = formatGP(g.galactic_power);
-                guildMembers.innerText = `${g.members.length} Members`;
-                guildStats.style.display = 'flex';
+    async function updateGuildUI(gId) {
+        if (!gId) { showError(); return; }
+        const proxy = "https://corsproxy.io/?";
+        try {
+            const gResp = await fetch(`${proxy}${encodeURIComponent('https://swgoh.gg/api/guild-profile/' + gId + '/')}`);
+            const gData = await gResp.json();
+            if (gData?.data) {
+                const guildName = gData.data.name;
+                
+                // Логика выбора картинки
+                const shieldImg = (guildName === "Those who are in the shadows") 
+                    ? "Logos/ShadeShield.png" 
+                    : "Logos/NoShield.png";
+
+                statusVisual.innerHTML = `<img class="guild-icon-img" src="${shieldImg}">`;
+                statusText.innerText = guildName;
+                statusText.classList.add('guild-name-success');
+                membersCount.innerText = `${gData.data.members.length}/50`;
                 btn.classList.add('active');
-            } else { showError(); }
-        } else { showError(); }
+            } else throw new Error();
+        } catch (e) { showError(); }
     }
 
     function showError() {
-        guildNameDisplay.innerText = 'ГИЛЬДИЯ НЕ НАЙДЕНА';
-        guildStats.style.display = 'none';
+        statusVisual.innerHTML = '';
+        statusText.innerText = 'Гильдия не найдена';
+        statusText.className = 'status-text';
+        membersCount.innerText = '';
         btn.classList.remove('active');
     }
 
     input.addEventListener('input', () => {
-        let val = input.value.replace(/\D/g, '').substring(0, 9);
-        let formatted = "";
-        for (let i = 0; i < val.length; i++) {
-            if (i > 0 && i % 3 === 0) formatted += "-";
-            formatted += val[i];
+        input.value = formatValue(input.value);
+        if (input.value.replace(/\D/g, '').length === 9) {
+            startSearch();
         }
-        input.value = formatted;
-        
-        if (val.length === 9) findGuild(val);
-        else { guildPreview.style.display = 'none'; btn.classList.remove('active'); }
     });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') startSearch();
+    });
+
+    resetBtn.addEventListener('click', resetUI);
 
     pasteBtn.addEventListener('click', async () => {
         try {
@@ -195,6 +271,8 @@
             input.dispatchEvent(new Event('input'));
         } catch (err) {}
     });
+
+    setTimeout(() => input.focus(), 300);
 </script>
 </body>
 </html>
