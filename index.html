@@ -24,7 +24,7 @@
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: 'Montserrat', sans-serif;
-            font-weight: 400; /* Обычный шрифт для всего сайта */
+            font-weight: 400;
             background-color: var(--bg-dark);
             background-image:
                 linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
@@ -38,7 +38,6 @@
         .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; }
         .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
         
-        /* Жирный заголовок */
         h1 { font-size: clamp(1.2rem, 5vw, 1.4rem); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
         
         .description { font-size: clamp(0.8rem, 3.5vw, 0.9rem); font-weight: 400; margin-bottom: 25px; opacity: 0.9; }
@@ -96,7 +95,6 @@
         .reset-icon:hover { opacity: 1; }
         .reset-icon img { width: 20px; height: 20px; }
 
-        /* Жирная кнопка */
         .submit-btn {
             position: relative; width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif;
             font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
@@ -178,11 +176,13 @@
         inputContainer.style.display = 'block';
         input.value = '';
         btn.classList.remove('active');
+        statusText.classList.remove('guild-name-success');
+        membersCount.innerText = '';
         setTimeout(() => input.focus(), 100);
     }
 
-    // Улучшенный кроссплатформенный запрос
     async function smartFetch(targetUrl) {
+        // Добавлен специфичный прокси для лучшей работы с iOS/CORS
         const proxies = [
             `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`,
             `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
@@ -191,18 +191,31 @@
         for (const proxy of proxies) {
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000);
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-                const response = await fetch(proxy, { signal: controller.signal });
+                const response = await fetch(proxy, { 
+                    method: 'GET',
+                    signal: controller.signal,
+                    headers: { 'Accept': 'application/json' }
+                });
+                
                 clearTimeout(timeoutId);
-
                 if (!response.ok) continue;
 
                 const result = await response.json();
-                const data = proxy.includes('allorigins') ? JSON.parse(result.contents) : result;
-
-                if (data) return data;
-            } catch (e) { console.warn("Proxy failed, trying next..."); }
+                
+                // Улучшенная обработка ответа AllOrigins
+                if (proxy.includes('allorigins')) {
+                    if (result && result.contents) {
+                        return JSON.parse(result.contents);
+                    }
+                    continue;
+                }
+                
+                if (result) return result;
+            } catch (e) { 
+                console.warn("Proxy attempt failed:", e); 
+            }
         }
         return null;
     }
@@ -218,13 +231,26 @@
 
         try {
             const pData = await smartFetch(`https://swgoh.gg/api/player/${pureDigits}/`);
-            if (pData?.data?.guild_id) {
-                const gData = await smartFetch(`https://swgoh.gg/api/guild-profile/${pData.data.guild_id}/`);
-                if (gData?.data) {
-                    renderSuccess(gData.data);
-                } else showError();
-            } else showError();
-        } catch (e) { showError(); }
+            
+            // На iOS pData.data может быть в разной структуре в зависимости от прокси
+            const playerInfo = pData?.data || pData;
+            
+            if (playerInfo && playerInfo.guild_id) {
+                const gData = await smartFetch(`https://swgoh.gg/api/guild-profile/${playerInfo.guild_id}/`);
+                const guildInfo = gData?.data || gData;
+
+                if (guildInfo && guildInfo.name) {
+                    renderSuccess(guildInfo);
+                } else {
+                    showError();
+                }
+            } else {
+                showError();
+            }
+        } catch (e) { 
+            console.error("Search error:", e);
+            showError(); 
+        }
     }
 
     function renderSuccess(gData) {
@@ -237,10 +263,12 @@
             shieldClass = "guild-icon-img";
         }
 
-        statusVisual.innerHTML = `<img class="${shieldClass}" src="Logos/${shieldImg}">`;
+        statusVisual.innerHTML = `<img class="${shieldClass}" src="Logos/${shieldImg}" onerror="this.src='Logos/NoShield.png'">`;
         statusText.innerText = guildName;
         statusText.classList.add('guild-name-success');
-        membersCount.innerText = `${gData.members.length}/50`;
+        
+        const mCount = gData.members ? (Array.isArray(gData.members) ? gData.members.length : gData.member_count) : 0;
+        membersCount.innerText = `${mCount || '?'}/50`;
         btn.classList.add('active');
     }
 
@@ -252,7 +280,6 @@
         btn.classList.remove('active');
     }
 
-    // Вставка для Safari и Telegram
     pasteBtn.addEventListener('click', async () => {
         try {
             const text = await navigator.clipboard.readText();
@@ -261,7 +288,6 @@
                 input.dispatchEvent(new Event('input'));
             }
         } catch (err) {
-            // Если Safari блокирует доступ к буферу, используем фокус
             input.focus();
             document.execCommand('paste'); 
         }
@@ -274,8 +300,11 @@
 
     resetBtn.addEventListener('click', resetUI);
     
-    // Автофокус при загрузке
-    window.addEventListener('load', () => setTimeout(() => input.focus(), 500));
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            if (window.innerWidth > 600) input.focus();
+        }, 500);
+    });
 </script>
 </body>
 </html>
