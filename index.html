@@ -69,8 +69,8 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Прозрачность иконок гильдий 0.75 */
-        .guild-icon-img { width: 32px; height: 32px; object-fit: contain; border-radius: 4px; opacity: 0.75; }
+        .guild-icon-img { width: 32px; height: 32px; object-fit: contain; }
+        .guild-icon-img.default-shield { opacity: 0.75; }
 
         .status-info-wrapper {
             flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -128,7 +128,7 @@
         <div id="inputContainer">
             <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11" inputmode="numeric">
             <div class="paste-icon" id="pasteBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9(1) 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
             </div>
         </div>
 
@@ -230,11 +230,15 @@
                 const guildName = gData.data.name;
                 
                 // Логика выбора картинки
-                const shieldImg = (guildName === "Those who are in the shadows") 
-                    ? "Logos/ShadeShield.png" 
-                    : "Logos/NoShield.png";
+                let shieldImg = "NoShield.png";
+                let shieldClass = "guild-icon-img default-shield";
+                
+                if (guildName === "Those who are in the shadows") {
+                    shieldImg = "ShadeShield.png";
+                    shieldClass = "guild-icon-img"; // Без прозрачности
+                }
 
-                statusVisual.innerHTML = `<img class="guild-icon-img" src="${shieldImg}">`;
+                statusVisual.innerHTML = `<img class="${shieldClass}" src="Logos/${shieldImg}">`;
                 statusText.innerText = guildName;
                 statusText.classList.add('guild-name-success');
                 membersCount.innerText = `${gData.data.members.length}/50`;
