@@ -24,7 +24,6 @@
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: 'Montserrat', sans-serif;
-            font-weight: 400;
             background-color: var(--bg-dark);
             background-image:
                 linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
@@ -76,11 +75,21 @@
             overflow: hidden; padding: 0 10px;
         }
         
+        .name-container {
+            display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
+        }
+
         .status-text { 
             font-weight: 400; font-size: 0.9rem; color: #ffffff; 
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; text-align: center;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         .player-name-success { color: var(--accent-blue); text-transform: uppercase; letter-spacing: 1px; font-size: 0.95rem; font-weight: 700; }
+        
+        /* Текст статуса в квадратных скобках цвета контура */
+        .bracket-status {
+            color: var(--border-default); font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+        }
+
         .player-gp-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: 400; margin-top: 2px; }
 
         .reset-icon {
@@ -133,7 +142,10 @@
             </div>
             
             <div class="status-info-wrapper">
-                <span id="statusText" class="status-text">Загрузка...</span>
+                <div class="name-container">
+                    <span id="statusText" class="status-text">Загрузка...</span>
+                    <span id="statusTag" class="bracket-status"></span>
+                </div>
                 <span id="subText" class="player-gp-sub"></span>
             </div>
 
@@ -155,6 +167,7 @@
     const inputContainer = document.getElementById('inputContainer');
     const statusPlate = document.getElementById('statusPlate');
     const statusText = document.getElementById('statusText');
+    const statusTag = document.getElementById('statusTag');
     const statusVisual = document.getElementById('statusVisual');
     const subText = document.getElementById('subText');
     const btn = document.getElementById('submitBtn');
@@ -178,6 +191,7 @@
         btn.classList.remove('active');
         statusText.classList.remove('player-name-success');
         subText.innerText = '';
+        statusTag.innerText = '';
         statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
         if(window.innerWidth > 1024) input.focus();
     }
@@ -211,6 +225,8 @@
         inputContainer.style.display = 'none';
         statusPlate.style.display = 'flex';
         statusText.innerText = 'Загрузка...';
+        statusTag.innerText = '';
+        statusText.classList.remove('player-name-success');
         statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
 
         try {
@@ -220,10 +236,16 @@
             if (p && p.name) {
                 const portrait = p.portrait_image || 'https://game-assets.swgoh.gg/textures/tex.vanity_stormtrooper.png';
                 statusVisual.innerHTML = `<img src="${portrait}" class="player-portrait" onerror="this.src='Logos/NoShield.png'">`;
+                
                 statusText.innerText = p.name;
                 statusText.classList.add('player-name-success');
+                
+                // Добавляем статус [ИГРОК] справа
+                statusTag.innerText = '[ИГРОК]';
+                
                 const gp = (p.galactic_power / 1000000).toFixed(2);
                 subText.innerText = `ГМ: ${gp}M • ${p.level} LVL`;
+                
                 btn.classList.add('active');
             } else {
                 showError("Не найден");
@@ -234,10 +256,10 @@
     }
 
     function showError(msg) {
-        // Подгружаем NoShield.png при ошибке
         statusVisual.innerHTML = '<img src="Logos/NoShield.png" class="player-portrait">';
         statusText.innerText = msg;
         statusText.classList.remove('player-name-success');
+        statusTag.innerText = '';
         subText.innerText = '';
         btn.classList.remove('active');
     }
