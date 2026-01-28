@@ -23,7 +23,7 @@
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: 'Roboto', sans-serif; /* Основной шрифт */
+            font-family: 'Roboto', sans-serif;
             background-color: var(--bg-dark);
             background-image:
                 linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
@@ -37,7 +37,6 @@
         .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; z-index: 10; }
         .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
         
-        /* Заголовок - Montserrat (Жирный) */
         h1 { 
             font-family: 'Montserrat', sans-serif;
             font-size: clamp(1.2rem, 5vw, 1.4rem); 
@@ -47,13 +46,7 @@
             letter-spacing: 1.5px; 
         }
         
-        /* Описание - Roboto */
-        .description { 
-            font-size: clamp(0.8rem, 3.5vw, 0.9rem); 
-            font-weight: 400; 
-            margin-bottom: 25px; 
-            opacity: 0.9; 
-        }
+        .description { font-size: clamp(0.8rem, 3.5vw, 0.9rem); font-weight: 400; margin-bottom: 25px; opacity: 0.9; }
         .description b { font-weight: 700; }
 
         .interactive-area { position: relative; width: 100%; height: 62px; margin-bottom: 20px; }
@@ -75,7 +68,6 @@
         }
 
         .status-plate { display: none; align-items: center; padding: 0 15px; z-index: 5; }
-        
         .loader-box { width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px; }
         .player-portrait { width: 100%; height: 100%; object-fit: cover; }
 
@@ -89,44 +81,26 @@
         .status-info-wrapper {
             flex-grow: 1; display: flex; flex-direction: column; 
             overflow: hidden; padding: 0 12px;
-            align-items: center; /* Центр для загрузки */
+            align-items: center;
             text-align: center;
         }
         
         .status-info-wrapper.align-left { align-items: flex-start; text-align: left; }
 
-        /* Ранг (Титул) - Roboto */
-        .player-rank-title { 
-            font-size: 0.65rem; 
-            color: rgba(255,255,255,0.6); 
-            margin-bottom: 1px; 
-            text-transform: uppercase; 
-            font-weight: 400;
-        }
-        
-        .player-name-success { 
-            color: var(--accent-blue); font-weight: 400; font-size: 0.95rem; 
-            text-transform: uppercase; letter-spacing: 0.5px;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;
-        }
-
+        .player-rank-title { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-bottom: 1px; text-transform: uppercase; font-weight: 400; }
+        .player-name-success { color: var(--accent-blue); font-weight: 400; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
         .player-gp-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: 400; margin-top: 2px; }
 
         .reset-icon {
             width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            opacity: 0.6; transition: opacity 0.2s; flex-shrink: 0;
-            filter: invert(47%) sepia(17%) saturate(1295%) hue-rotate(174deg) brightness(95%) contrast(92%);
+            opacity: 0.6; flex-shrink: 0; filter: invert(47%) sepia(17%) saturate(1295%) hue-rotate(174deg) brightness(95%) contrast(92%);
         }
-        .reset-icon img { width: 20px; height: 20px; }
 
-        /* Кнопка - Montserrat */
         .submit-btn {
-            position: relative; width: 100%; padding: 20px; 
-            font-family: 'Montserrat', sans-serif;
+            position: relative; width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif;
             font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
             cursor: not-allowed; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
             background: rgba(255, 255, 255, 0.05); transition: background 0.3s ease; letter-spacing: 2px;
-            overflow: hidden;
         }
 
         .submit-btn.active {
@@ -134,19 +108,9 @@
             border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
         }
 
-        /* При нажатии ничего не ломаем и не затемняем */
-        .submit-btn.active:active {
-            filter: brightness(1.1);
-        }
+        .submit-btn.active:active { filter: brightness(1.1); }
 
-        /* Футер - Roboto */
-        .credits { 
-            font-size: 0.75rem; 
-            margin-top: 25px; 
-            color: rgba(255,255,255,0.4); 
-            font-weight: 400;
-            line-height: 1.4;
-        }
+        .credits { font-size: 0.72rem; margin-top: 25px; color: rgba(255,255,255,0.4); font-weight: 400; line-height: 1.4; }
         .credits b { font-weight: 700; }
         .credits a { color: var(--accent-blue); text-decoration: none; }
     </style>
@@ -178,7 +142,7 @@
             </div>
 
             <div class="reset-icon" id="resetBtn">
-                <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" alt="reset">
+                <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" alt="reset" width="20">
             </div>
         </div>
     </div>
@@ -223,22 +187,29 @@
         playerRank.innerText = '';
         statusText.innerText = 'Загрузка...';
         statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
-        if(window.innerWidth > 1024) input.focus();
     }
 
     async function smartFetch(targetUrl) {
+        // Добавлен каскад из 3 прокси для мобильной версии
         const proxies = [
             `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`,
-            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+            `https://thingproxy.freeboard.io/fetch/${targetUrl}`
         ];
+
         for (let proxyUrl of proxies) {
             try {
-                const response = await fetch(proxyUrl);
+                const response = await fetch(proxyUrl, { method: 'GET' });
                 if (!response.ok) continue;
+                
                 const result = await response.json();
+                // Обработка специфического формата AllOrigins
                 let cleanData = proxyUrl.includes('allorigins') ? JSON.parse(result.contents) : result;
-                if (cleanData) return cleanData;
-            } catch (err) {}
+                
+                if (cleanData && (cleanData.data || cleanData.name)) return cleanData;
+            } catch (err) {
+                console.error("Proxy error:", err);
+            }
         }
         return null;
     }
@@ -265,22 +236,20 @@
                 infoWrapper.classList.add('align-left');
                 statusText.innerText = p.name;
                 
-                // Определение ранга на русском
                 let rank = p.title || "ИГРОК SWGOH";
                 if (p.guild_rank === 4) rank = "[ЛИДЕР]";
                 else if (p.guild_rank === 3) rank = "[ОФИЦЕР]";
                 else if (p.guild_rank === 2) rank = "[УЧАСТНИК]";
 
                 playerRank.innerText = rank;
-                
                 const gp = (p.galactic_power / 1000000).toFixed(2);
                 subText.innerText = `ГМ: ${gp}M • ${p.level} LVL`;
                 btn.classList.add('active');
             } else {
-                showError("Не найден");
+                showError("Игрок не найден");
             }
         } catch (e) {
-            showError("Ошибка сети");
+            showError("Проверь код");
         }
     }
 
