@@ -8,6 +8,9 @@
     <link rel="icon" type="image/jpeg" href="Guild_WEB_Logo.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     
+    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+    <script>var vConsole = new window.VConsole();</script>
+
     <style>
         :root {
             --bg-dark: #050b14;
@@ -39,7 +42,6 @@
         
         h1 { font-family: 'Montserrat', sans-serif; font-size: clamp(1.2rem, 5vw, 1.4rem); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
         .description { font-size: clamp(0.8rem, 3.5vw, 0.9rem); font-weight: 400; margin-bottom: 25px; opacity: 0.9; }
-        .description b { font-weight: 700; }
 
         .interactive-area { position: relative; width: 100%; height: 62px; margin-bottom: 20px; }
 
@@ -83,7 +85,7 @@
 
         .reset-icon {
             width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            opacity: 0.6; flex-shrink: 0; filter: invert(47%) sepia(17%) saturate(1295%) hue-rotate(174deg) brightness(95%) contrast(92%);
+            opacity: 0.6; flex-shrink: 0; filter: invert(1);
         }
 
         .submit-btn {
@@ -97,76 +99,43 @@
             background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%);
             border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
         }
-        .submit-btn.active:hover { background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%); }
 
-        /* Disclaimer - Квадратные углы */
         .disclaimer-bar {
-            position: fixed;
-            bottom: -300px;
-            left: 0;
-            width: 100%;
-            background-color: #ffffff;
-            color: #000000;
-            padding: 15px 20px;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
-            z-index: 1000;
-            transition: bottom 0.6s ease;
-            font-family: 'Roboto', sans-serif;
-            border-radius: 0; /* Углы не закруглением */
-            text-align: left;
+            position: fixed; bottom: -300px; left: 0; width: 100%;
+            background-color: #ffffff; color: #000000; padding: 15px 20px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.3); z-index: 1000;
+            transition: bottom 0.6s ease; text-align: left;
         }
-
         .disclaimer-bar.active { bottom: 0; }
+        .close-disclaimer-icon { width: 20px; height: 20px; cursor: pointer; filter: brightness(0); }
 
-        .disclaimer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 700;
-            font-size: 0.85rem;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-        }
-
-        .disclaimer-body { font-size: 0.72rem; line-height: 1.4; color: #333; padding-right: 10px; }
-
-        /* Иконка крестика как в поиске, но темная */
-        .close-disclaimer-icon {
-            width: 20px; height: 20px; cursor: pointer;
-            filter: brightness(0); /* Делаем иконку черной */
-        }
-
-        .decline-link { color: #4facfe; text-decoration: none; font-weight: 700; }
-        .credits { font-size: 0.72rem; margin-top: 25px; color: rgba(255,255,255,0.4); line-height: 1.4; }
-        .credits b { font-weight: 700; }
+        .credits { font-size: 0.72rem; margin-top: 25px; color: rgba(255,255,255,0.4); }
         .credits a { color: var(--accent-blue); text-decoration: none; }
     </style>
 </head>
 <body>
 
 <div id="disclaimer" class="disclaimer-bar">
-    <div class="disclaimer-header">
-        <span>Отказ от ответственности</span>
-        <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" class="close-disclaimer-icon" id="closeDisclaimer" alt="close">
+    <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.85rem; margin-bottom: 6px;">
+        <span>ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ</span>
+        <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" class="close-disclaimer-icon" id="closeDisclaimer">
     </div>
-    <div class="disclaimer-body">
-        Наша команда не несет никакой ответственности за информацию, которую вы можете получить на нашем сайте. 
-        Хотя эта информация является полностью легальной и полностью доступной для любого пользователя в открытом доступе, 
-        мы отказываемся от ответственности за любые инциденты. Подробнее 
-        <a href="Decline.txt" target="_blank" class="decline-link">читайте здесь.</a>
+    <div style="font-size: 0.72rem; line-height: 1.4;">
+        Мы не несем ответственности за информацию. Она легальна и находится в открытом доступе. 
+        <a href="Decline.txt" target="_blank" style="color: #4facfe; font-weight: 700;">Подробнее.</a>
     </div>
 </div>
 
 <div class="main-content">
-    <img src="Logos/Logo.png" alt="Logo" class="logo">
+    <img src="Logos/Logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
     <h1>Добро пожаловать!</h1>
-    <p class="description">Введи свой <b>код союзника</b> для авторизации.</p>
+    <p class="description">Введи свой <b>код союзника</b></p>
 
     <div class="interactive-area">
         <div id="inputContainer">
             <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11" inputmode="numeric">
             <div class="paste-icon" id="pasteBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1(23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
             </div>
         </div>
 
@@ -178,7 +147,7 @@
                 <span id="subText" class="player-gp-sub"></span>
             </div>
             <div class="reset-icon" id="resetBtn">
-                <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" alt="reset" width="20">
+                <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" width="20">
             </div>
         </div>
     </div>
@@ -186,7 +155,7 @@
     <button id="submitBtn" class="submit-btn">Продолжить</button>
 
     <div class="credits">
-        Это приложение создано специально по заказу гильдии <b>Те, кто в тени</b>. By <a href="https://t.me/tz_projects" target="_blank">@tz_projects</a>
+        Создано для гильдии <b>Те, кто в тени</b>. <br> By <a href="https://t.me/tz_projects" target="_blank">@tz_projects</a>
     </div>
 </div>
 
@@ -215,9 +184,9 @@
         return formatted;
     }
 
-    // "Прогрев" сервера при загрузке страницы
     window.addEventListener('load', () => {
-        fetch('/api/player/111111111').catch(() => {}); // Просто пинг
+        // Пинг сервера для "прогрева" (Render Free Tier засыпает)
+        fetch('/api/player/111111111').catch(() => {});
         setTimeout(() => disclaimer.classList.add('active'), 1000);
     });
 
@@ -229,11 +198,17 @@
         statusPlate.style.display = 'flex';
         infoWrapper.classList.remove('align-left');
         statusText.innerText = 'Загрузка...';
+        playerRank.innerText = '';
+        subText.innerText = '';
 
         try {
-            // Используем относительный путь для обхода мобильных блокировок
-            const response = await fetch(`./api/player/${pureDigits}`);
-            if (!response.ok) throw new Error("Игрок не найден");
+            // Исправлено: Путь от корня /api/... и добавлена метка времени для обхода кэша
+            const response = await fetch(`/api/player/${pureDigits}?nocache=${Date.now()}`);
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Не найден");
+            }
 
             const data = await response.json();
             const p = data.data || data;
@@ -252,19 +227,20 @@
                 subText.innerText = `ГМ: ${(p.galactic_power / 1000000).toFixed(2)}M • ${p.level} LVL`;
                 btn.classList.add('active');
             } else {
-                throw new Error("Игрок не найден");
+                throw new Error("Данные повреждены");
             }
         } catch (e) {
+            console.error("Fetch error:", e);
             showError(e.message);
         }
     }
 
     function showError(msg) {
-        statusVisual.innerHTML = '<img src="Logos/NoShield.png" class="player-portrait">';
+        statusVisual.innerHTML = '<img src="https://img.icons8.com/?size=100&id=63688&format=png&color=FA5252" style="width:30px">';
         infoWrapper.classList.add('align-left');
         playerRank.innerText = "ОШИБКА";
         statusText.innerText = msg;
-        subText.innerText = '';
+        subText.innerText = 'Проверьте код';
         btn.classList.remove('active');
     }
 
@@ -275,10 +251,17 @@
 
     pasteBtn.addEventListener('click', async () => {
         try {
-            const text = await navigator.clipboard.readText();
-            input.value = formatValue(text);
-            if (input.value.replace(/\D/g, '').length === 9) startSearch();
-        } catch (err) { input.focus(); }
+            // Улучшенная работа с буфером для iOS
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                const text = await navigator.clipboard.readText();
+                input.value = formatValue(text);
+                if (input.value.replace(/\D/g, '').length === 9) startSearch();
+            } else {
+                input.focus();
+            }
+        } catch (err) { 
+            input.focus(); 
+        }
     });
 
     resetBtn.addEventListener('click', () => {
