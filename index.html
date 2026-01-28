@@ -6,7 +6,7 @@
     <title>Guild Hub - Elite Interface</title>
     
     <link rel="icon" type="image/jpeg" href="Guild_WEB_Logo.jpg">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -23,7 +23,7 @@
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Roboto', sans-serif; /* Основной шрифт - Roboto */
             background-color: var(--bg-dark);
             background-image:
                 linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
@@ -37,8 +37,19 @@
         .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; z-index: 10; }
         .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
         
-        h1 { font-size: clamp(1.2rem, 5vw, 1.4rem); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
+        /* Заголовок - Montserrat, Жирный */
+        h1 { 
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(1.2rem, 5vw, 1.4rem); 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            margin-bottom: 12px; 
+            letter-spacing: 1.5px; 
+        }
+        
+        /* Описание - Roboto */
         .description { font-size: clamp(0.8rem, 3.5vw, 0.9rem); font-weight: 400; margin-bottom: 25px; opacity: 0.9; }
+        .description b { font-weight: 700; }
 
         .interactive-area { position: relative; width: 100%; height: 62px; margin-bottom: 20px; }
 
@@ -49,7 +60,7 @@
 
         .swgoh-input {
             padding: 0 50px 0 18px; color: #ffffff;
-            font-family: 'Montserrat', sans-serif; font-size: clamp(1.1rem, 4vw, 1.2rem);
+            font-family: 'Roboto', sans-serif; font-size: clamp(1.1rem, 4vw, 1.2rem);
             outline: none; text-align: center; letter-spacing: 3px; font-weight: 400;
         }
 
@@ -58,36 +69,32 @@
             cursor: pointer; fill: rgba(255, 255, 255, 0.4); display: flex; align-items: center; padding: 8px; z-index: 10;
         }
 
-        .status-plate { display: none; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 5; }
+        .status-plate { display: none; align-items: center; padding: 0 15px; z-index: 5; }
         
-        .loader-box { width: 36px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .player-portrait { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+        .loader-box { width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px; }
+        .player-portrait { width: 100%; height: 100%; object-fit: cover; }
 
         .swgoh-spinner {
-            width: 22px; height: 22px; border: 2px solid rgba(79, 172, 254, 0.1);
+            width: 20px; height: 20px; border: 2px solid rgba(79, 172, 254, 0.1);
             border-top: 2px solid var(--accent-blue); border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .status-info-wrapper {
-            flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            overflow: hidden; padding: 0 10px;
+            flex-grow: 1; display: flex; flex-direction: column; 
+            overflow: hidden; padding: 0 12px;
+            align-items: center; text-align: center;
         }
         
-        .name-container {
-            display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
-        }
+        .status-info-wrapper.align-left { align-items: flex-start; text-align: left; }
 
-        .status-text { 
-            font-weight: 400; font-size: 0.9rem; color: #ffffff; 
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-        }
-        .player-name-success { color: var(--accent-blue); text-transform: uppercase; letter-spacing: 1px; font-size: 0.95rem; font-weight: 700; }
+        .player-rank-title { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-bottom: 1px; text-transform: uppercase; font-weight: 400; }
         
-        /* Текст статуса в квадратных скобках цвета контура */
-        .bracket-status {
-            color: var(--border-default); font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+        .player-name-success { 
+            color: var(--accent-blue); font-weight: 400; font-size: 0.95rem; 
+            text-transform: uppercase; letter-spacing: 0.5px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;
         }
 
         .player-gp-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: 400; margin-top: 2px; }
@@ -99,25 +106,31 @@
         }
         .reset-icon img { width: 20px; height: 20px; }
 
+        /* Кнопка - Montserrat, Жирный */
         .submit-btn {
-            position: relative; width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif;
+            position: relative; width: 100%; padding: 20px; 
+            font-family: 'Montserrat', sans-serif;
             font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
             cursor: not-allowed; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05); transition: all 0.3s ease; letter-spacing: 2px;
+            background: rgba(255, 255, 255, 0.05); transition: background 0.3s ease, border 0.3s ease; 
+            letter-spacing: 2px; overflow: hidden;
         }
 
         .submit-btn.active {
             background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%);
             border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 15px rgba(0,0,0,0.4);
         }
 
-        .submit-btn.active:active, .submit-btn.active:focus {
-            filter: brightness(1) !important;
+        /* Убраны все эффекты наведения и клика по просьбе пользователя */
+        .submit-btn.active:hover, .submit-btn.active:active, .submit-btn.active:focus {
+            filter: none !important;
+            transform: none !important;
             outline: none;
         }
 
-        .credits { font-size: 0.85rem; margin-top: 25px; color: rgba(255,255,255,0.4); font-weight: 400; }
+        /* Футер - Roboto */
+        .credits { font-size: 0.75rem; margin-top: 25px; color: rgba(255,255,255,0.4); font-weight: 400; line-height: 1.4; }
+        .credits b { font-weight: 700; color: rgba(255,255,255,0.6); }
         .credits a { color: var(--accent-blue); text-decoration: none; }
     </style>
 </head>
@@ -126,7 +139,7 @@
 <div class="main-content">
     <img src="Logos/Logo.png" alt="Logo" class="logo">
     <h1>Добро пожаловать!</h1>
-    <p class="description">Введи свой код союзника для авторизации.</p>
+    <p class="description">Введи свой <b>код союзника</b> для авторизации.</p>
 
     <div class="interactive-area">
         <div id="inputContainer">
@@ -141,11 +154,9 @@
                 <div class="swgoh-spinner"></div>
             </div>
             
-            <div class="status-info-wrapper">
-                <div class="name-container">
-                    <span id="statusText" class="status-text">Загрузка...</span>
-                    <span id="statusTag" class="bracket-status"></span>
-                </div>
+            <div id="infoWrapper" class="status-info-wrapper">
+                <span id="playerRank" class="player-rank-title"></span>
+                <span id="statusText" class="player-name-success">Загрузка...</span>
                 <span id="subText" class="player-gp-sub"></span>
             </div>
 
@@ -158,7 +169,8 @@
     <button id="submitBtn" class="submit-btn">Продолжить</button>
 
     <div class="credits">
-        Создано <a href="https://t.me/tz_projects" target="_blank">@tz_projects</a>
+        Это приложение создано специально по заказу гильдии <b>Те, кто в тени</b>.<br>
+        By <a href="https://t.me/tz_projects" target="_blank">@tz_projects</a>
     </div>
 </div>
 
@@ -167,8 +179,9 @@
     const inputContainer = document.getElementById('inputContainer');
     const statusPlate = document.getElementById('statusPlate');
     const statusText = document.getElementById('statusText');
-    const statusTag = document.getElementById('statusTag');
+    const playerRank = document.getElementById('playerRank');
     const statusVisual = document.getElementById('statusVisual');
+    const infoWrapper = document.getElementById('infoWrapper');
     const subText = document.getElementById('subText');
     const btn = document.getElementById('submitBtn');
     const pasteBtn = document.getElementById('pasteBtn');
@@ -189,9 +202,10 @@
         inputContainer.style.display = 'block';
         input.value = '';
         btn.classList.remove('active');
-        statusText.classList.remove('player-name-success');
+        infoWrapper.classList.remove('align-left');
         subText.innerText = '';
-        statusTag.innerText = '';
+        playerRank.innerText = '';
+        statusText.innerText = 'Загрузка...';
         statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
         if(window.innerWidth > 1024) input.focus();
     }
@@ -201,19 +215,14 @@
             `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`,
             `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
         ];
-
         for (let proxyUrl of proxies) {
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 6000);
-                const response = await fetch(proxyUrl, { signal: controller.signal });
-                clearTimeout(timeoutId);
-
+                const response = await fetch(proxyUrl);
                 if (!response.ok) continue;
                 const result = await response.json();
                 let cleanData = proxyUrl.includes('allorigins') ? JSON.parse(result.contents) : result;
                 if (cleanData) return cleanData;
-            } catch (err) { console.warn("Proxy fail"); }
+            } catch (err) {}
         }
         return null;
     }
@@ -224,9 +233,9 @@
 
         inputContainer.style.display = 'none';
         statusPlate.style.display = 'flex';
+        infoWrapper.classList.remove('align-left');
         statusText.innerText = 'Загрузка...';
-        statusTag.innerText = '';
-        statusText.classList.remove('player-name-success');
+        playerRank.innerText = '';
         statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
 
         try {
@@ -237,15 +246,12 @@
                 const portrait = p.portrait_image || 'https://game-assets.swgoh.gg/textures/tex.vanity_stormtrooper.png';
                 statusVisual.innerHTML = `<img src="${portrait}" class="player-portrait" onerror="this.src='Logos/NoShield.png'">`;
                 
+                infoWrapper.classList.add('align-left');
                 statusText.innerText = p.name;
-                statusText.classList.add('player-name-success');
-                
-                // Добавляем статус [ИГРОК] справа
-                statusTag.innerText = '[ИГРОК]';
+                playerRank.innerText = p.title || "Игрок SWGOH";
                 
                 const gp = (p.galactic_power / 1000000).toFixed(2);
                 subText.innerText = `ГМ: ${gp}M • ${p.level} LVL`;
-                
                 btn.classList.add('active');
             } else {
                 showError("Не найден");
@@ -257,9 +263,9 @@
 
     function showError(msg) {
         statusVisual.innerHTML = '<img src="Logos/NoShield.png" class="player-portrait">';
+        infoWrapper.classList.add('align-left');
+        playerRank.innerText = "Ошибка";
         statusText.innerText = msg;
-        statusText.classList.remove('player-name-success');
-        statusTag.innerText = '';
         subText.innerText = '';
         btn.classList.remove('active');
     }
