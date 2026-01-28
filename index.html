@@ -23,7 +23,7 @@
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: 'Roboto', sans-serif; /* Основной шрифт - Roboto */
+            font-family: 'Roboto', sans-serif; /* Основной шрифт */
             background-color: var(--bg-dark);
             background-image:
                 linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
@@ -37,7 +37,7 @@
         .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; z-index: 10; }
         .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
         
-        /* Заголовок - Montserrat, Жирный */
+        /* Заголовок - Montserrat (Жирный) */
         h1 { 
             font-family: 'Montserrat', sans-serif;
             font-size: clamp(1.2rem, 5vw, 1.4rem); 
@@ -48,7 +48,12 @@
         }
         
         /* Описание - Roboto */
-        .description { font-size: clamp(0.8rem, 3.5vw, 0.9rem); font-weight: 400; margin-bottom: 25px; opacity: 0.9; }
+        .description { 
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem); 
+            font-weight: 400; 
+            margin-bottom: 25px; 
+            opacity: 0.9; 
+        }
         .description b { font-weight: 700; }
 
         .interactive-area { position: relative; width: 100%; height: 62px; margin-bottom: 20px; }
@@ -84,12 +89,20 @@
         .status-info-wrapper {
             flex-grow: 1; display: flex; flex-direction: column; 
             overflow: hidden; padding: 0 12px;
-            align-items: center; text-align: center;
+            align-items: center; /* Центр для загрузки */
+            text-align: center;
         }
         
         .status-info-wrapper.align-left { align-items: flex-start; text-align: left; }
 
-        .player-rank-title { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-bottom: 1px; text-transform: uppercase; font-weight: 400; }
+        /* Ранг (Титул) - Roboto */
+        .player-rank-title { 
+            font-size: 0.65rem; 
+            color: rgba(255,255,255,0.6); 
+            margin-bottom: 1px; 
+            text-transform: uppercase; 
+            font-weight: 400;
+        }
         
         .player-name-success { 
             color: var(--accent-blue); font-weight: 400; font-size: 0.95rem; 
@@ -106,14 +119,14 @@
         }
         .reset-icon img { width: 20px; height: 20px; }
 
-        /* Кнопка - Montserrat, Жирный */
+        /* Кнопка - Montserrat */
         .submit-btn {
             position: relative; width: 100%; padding: 20px; 
             font-family: 'Montserrat', sans-serif;
             font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
             cursor: not-allowed; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05); transition: background 0.3s ease, border 0.3s ease; 
-            letter-spacing: 2px; overflow: hidden;
+            background: rgba(255, 255, 255, 0.05); transition: background 0.3s ease; letter-spacing: 2px;
+            overflow: hidden;
         }
 
         .submit-btn.active {
@@ -121,16 +134,20 @@
             border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
         }
 
-        /* Убраны все эффекты наведения и клика по просьбе пользователя */
-        .submit-btn.active:hover, .submit-btn.active:active, .submit-btn.active:focus {
-            filter: none !important;
-            transform: none !important;
-            outline: none;
+        /* При нажатии ничего не ломаем и не затемняем */
+        .submit-btn.active:active {
+            filter: brightness(1.1);
         }
 
         /* Футер - Roboto */
-        .credits { font-size: 0.75rem; margin-top: 25px; color: rgba(255,255,255,0.4); font-weight: 400; line-height: 1.4; }
-        .credits b { font-weight: 700; color: rgba(255,255,255,0.6); }
+        .credits { 
+            font-size: 0.75rem; 
+            margin-top: 25px; 
+            color: rgba(255,255,255,0.4); 
+            font-weight: 400;
+            line-height: 1.4;
+        }
+        .credits b { font-weight: 700; }
         .credits a { color: var(--accent-blue); text-decoration: none; }
     </style>
 </head>
@@ -169,8 +186,7 @@
     <button id="submitBtn" class="submit-btn">Продолжить</button>
 
     <div class="credits">
-        Это приложение создано специально по заказу гильдии <b>Те, кто в тени</b>.<br>
-        By <a href="https://t.me/tz_projects" target="_blank">@tz_projects</a>
+        Это приложение создано специально по заказу гильдии <b>Те, кто в тени</b>. By <a href="https://t.me/tz_projects" target="_blank">@tz_projects</a>
     </div>
 </div>
 
@@ -248,7 +264,14 @@
                 
                 infoWrapper.classList.add('align-left');
                 statusText.innerText = p.name;
-                playerRank.innerText = p.title || "Игрок SWGOH";
+                
+                // Определение ранга на русском
+                let rank = p.title || "ИГРОК SWGOH";
+                if (p.guild_rank === 4) rank = "[ЛИДЕР]";
+                else if (p.guild_rank === 3) rank = "[ОФИЦЕР]";
+                else if (p.guild_rank === 2) rank = "[УЧАСТНИК]";
+
+                playerRank.innerText = rank;
                 
                 const gp = (p.galactic_power / 1000000).toFixed(2);
                 subText.innerText = `ГМ: ${gp}M • ${p.level} LVL`;
@@ -264,7 +287,7 @@
     function showError(msg) {
         statusVisual.innerHTML = '<img src="Logos/NoShield.png" class="player-portrait">';
         infoWrapper.classList.add('align-left');
-        playerRank.innerText = "Ошибка";
+        playerRank.innerText = "ОШИБКА";
         statusText.innerText = msg;
         subText.innerText = '';
         btn.classList.remove('active');
