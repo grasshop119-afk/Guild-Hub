@@ -1,12 +1,13 @@
 {
-  "name": "guild-hub",
+  "name": "swgoh-proxy",
   "version": "1.0.0",
-  "description": "Elite Interface for SWGOH",
-  "main": "index.html",
-  "scripts": {
-    "start": "npx serve ."
-  },
+  "main": "server.js",
   "dependencies": {
-    "serve": "^14.2.1"
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "scripts": {
+    "start": "node server.js"
   }
 }
