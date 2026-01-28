@@ -37,15 +37,7 @@
         .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; z-index: 10; }
         .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
         
-        h1 { 
-            font-family: 'Montserrat', sans-serif;
-            font-size: clamp(1.2rem, 5vw, 1.4rem); 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            margin-bottom: 12px; 
-            letter-spacing: 1.5px; 
-        }
-        
+        h1 { font-family: 'Montserrat', sans-serif; font-size: clamp(1.2rem, 5vw, 1.4rem); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
         .description { font-size: clamp(0.8rem, 3.5vw, 0.9rem); font-weight: 400; margin-bottom: 25px; opacity: 0.9; }
         .description b { font-weight: 700; }
 
@@ -85,10 +77,9 @@
         }
         
         .status-info-wrapper.align-left { align-items: flex-start; text-align: left; }
-
-        .player-rank-title { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-bottom: 1px; text-transform: uppercase; font-weight: 400; }
-        .player-name-success { color: var(--accent-blue); font-weight: 400; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
-        .player-gp-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: 400; margin-top: 2px; }
+        .player-rank-title { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-bottom: 1px; text-transform: uppercase; }
+        .player-name-success { color: var(--accent-blue); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
+        .player-gp-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
 
         .reset-icon {
             width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -107,9 +98,8 @@
             border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
         }
         .submit-btn.active:hover { background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%); }
-        .submit-btn.active:active { filter: brightness(1.1); }
 
-        /* Стиль Disclaimer */
+        /* Disclaimer - Квадратные углы */
         .disclaimer-bar {
             position: fixed;
             bottom: -300px;
@@ -120,9 +110,9 @@
             padding: 15px 20px;
             box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
             z-index: 1000;
-            transition: bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: bottom 0.6s ease;
             font-family: 'Roboto', sans-serif;
-            border-radius: 12px 12px 0 0;
+            border-radius: 0; /* Углы не закруглением */
             text-align: left;
         }
 
@@ -136,31 +126,18 @@
             font-size: 0.85rem;
             margin-bottom: 6px;
             text-transform: uppercase;
-            font-family: 'Montserrat', sans-serif;
         }
 
-        .disclaimer-body {
-            font-size: 0.72rem;
-            line-height: 1.4;
-            color: #333;
-            padding-right: 10px;
+        .disclaimer-body { font-size: 0.72rem; line-height: 1.4; color: #333; padding-right: 10px; }
+
+        /* Иконка крестика как в поиске, но темная */
+        .close-disclaimer-icon {
+            width: 20px; height: 20px; cursor: pointer;
+            filter: brightness(0); /* Делаем иконку черной */
         }
 
-        .close-disclaimer {
-            cursor: pointer;
-            font-size: 24px;
-            line-height: 1;
-            color: #000;
-            font-weight: bold;
-        }
-
-        .decline-link {
-            color: #4facfe;
-            text-decoration: none;
-            font-weight: 700;
-        }
-
-        .credits { font-size: 0.72rem; margin-top: 25px; color: rgba(255,255,255,0.4); font-weight: 400; line-height: 1.4; }
+        .decline-link { color: #4facfe; text-decoration: none; font-weight: 700; }
+        .credits { font-size: 0.72rem; margin-top: 25px; color: rgba(255,255,255,0.4); line-height: 1.4; }
         .credits b { font-weight: 700; }
         .credits a { color: var(--accent-blue); text-decoration: none; }
     </style>
@@ -170,7 +147,7 @@
 <div id="disclaimer" class="disclaimer-bar">
     <div class="disclaimer-header">
         <span>Отказ от ответственности</span>
-        <span class="close-disclaimer" id="closeDisclaimer">&times;</span>
+        <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" class="close-disclaimer-icon" id="closeDisclaimer" alt="close">
     </div>
     <div class="disclaimer-body">
         Наша команда не несет никакой ответственности за информацию, которую вы можете получить на нашем сайте. 
@@ -189,21 +166,17 @@
         <div id="inputContainer">
             <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11" inputmode="numeric">
             <div class="paste-icon" id="pasteBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1(23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
             </div>
         </div>
 
         <div id="statusPlate" class="status-plate">
-            <div id="statusVisual" class="loader-box">
-                <div class="swgoh-spinner"></div>
-            </div>
-            
+            <div id="statusVisual" class="loader-box"><div class="swgoh-spinner"></div></div>
             <div id="infoWrapper" class="status-info-wrapper">
                 <span id="playerRank" class="player-rank-title"></span>
                 <span id="statusText" class="player-name-success">Загрузка...</span>
                 <span id="subText" class="player-gp-sub"></span>
             </div>
-
             <div class="reset-icon" id="resetBtn">
                 <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" alt="reset" width="20">
             </div>
@@ -242,6 +215,12 @@
         return formatted;
     }
 
+    // "Прогрев" сервера при загрузке страницы
+    window.addEventListener('load', () => {
+        fetch('/api/player/111111111').catch(() => {}); // Просто пинг
+        setTimeout(() => disclaimer.classList.add('active'), 1000);
+    });
+
     async function startSearch() {
         const pureDigits = input.value.replace(/\D/g, '');
         if (pureDigits.length !== 9) return;
@@ -250,21 +229,17 @@
         statusPlate.style.display = 'flex';
         infoWrapper.classList.remove('align-left');
         statusText.innerText = 'Загрузка...';
-        playerRank.innerText = '';
-        statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
 
         try {
-            // КАРДИНАЛЬНО: обращаемся к API на том же домене (Render)
-            const response = await fetch(`/api/player/${pureDigits}`);
-            if (!response.ok) throw new Error(response.status === 404 ? "Игрок не найден" : "Ошибка сети");
+            // Используем относительный путь для обхода мобильных блокировок
+            const response = await fetch(`./api/player/${pureDigits}`);
+            if (!response.ok) throw new Error("Игрок не найден");
 
             const data = await response.json();
             const p = data.data || data;
 
             if (p && p.name) {
-                const portrait = p.portrait_image || 'https://game-assets.swgoh.gg/textures/tex.vanity_stormtrooper.png';
-                statusVisual.innerHTML = `<img src="${portrait}" class="player-portrait" onerror="this.src='Logos/NoShield.png'">`;
-                
+                statusVisual.innerHTML = `<img src="${p.portrait_image || 'https://game-assets.swgoh.gg/textures/tex.vanity_stormtrooper.png'}" class="player-portrait" onerror="this.src='Logos/NoShield.png'">`;
                 infoWrapper.classList.add('align-left');
                 statusText.innerText = p.name;
                 
@@ -274,8 +249,7 @@
                 else if (p.guild_rank === 2) rank = "[УЧАСТНИК]";
 
                 playerRank.innerText = rank;
-                const gp = (p.galactic_power / 1000000).toFixed(2);
-                subText.innerText = `ГМ: ${gp}M • ${p.level} LVL`;
+                subText.innerText = `ГМ: ${(p.galactic_power / 1000000).toFixed(2)}M • ${p.level} LVL`;
                 btn.classList.add('active');
             } else {
                 throw new Error("Игрок не найден");
@@ -312,23 +286,9 @@
         inputContainer.style.display = 'block';
         input.value = '';
         btn.classList.remove('active');
-        infoWrapper.classList.remove('align-left');
-        subText.innerText = '';
-        playerRank.innerText = '';
-        statusText.innerText = 'Загрузка...';
-        statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
     });
 
-    // Логика Disclaimer
-    window.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            disclaimer.classList.add('active');
-        }, 1000);
-    });
-
-    closeDisclaimer.addEventListener('click', () => {
-        disclaimer.classList.remove('active');
-    });
+    closeDisclaimer.addEventListener('click', () => disclaimer.classList.remove('active'));
 </script>
 </body>
 </html>
