@@ -97,7 +97,6 @@
             background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%);
             border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
         }
-        /* Условие: кнопка Share (Продолжить) не должна темнеть при наведении */
         .submit-btn.active:hover { background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%); }
 
         .disclaimer-bar {
@@ -135,7 +134,10 @@
             filter: brightness(0);
         }
 
-        .decline-link { color: #4facfe; text-decoration: none; font-weight: 700; }
+        /* Синяя ссылка для отказа от ответственности */
+        .decline-link { color: #007bff; text-decoration: none; font-weight: 700; }
+        .decline-link:hover { text-decoration: underline; }
+
         .credits { font-size: 0.72rem; margin-top: 25px; color: rgba(255,255,255,0.4); line-height: 1.4; }
         .credits b { font-weight: 700; }
         .credits a { color: var(--accent-blue); text-decoration: none; }
@@ -149,7 +151,9 @@
         <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" class="close-disclaimer-icon" id="closeDisclaimer" alt="close">
     </div>
     <div class="disclaimer-body">
-        Наша команда не несет никакой ответственности за информацию, которую вы можете получить на нашем сайте... 
+        Наша команда не несет никакой ответственности за информацию, которую вы можете получить на нашем сайте. 
+        Хотя эта информация является полностью легальной и полностью доступной для любого пользователя в открытом доступе, 
+        мы отказываемся от ответственности за любые инциденты. Подробнее 
         <a href="Decline.txt" target="_blank" class="decline-link">читайте здесь.</a>
     </div>
 </div>
@@ -230,11 +234,10 @@
 
         try {
             const targetUrl = `https://swgoh.gg/api/player/${pureDigits}/`;
-            // Запрос через твой Worker с защитой от кэша
             const proxyUrl = `${myWorkerUrl}?url=${encodeURIComponent(targetUrl)}&_nocache=${Date.now()}`;
 
             const response = await fetch(proxyUrl);
-            if (!response.ok) throw new Error("Ошибка сети");
+            if (!response.ok) throw new Error("Not Found");
 
             const data = await response.json();
             const p = data.data || data;
@@ -255,19 +258,19 @@
                 btn.classList.add('active');
                 btn.disabled = false;
             } else {
-                throw new Error("Не найден");
+                throw new Error("Not Found");
             }
         } catch (e) {
-            showError("Игрок не найден");
+            showNotFound();
         }
     }
 
-    function showError(msg) {
+    function showNotFound() {
         statusVisual.innerHTML = '<img src="Logos/NoShield.png" class="player-portrait">';
         infoWrapper.classList.add('align-left');
-        playerRank.innerText = "ОШИБКА";
-        statusText.innerText = msg;
-        subText.innerText = 'Проверьте код';
+        playerRank.innerText = ""; // Убрали заголовок "ОШИБКА"
+        statusText.innerText = "Игрок не найден";
+        subText.innerText = "Проверьте код";
         btn.classList.remove('active');
         btn.disabled = true;
     }
@@ -292,6 +295,7 @@
         btn.classList.remove('active');
         btn.disabled = true;
         statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
+        playerRank.innerText = "";
     });
 
     closeDisclaimer.addEventListener('click', () => disclaimer.classList.remove('active'));
