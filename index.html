@@ -79,7 +79,7 @@
         }
         
         .status-info-wrapper.align-left { align-items: flex-start; text-align: left; }
-        .player-rank-title { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-bottom: 1px; text-transform: uppercase; min-height: 12px; }
+        .player-rank-title { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-bottom: 1px; text-transform: uppercase; min-height: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
         .player-name-success { color: var(--accent-blue); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
         .player-gp-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 2px; min-height: 14px; }
 
@@ -100,6 +100,13 @@
             border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
         }
         .submit-btn.active:hover { background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%); opacity: 1; }
+
+        /* Правило для кнопки Share, чтобы она не темнела */
+        .share-btn:hover, .share-btn:active {
+            filter: none !important;
+            background: inherit !important;
+            opacity: 1 !important;
+        }
 
         .disclaimer-bar {
             position: fixed; bottom: -300px; left: 0; width: 100%; background-color: #ffffff;
@@ -163,7 +170,6 @@
 </div>
 
 <script>
-    // URL воркера оставляем твой
     const myWorkerUrl = 'https://swgoh-auth.grasshop119.workers.dev/';
 
     const input = document.getElementById('allyCode');
@@ -192,7 +198,6 @@
         const pureDigits = input.value.replace(/\D/g, '');
         if (pureDigits.length !== 9) return;
 
-        // Прячем ввод, показываем загрузку
         inputContainer.style.display = 'none';
         statusPlate.style.display = 'flex';
         infoWrapper.classList.remove('align-left');
@@ -204,51 +209,54 @@
         btn.disabled = true;
 
         try {
-            // Ключевой момент: добавляем уникальный хвост к URL, чтобы убить кэш в браузере и на Cloudflare
-            const targetUrl = `https://swgoh.gg/api/player/${pureDigits}/`;
-            const proxyUrl = `${myWorkerUrl}?url=${encodeURIComponent(targetUrl)}&cb=${Math.random().toString(36).substring(7)}`;
+            // Формируем URL с уникальным ключом для каждого запроса (убиваем кэш)
+            const targetApiUrl = `https://swgoh.gg/api/player/${pureDigits}/`;
+            const finalProxyUrl = `${myWorkerUrl}?url=${encodeURIComponent(targetApiUrl)}&cb=${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
 
-            // Запрашиваем данные БЕЗ использования кэша
-            const response = await fetch(proxyUrl, { 
+            const response = await fetch(finalProxyUrl, { 
                 method: "GET",
-                cache: "no-store", 
-                headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' } 
+                cache: "no-store",
+                headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
             });
 
-            if (!response.ok) throw new Error("Network error");
+            if (!response.ok) throw new Error("Fetch Error");
 
-            const data = await response.json();
-            // Поддержка разных форматов ответа (data.data или просто data)
-            const p = data.data || data;
+            const rawData = await response.json();
+            
+            // Универсальный поиск данных игрока в ответе
+            const p = rawData.data || rawData.player_data || (rawData.name ? rawData : null);
 
             if (p && (p.name || p.username)) {
-                // Отображаем портрет (или заглушку)
-                const imgUrl = p.portrait_image || 'https://game-assets.swgoh.gg/textures/tex.vanity_stormtrooper.png';
-                statusVisual.innerHTML = `<img src="${imgUrl}" class="player-portrait" onerror="this.src='Logos/NoShield.png'">`;
+                // Портрет
+                const portrait = p.portrait_image || 'https://game-assets.swgoh.gg/textures/tex.vanity_stormtrooper.png';
+                statusVisual.innerHTML = `<img src="${portrait}" class="player-portrait" onerror="this.src='Logos/NoShield.png'">`;
                 
                 infoWrapper.classList.add('align-left');
                 statusText.innerText = p.name || p.username;
                 
-                // Отображаем гильдию
-                let gName = p.guild_name || "Без гильдии";
-                playerRank.innerText = gName.toUpperCase();
+                // Гильдия и ранг
+                let guildName = p.guild_name || "БЕЗ ГИЛЬДИИ";
+                if (p.guild_rank === 4) guildName = "[ЛИДЕР] " + guildName;
+                else if (p.guild_rank === 3) guildName = "[ОФИЦЕР] " + guildName;
+                
+                playerRank.innerText = guildName.toUpperCase();
 
-                // Опыт и уровень
+                // Мощь и уровень
                 const gp = p.galactic_power || 0;
-                subText.innerText = `ГМ: ${(gp / 1000000).toFixed(2)}M • LVL ${p.level || '??'}`;
+                subText.innerText = `ГМ: ${(gp / 1000000).toFixed(2)}M • LVL ${p.level || 85}`;
                 
                 btn.classList.add('active');
                 btn.disabled = false;
             } else {
-                throw new Error("Empty data");
+                throw new Error("Data not found");
             }
         } catch (e) {
-            console.error("Search error:", e);
+            console.error(e);
             statusVisual.innerHTML = '<img src="Logos/NoShield.png" class="player-portrait">';
             infoWrapper.classList.add('align-left');
-            playerRank.innerText = "ОШИБКА";
+            playerRank.innerText = "ОШИБКА ДОСТУПА";
             statusText.innerText = "Игрок не найден";
-            subText.innerText = "Проверьте код или сеть";
+            subText.innerText = "Проверьте профиль на swgoh.gg";
             btn.classList.remove('active');
             btn.disabled = true;
         }
@@ -257,7 +265,7 @@
     input.addEventListener('input', () => {
         input.value = formatValue(input.value);
         if (input.value.replace(/\D/g, '').length === 9) {
-            input.blur(); // Скрываем клаву на мобилках
+            input.blur(); // Скрываем клавиатуру
             startSearch();
         }
     });
