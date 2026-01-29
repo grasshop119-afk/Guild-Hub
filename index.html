@@ -2,9 +2,6 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Guild Hub - Elite Interface</title>
     
@@ -28,9 +25,7 @@
             margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: 'Roboto', sans-serif;
             background-color: var(--bg-dark);
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
             background-size: 100% 3px, cover;
             background-attachment: fixed;
             display: flex; justify-content: center; align-items: center;
@@ -40,8 +35,8 @@
         .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; z-index: 10; }
         .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
         
-        h1 { font-family: 'Montserrat', sans-serif; font-size: clamp(1.2rem, 5vw, 1.4rem); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
-        .description { font-size: clamp(0.8rem, 3.5vw, 0.9rem); font-weight: 400; margin-bottom: 25px; opacity: 0.9; }
+        h1 { font-family: 'Montserrat', sans-serif; font-size: 1.4rem; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px; }
+        .description { font-size: 0.9rem; margin-bottom: 25px; opacity: 0.9; }
 
         .interactive-area { position: relative; width: 100%; height: 62px; margin-bottom: 20px; }
 
@@ -52,14 +47,10 @@
 
         .swgoh-input {
             padding: 0 50px 0 18px; color: #ffffff;
-            font-family: 'Roboto', sans-serif; font-size: clamp(1.1rem, 4vw, 1.2rem);
-            outline: none; text-align: center; letter-spacing: 3px; font-weight: 400;
+            font-size: 1.2rem; outline: none; text-align: center; letter-spacing: 3px;
         }
 
-        .paste-icon {
-            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
-            cursor: pointer; fill: rgba(255, 255, 255, 0.4); display: flex; align-items: center; padding: 8px; z-index: 10;
-        }
+        .paste-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; fill: rgba(255, 255, 255, 0.4); z-index: 10; display: flex; }
 
         .status-plate { display: none; align-items: center; padding: 0 15px; z-index: 5; }
         .loader-box { width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px; }
@@ -72,66 +63,50 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .status-info-wrapper {
-            flex-grow: 1; display: flex; flex-direction: column; 
-            overflow: hidden; padding: 0 12px;
-            align-items: center; text-align: center;
-        }
-        
+        .status-info-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; padding: 0 12px; align-items: center; text-align: center; }
         .status-info-wrapper.align-left { align-items: flex-start; text-align: left; }
-        .player-rank-title { 
-            font-size: 0.65rem; color: rgba(255,255,255,0.6); 
-            margin-bottom: 1px; text-transform: uppercase; 
-            min-height: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;
-        }
-        .player-name-success { color: var(--accent-blue); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
-        .player-gp-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 2px; min-height: 14px; }
+        
+        .player-rank-title { font-size: 0.65rem; color: rgba(255,255,255,0.6); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .player-name-success { color: var(--accent-blue); font-size: 0.95rem; text-transform: uppercase; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .player-gp-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
 
-        .reset-icon {
-            width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            opacity: 0.6; flex-shrink: 0; filter: invert(47%) sepia(17%) saturate(1295%) hue-rotate(174deg) brightness(95%) contrast(92%);
-        }
+        .reset-icon { width: 24px; height: 24px; cursor: pointer; opacity: 0.6; filter: invert(1); }
 
         .submit-btn {
-            position: relative; width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif;
-            font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
-            cursor: not-allowed; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05); transition: background 0.3s ease; letter-spacing: 2px;
+            width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif; font-weight: 700;
+            text-transform: uppercase; color: rgba(255, 255, 255, 0.3); border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease; letter-spacing: 2px; cursor: not-allowed;
         }
 
         .submit-btn.active {
-            background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%);
-            border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
+            background: linear-gradient(to top, var(--swgoh-green-bright), var(--swgoh-green-dark));
+            border: 1px solid #45f53d; color: #ffffff; cursor: pointer;
         }
-        .submit-btn.active:hover { opacity: 0.95; }
 
         .disclaimer-bar {
-            position: fixed; bottom: -300px; left: 0; width: 100%; background-color: #ffffff;
-            color: #000000; padding: 15px 20px; box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
-            z-index: 1000; transition: bottom 0.6s ease; font-family: 'Roboto', sans-serif; text-align: left;
+            position: fixed; bottom: -300px; left: 0; width: 100%; background: #fff; color: #000;
+            padding: 15px 20px; z-index: 1000; transition: bottom 0.6s ease;
         }
-
         .disclaimer-bar.active { bottom: 0; }
-        .credits { font-size: 0.72rem; margin-top: 25px; color: rgba(255,255,255,0.4); line-height: 1.4; }
+        .credits { font-size: 0.7rem; margin-top: 25px; color: rgba(255,255,255,0.4); }
         .credits a { color: var(--accent-blue); text-decoration: none; }
     </style>
 </head>
 <body>
 
 <div id="disclaimer" class="disclaimer-bar">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <span style="font-weight:700; font-size:0.85rem; text-transform:uppercase;">Отказ от ответственности</span>
-        <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" id="closeDisclaimer" style="width:20px; cursor:pointer; filter:brightness(0);">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <b style="font-size:0.8rem;">ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ</b>
+        <span id="closeDisclaimer" style="cursor:pointer; font-weight:bold; padding:5px;">✕</span>
     </div>
-    <div style="font-size:0.72rem; line-height:1.4; color:#333;">
-        Наша команда не несет ответственности за данные. Информация полностью легальна и открыта. Подробнее <a href="Decline.txt" target="_blank" style="color:#007bff; text-decoration:none; font-weight:700;">читайте здесь.</a>
-    </div>
+    <p style="font-size:0.7rem; margin-top:5px;">Информация легальна и открыта. <a href="Decline.txt">Подробнее.</a></p>
 </div>
 
 <div class="main-content">
-    <img src="Logos/Logo.png" alt="Logo" class="logo">
+    <img src="Logos/Logo.png" class="logo">
     <h1>Добро пожаловать!</h1>
-    <p class="description">Введи свой <b>код союзника</b> для авторизации.</p>
+    <p class="description">Введи <b>код союзника</b> для авторизации.</p>
 
     <div class="interactive-area">
         <div id="inputContainer">
@@ -148,21 +123,18 @@
                 <span id="statusText" class="player-name-success"></span>
                 <span id="subText" class="player-gp-sub"></span>
             </div>
-            <div class="reset-icon" id="resetBtn">
-                <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" alt="reset" width="20">
-            </div>
+            <img src="https://img.icons8.com/ios-glyphs/30/ffffff/multiply.png" class="reset-icon" id="resetBtn">
         </div>
     </div>
 
     <button id="submitBtn" class="submit-btn">Продолжить</button>
 
-    <div class="credits">
-        Приложение создано по заказу гильдии <b>Те, кто в тени</b>.<br>By <a href="https://t.me/tz_projects" target="_blank">@tz_projects</a>
-    </div>
+    <div class="credits">Заказ гильдии <b>Те, кто в тени</b>.<br>By <a href="https://t.me/tz_projects">@tz_projects</a></div>
 </div>
 
 <script>
-    const myWorkerUrl = 'https://swgoh-auth.grasshop119.workers.dev/';
+    // ЗАМЕНИ НА ССЫЛКУ ОТ RENDER
+    const myProxyUrl = 'https://твой-бэкенд.onrender.com/';
 
     const input = document.getElementById('allyCode');
     const inputContainer = document.getElementById('inputContainer');
@@ -173,110 +145,70 @@
     const infoWrapper = document.getElementById('infoWrapper');
     const subText = document.getElementById('subText');
     const btn = document.getElementById('submitBtn');
-    const pasteBtn = document.getElementById('pasteBtn');
-    const resetBtn = document.getElementById('resetBtn');
 
     function formatValue(val) {
         let digits = val.replace(/\D/g, '').substring(0, 9);
-        let formatted = "";
+        let res = "";
         for (let i = 0; i < digits.length; i++) {
-            if (i > 0 && i % 3 === 0) formatted += "-";
-            formatted += digits[i];
+            if (i > 0 && i % 3 === 0) res += "-";
+            res += digits[i];
         }
-        return formatted;
+        return res;
     }
 
-    async function startSearch() {
-        const pureDigits = input.value.replace(/\D/g, '');
-        if (pureDigits.length !== 9) return;
+    async function fetchData() {
+        const code = input.value.replace(/\D/g, '');
+        if (code.length !== 9) return;
 
         inputContainer.style.display = 'none';
         statusPlate.style.display = 'flex';
-        infoWrapper.classList.remove('align-left');
         statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
         statusText.innerText = 'ПОИСК...';
-        playerRank.innerText = '';
-        subText.innerText = '';
-        btn.classList.remove('active');
-        btn.disabled = true;
 
         try {
-            const targetUrl = `https://swgoh.gg/api/player/${pureDigits}/`;
-            const proxyUrl = `${myWorkerUrl}?url=${encodeURIComponent(targetUrl)}&_cb=${Date.now()}`;
-
-            const response = await fetch(proxyUrl, {
-                method: 'GET',
-                mode: 'cors',
-                headers: { 'Accept': 'application/json' }
-            });
-
-            if (!response.ok) throw new Error("API Connection Error");
-
-            const result = await response.json();
-            const p = result.data || result;
+            const api = `https://swgoh.gg/api/player/${code}/`;
+            const response = await fetch(`${myProxyUrl}?url=${encodeURIComponent(api)}`);
+            const data = await response.json();
+            const p = data.data || data;
 
             if (p && (p.name || p.username)) {
-                // Успех: Набиваем данные
-                statusVisual.innerHTML = `<img src="${p.portrait_image || 'https://game-assets.swgoh.gg/textures/tex.vanity_stormtrooper.png'}" class="player-portrait" onerror="this.src='Logos/NoShield.png'">`;
+                statusVisual.innerHTML = `<img src="${p.portrait_image || 'https://game-assets.swgoh.gg/textures/tex.vanity_stormtrooper.png'}" class="player-portrait">`;
                 infoWrapper.classList.add('align-left');
-                
                 statusText.innerText = (p.name || p.username).toUpperCase();
                 
-                // Гильдия и ранг
-                let gName = p.guild_name || "БЕЗ ГИЛЬДИИ";
-                let role = "";
-                if (p.guild_rank === 4) role = "[ЛИДЕР] ";
-                else if (p.guild_rank === 3) role = "[ОФИЦЕР] ";
-                else if (p.guild_rank === 2) role = "[УЧАСТНИК] ";
-                
-                playerRank.innerText = (role + gName).toUpperCase();
-
-                const gp = p.galactic_power || 0;
-                subText.innerText = `ГМ: ${(gp / 1000000).toFixed(2)}M • ${p.level || 85} LVL`;
+                let role = p.guild_rank === 4 ? "[ЛИДЕР] " : p.guild_rank === 3 ? "[ОФИЦЕР] " : "[УЧАСТНИК] ";
+                playerRank.innerText = role + (p.guild_name || "БЕЗ ГИЛЬДИИ");
+                subText.innerText = `ГМ: ${(p.galactic_power / 1000000).toFixed(2)}M • ${p.level || 85} LVL`;
                 
                 btn.classList.add('active');
                 btn.disabled = false;
-            } else {
-                throw new Error("Invalid Player Data");
-            }
+            } else { throw new Error(); }
         } catch (e) {
-            console.error(e);
-            statusVisual.innerHTML = '<img src="Logos/NoShield.png" class="player-portrait">';
-            infoWrapper.classList.add('align-left');
-            statusText.innerText = "ИГРОК НЕ НАЙДЕН";
-            playerRank.innerText = "ERROR";
-            subText.innerText = "Проверьте код союзника";
+            statusText.innerText = "НЕ НАЙДЕН";
+            playerRank.innerText = "ОШИБКА";
         }
     }
 
     input.addEventListener('input', () => {
         input.value = formatValue(input.value);
-        if (input.value.replace(/\D/g, '').length === 9) startSearch();
+        if (input.value.replace(/\D/g, '').length === 9) fetchData();
     });
 
-    pasteBtn.onclick = async () => {
-        try {
-            const text = await navigator.clipboard.readText();
-            input.value = formatValue(text);
-            if (input.value.replace(/\D/g, '').length === 9) startSearch();
-        } catch (err) { input.focus(); }
-    };
-
-    resetBtn.onclick = () => {
+    document.getElementById('resetBtn').onclick = () => {
         statusPlate.style.display = 'none';
         inputContainer.style.display = 'block';
         input.value = '';
         btn.classList.remove('active');
-        btn.disabled = true;
     };
 
-    document.getElementById('closeDisclaimer').onclick = () => {
-        document.getElementById('disclaimer').classList.remove('active');
+    document.getElementById('pasteBtn').onclick = async () => {
+        const text = await navigator.clipboard.readText();
+        input.value = formatValue(text);
+        if (input.value.replace(/\D/g, '').length === 9) fetchData();
     };
 
-    window.onload = () => {
-        setTimeout(() => document.getElementById('disclaimer').classList.add('active'), 1000);
-    };
+    window.onload = () => setTimeout(() => document.getElementById('disclaimer').classList.add('active'), 1000);
+    document.getElementById('closeDisclaimer').onclick = () => document.getElementById('disclaimer').classList.remove('active');
 </script>
 </body>
 </html>
