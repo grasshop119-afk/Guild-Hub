@@ -1,0 +1,46 @@
+export default {
+  async fetch(request, env, ctx) {
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
+      "Access-Control-Max-Age": "86400",
+    };
+
+    // 1. Обработка OPTIONS (обязательно для телефонов!)
+    if (request.method === "OPTIONS") {
+      return new Response(null, { headers: corsHeaders });
+    }
+
+    const url = new URL(request.url);
+    const targetUrl = url.searchParams.get("url");
+
+    if (!targetUrl) {
+      return new Response("Missing URL", { status: 400 });
+    }
+
+    try {
+      const response = await fetch(targetUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "Accept": "application/json"
+        }
+      });
+
+      const data = await response.text(); // Берем как текст, чтобы не сломать прокси
+
+      return new Response(data, {
+        status: response.status,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json"
+        }
+      });
+    } catch (e) {
+      return new Response("Backend Error: " + e.message, { 
+        status: 500, 
+        headers: corsHeaders 
+      });
+    }
+  }
+};
