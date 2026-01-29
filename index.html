@@ -76,9 +76,9 @@
         }
         
         .status-info-wrapper.align-left { align-items: flex-start; text-align: left; }
-        .player-rank-title { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-bottom: 1px; text-transform: uppercase; height: 12px; }
+        .player-rank-title { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-bottom: 1px; text-transform: uppercase; min-height: 12px; }
         .player-name-success { color: var(--accent-blue); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
-        .player-gp-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 2px; height: 14px; }
+        .player-gp-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 2px; min-height: 14px; }
 
         .reset-icon {
             width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -131,7 +131,10 @@
         .close-disclaimer-icon { width: 20px; height: 20px; cursor: pointer; filter: brightness(0); }
 
         .decline-link { color: #007bff; text-decoration: none; font-weight: 700; }
+        .decline-link:hover { text-decoration: underline; }
+
         .credits { font-size: 0.72rem; margin-top: 25px; color: rgba(255,255,255,0.4); line-height: 1.4; }
+        .credits b { font-weight: 700; }
         .credits a { color: var(--accent-blue); text-decoration: none; }
     </style>
 </head>
@@ -214,22 +217,23 @@
         const pureDigits = input.value.replace(/\D/g, '');
         if (pureDigits.length !== 9) return;
 
-        // Очистка перед загрузкой
         inputContainer.style.display = 'none';
         statusPlate.style.display = 'flex';
         infoWrapper.classList.remove('align-left');
         
-        playerRank.innerText = ''; // Убираем верхний текст
+        // Полная очистка перед новым запросом
+        playerRank.innerText = '';
         statusText.innerText = 'Загрузка...';
-        subText.innerText = '';    // Убираем нижний текст
+        subText.innerText = '';
         statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
 
         try {
             const targetUrl = `https://swgoh.gg/api/player/${pureDigits}/`;
-            const proxyUrl = `${myWorkerUrl}?url=${encodeURIComponent(targetUrl)}&_nocache=${Date.now()}`;
+            // Рандомный параметр, чтобы избежать старого кэша
+            const proxyUrl = `${myWorkerUrl}?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
 
             const response = await fetch(proxyUrl);
-            if (!response.ok) throw new Error("NotFound");
+            if (!response.ok) throw new Error("Not Found");
 
             const data = await response.json();
             const p = data.data || data;
@@ -250,7 +254,7 @@
                 btn.classList.add('active');
                 btn.disabled = false;
             } else {
-                throw new Error("NotFound");
+                throw new Error("Not Found");
             }
         } catch (e) {
             statusVisual.innerHTML = '<img src="Logos/NoShield.png" class="player-portrait">';
