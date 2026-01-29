@@ -163,7 +163,7 @@
 </div>
 
 <script>
-    const myWorkerUrl = 'https://swgoh-auth.grasshop119.workers.dev/';
+    const myWorkerUrl = 'https://swgoh-auth.grasshop119.workers.dev';
 
     const input = document.getElementById('allyCode');
     const inputContainer = document.getElementById('inputContainer');
@@ -190,22 +190,30 @@
 
     // Функция для безопасного запроса через прокси
     async function makeRequest(url) {
-        const proxyUrl = `${myWorkerUrl}?url=${encodeURIComponent(url)}&_t=${Date.now()}`;
+        const proxyUrl = `${myWorkerUrl}/?url=${encodeURIComponent(url)}&_t=${Date.now()}`;
         
-        const response = await fetch(proxyUrl, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-            },
-            mode: 'cors',
-            cache: 'no-store'
-        });
+        console.log('Requesting URL:', proxyUrl);
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        try {
+            const response = await fetch(proxyUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                },
+                mode: 'cors',
+                cache: 'no-store'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Fetch error:', error);
+            throw error;
         }
-        
-        return response.json();
     }
 
     async function startSearch() {
@@ -223,27 +231,10 @@
         btn.disabled = true;
 
         try {
-            // Пробуем разные эндпоинты API для лучшей совместимости
-            const endpoints = [
-                `https://swgoh.gg/api/player/${pureDigits}/`,
-                `https://api.swgoh.gg/player/${pureDigits}/`
-            ];
+            // Используем проверенный рабочий эндпоинт
+            const endpoint = `https://api.swgoh.gg/player/${pureDigits}/`;
             
-            let data = null;
-            let lastError = null;
-            
-            // Пробуем каждый эндпоинт по очереди
-            for (const endpoint of endpoints) {
-                try {
-                    data = await makeRequest(endpoint);
-                    if (data && (data.data || data.name || data.username)) {
-                        break;
-                    }
-                } catch (err) {
-                    lastError = err;
-                    continue;
-                }
-            }
+            const data = await makeRequest(endpoint);
             
             if (!data) {
                 throw new Error("Не удалось получить данные");
@@ -253,14 +244,14 @@
             
             if (p && (p.name || p.username)) {
                 // Используем безопасный URL для изображения
-                const portraitUrl = p.portrait_image || 'https://game-assets.swgoh.gg/textures/tex.vanity_stormtrooper.png';
+                const portraitUrl = p.portrait || p.portrait_image || 'https://game-assets.swgoh.gg/textures/tex.vanity_stormtrooper.png';
                 statusVisual.innerHTML = `<img src="${portraitUrl}" class="player-portrait" onerror="this.onerror=null; this.src='Logos/NoShield.png'">`;
                 
                 infoWrapper.classList.add('align-left');
-                statusText.innerText = p.name || p.username;
+                statusText.innerText = p.name || p.username || "Без имени";
                 
                 // Определяем ранг игрока
-                let rank = p.title || "ИГРОК SWGOH";
+                let rank = "ИГРОК SWGOH";
                 if (p.guild_rank === 4) rank = "[ЛИДЕР]";
                 else if (p.guild_rank === 3) rank = "[ОФИЦЕР]";
                 else if (p.guild_rank === 2) rank = "[УЧАСТНИК]";
@@ -270,14 +261,28 @@
                 
                 // Получаем информацию о гильдии
                 let guildInfo = "";
-                if (p.guild) {
-                    guildInfo = ` | ${p.guild.name || "Без гильдии"}`;
+                if (p.guild && p.guild.name) {
+                    guildInfo = ` | ${p.guild.name}`;
                 } else if (p.guild_name) {
                     guildInfo = ` | ${p.guild_name}`;
+                } else if (p.guild_data && p.guild_data.name) {
+                    guildInfo = ` | ${p.guild_data.name}`;
                 }
                 
-                const gp = p.galactic_power || 0;
-                subText.innerText = `ГМ: ${(gp / 1000000).toFixed(2)}M • ${p.level || '??'} LVL${guildInfo}`;
+                const gp = p.galactic_power || p.gp || 0;
+                const level = p.level || '??';
+                
+                // Форматируем ГМ
+                let gpText;
+                if (gp >= 1000000) {
+                    gpText = `ГМ: ${(gp / 1000000).toFixed(2)}M`;
+                } else if (gp >= 1000) {
+                    gpText = `ГМ: ${(gp / 1000).toFixed(1)}K`;
+                } else {
+                    gpText = `ГМ: ${gp}`;
+                }
+                
+                subText.innerText = `${gpText} • ${level} LVL${guildInfo}`;
                 
                 btn.classList.add('active');
                 btn.disabled = false;
