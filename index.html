@@ -97,6 +97,7 @@
             background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%);
             border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
         }
+        /* Условие: кнопка Share (Продолжить) не должна темнеть при наведении */
         .submit-btn.active:hover { background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%); }
 
         .disclaimer-bar {
@@ -148,9 +149,7 @@
         <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" class="close-disclaimer-icon" id="closeDisclaimer" alt="close">
     </div>
     <div class="disclaimer-body">
-        Наша команда не несет никакой ответственности за информацию, которую вы можете получить на нашем сайте. 
-        Хотя эта информация является полностью легальной и полностью доступной для любого пользователя в открытом доступе, 
-        мы отказываемся от ответственности за любые инциденты. Подробнее 
+        Наша команда не несет никакой ответственности за информацию, которую вы можете получить на нашем сайте... 
         <a href="Decline.txt" target="_blank" class="decline-link">читайте здесь.</a>
     </div>
 </div>
@@ -189,6 +188,9 @@
 </div>
 
 <script>
+    // Твой личный Cloudflare Worker
+    const myWorkerUrl = 'https://swgoh-auth.grasshop119.workers.dev/';
+
     const input = document.getElementById('allyCode');
     const inputContainer = document.getElementById('inputContainer');
     const statusPlate = document.getElementById('statusPlate');
@@ -214,7 +216,6 @@
     }
 
     window.addEventListener('load', () => {
-        // Задержка показа дисклеймера
         setTimeout(() => disclaimer.classList.add('active'), 1000);
     });
 
@@ -228,23 +229,14 @@
         statusText.innerText = 'Загрузка...';
 
         try {
-            // 1. Формируем прямой URL к SWGOH
             const targetUrl = `https://swgoh.gg/api/player/${pureDigits}/`;
-            
-            // 2. Используем corsproxy.io
-            // Добавляем параметр _nocache, чтобы Телеграм не кэшировал старые ошибки
-            const proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(targetUrl) + `&_nocache=${Date.now()}`;
+            // Запрос через твой Worker с защитой от кэша
+            const proxyUrl = `${myWorkerUrl}?url=${encodeURIComponent(targetUrl)}&_nocache=${Date.now()}`;
 
             const response = await fetch(proxyUrl);
-            
-            if (!response.ok) {
-                // Если статус не 200, кидаем ошибку
-                throw new Error("Ошибка API");
-            }
+            if (!response.ok) throw new Error("Ошибка сети");
 
             const data = await response.json();
-            // corsproxy возвращает чистый JSON, как он есть на сайте-источнике
-            // API SWGOH иногда возвращает { data: {...} }, а иногда сразу объект
             const p = data.data || data;
 
             if (p && p.name) {
@@ -260,14 +252,12 @@
                 playerRank.innerText = rank;
                 subText.innerText = `ГМ: ${(p.galactic_power / 1000000).toFixed(2)}M • ${p.level} LVL`;
                 
-                // Включаем кнопку
                 btn.classList.add('active');
                 btn.disabled = false;
             } else {
-                throw new Error("Данные не полные");
+                throw new Error("Не найден");
             }
         } catch (e) {
-            console.error(e);
             showError("Игрок не найден");
         }
     }
@@ -277,7 +267,7 @@
         infoWrapper.classList.add('align-left');
         playerRank.innerText = "ОШИБКА";
         statusText.innerText = msg;
-        subText.innerText = '';
+        subText.innerText = 'Проверьте код';
         btn.classList.remove('active');
         btn.disabled = true;
     }
