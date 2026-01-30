@@ -23,7 +23,7 @@
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: 'Roboto', sans-serif; /* Основной шрифт */
+            font-family: 'Roboto', sans-serif;
             background-color: var(--bg-dark);
             background-image:
                 linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
@@ -37,7 +37,6 @@
         .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; z-index: 10; }
         .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
         
-        /* Заголовок - Montserrat (Жирный) */
         h1 { 
             font-family: 'Montserrat', sans-serif;
             font-size: clamp(1.2rem, 5vw, 1.4rem); 
@@ -47,7 +46,6 @@
             letter-spacing: 1.5px; 
         }
         
-        /* Описание - Roboto */
         .description { 
             font-size: clamp(0.8rem, 3.5vw, 0.9rem); 
             font-weight: 400; 
@@ -89,13 +87,12 @@
         .status-info-wrapper {
             flex-grow: 1; display: flex; flex-direction: column; 
             overflow: hidden; padding: 0 12px;
-            align-items: center; /* Центр для загрузки */
+            align-items: center;
             text-align: center;
         }
         
         .status-info-wrapper.align-left { align-items: flex-start; text-align: left; }
 
-        /* Ранг (Титул) - Roboto */
         .player-rank-title { 
             font-size: 0.65rem; 
             color: rgba(255,255,255,0.6); 
@@ -119,7 +116,6 @@
         }
         .reset-icon img { width: 20px; height: 20px; }
 
-        /* Кнопка - Montserrat */
         .submit-btn {
             position: relative; width: 100%; padding: 20px; 
             font-family: 'Montserrat', sans-serif;
@@ -134,12 +130,10 @@
             border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
         }
 
-        /* При нажатии ничего не ломаем и не затемняем */
         .submit-btn.active:active {
             filter: brightness(1.1);
         }
 
-        /* Футер - Roboto */
         .credits { 
             font-size: 0.75rem; 
             margin-top: 25px; 
@@ -227,18 +221,30 @@
     }
 
     async function smartFetch(targetUrl) {
+        // Список прокси, отсортированный по надежности
         const proxies = [
-            `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`,
-            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+            `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`
         ];
+
         for (let proxyUrl of proxies) {
             try {
-                const response = await fetch(proxyUrl);
+                const response = await fetch(proxyUrl, { cache: "no-store" });
                 if (!response.ok) continue;
+                
                 const result = await response.json();
-                let cleanData = proxyUrl.includes('allorigins') ? JSON.parse(result.contents) : result;
-                if (cleanData) return cleanData;
-            } catch (err) {}
+                let cleanData;
+
+                if (proxyUrl.includes('allorigins')) {
+                    cleanData = JSON.parse(result.contents);
+                } else {
+                    cleanData = result;
+                }
+
+                if (cleanData && (cleanData.data || cleanData.name)) return cleanData;
+            } catch (err) {
+                console.error("Proxy error:", err);
+            }
         }
         return null;
     }
@@ -265,7 +271,6 @@
                 infoWrapper.classList.add('align-left');
                 statusText.innerText = p.name;
                 
-                // Определение ранга на русском
                 let rank = p.title || "ИГРОК SWGOH";
                 if (p.guild_rank === 4) rank = "[ЛИДЕР]";
                 else if (p.guild_rank === 3) rank = "[ОФИЦЕР]";
@@ -281,6 +286,7 @@
             }
         } catch (e) {
             showError("Ошибка сети");
+            console.error(e);
         }
     }
 
@@ -289,7 +295,7 @@
         infoWrapper.classList.add('align-left');
         playerRank.innerText = "ОШИБКА";
         statusText.innerText = msg;
-        subText.innerText = '';
+        subText.innerText = 'Проверьте код';
         btn.classList.remove('active');
     }
 
@@ -303,7 +309,10 @@
             const text = await navigator.clipboard.readText();
             input.value = formatValue(text);
             if (input.value.replace(/\D/g, '').length === 9) startSearch();
-        } catch (err) { input.focus(); }
+        } catch (err) { 
+            // Фокус для мобильных, если доступ к буферу запрещен
+            input.focus(); 
+        }
     });
 
     resetBtn.addEventListener('click', resetUI);
