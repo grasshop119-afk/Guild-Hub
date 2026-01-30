@@ -1,281 +1,352 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shadow Guild - Логин</title>
-    
-    <link rel="icon" type="image/jpeg" href="Guild_WEB_Logo.jpg">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --bg-dark: #050b14;
-            --accent-blue: #4facfe;
-            --swgoh-green-bright: #26b31e;
-            --swgoh-green-dark: #0f400b;
-            --text-white: #ffffff;
-            --border-default: rgba(30, 58, 95, 0.8);
-            --input-bg: rgba(5, 13, 22, 0.8);
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guild Hub - Elite Interface</title>
+    
+    <link rel="icon" type="image/jpeg" href="Guild_WEB_Logo.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #050b14;
+            --accent-blue: #4facfe;
+            --swgoh-green-bright: #26b31e;
+            --swgoh-green-dark: #0f400b;
+            --text-white: #ffffff;
+            --border-default: rgba(30, 58, 95, 0.8);
+            --input-bg: rgba(5, 13, 22, 0.8);
+        }
 
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        /* Убираем лишние отступы и фиксируем высоту для мобилок */
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-dark);
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
-            background-size: 100% 3px, cover;
-            background-attachment: fixed;
-            display: flex; justify-content: center; align-items: center;
-            color: var(--text-white); overflow: hidden; position: fixed;
-        }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-dark);
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
+            background-size: 100% 3px, cover;
+            background-attachment: fixed;
+            display: flex; justify-content: center; align-items: center;
+            color: var(--text-white); overflow: hidden; position: fixed;
+        }
 
-        .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; z-index: 10; }
-        .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
-        
-        h1 { 
-            font-family: 'Montserrat', sans-serif;
-            font-size: clamp(1.2rem, 5vw, 1.4rem); 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            margin-bottom: 12px; 
-            letter-spacing: 1.5px; 
-        }
-        
-        .description { font-size: clamp(0.8rem, 3.5vw, 0.9rem); font-weight: 400; margin-bottom: 25px; opacity: 0.9; }
-        .description b { font-weight: 700; }
+        .main-content { text-align: center; width: 90%; max-width: 360px; padding: 20px; z-index: 10; }
+        .logo { width: 70%; max-width: 240px; margin: 0 auto 25px; display: block; }
+        
+        h1 { 
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(1.2rem, 5vw, 1.4rem); 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            margin-bottom: 12px; 
+            letter-spacing: 1.5px; 
+        }
+        
+        .description { 
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem); 
+            font-weight: 400; 
+            margin-bottom: 25px; 
+            opacity: 0.9; 
+        }
+        .description b { font-weight: 700; }
 
-        .interactive-area { position: relative; width: 100%; height: 62px; margin-bottom: 20px; }
+        .interactive-area { position: relative; width: 100%; height: 62px; margin-bottom: 20px; }
 
-        .swgoh-input, .status-plate {
-            width: 100%; height: 100%; background-color: var(--input-bg); border: 1px solid var(--border-default);
-            border-radius: 8px; position: absolute; top: 0; left: 0;
-        }
+        .swgoh-input, .status-plate {
+            width: 100%; height: 100%; background-color: var(--input-bg); border: 1px solid var(--border-default);
+            border-radius: 8px; position: absolute; top: 0; left: 0;
+        }
 
-        .swgoh-input {
-            padding: 0 50px 0 18px; color: #ffffff;
-            font-family: 'Roboto', sans-serif; font-size: clamp(1.1rem, 4vw, 1.2rem);
-            outline: none; text-align: center; letter-spacing: 3px; font-weight: 400;
-        }
+        .swgoh-input {
+            padding: 0 50px 0 18px; color: #ffffff;
+            font-family: 'Roboto', sans-serif; font-size: clamp(1.1rem, 4vw, 1.2rem);
+            outline: none; text-align: center; letter-spacing: 3px; font-weight: 400;
+            appearance: none; /* Убирает системные тени iOS */
+        }
 
-        .paste-icon {
-            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
-            cursor: pointer; fill: rgba(255, 255, 255, 0.4); display: flex; align-items: center; padding: 8px; z-index: 10;
-        }
+        .paste-icon {
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; fill: rgba(255, 255, 255, 0.4); display: flex; align-items: center; padding: 8px; z-index: 10;
+        }
 
-        .status-plate { display: none; align-items: center; padding: 0 15px; z-index: 5; }
-        .loader-box { width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px; }
-        .player-portrait { width: 100%; height: 100%; object-fit: cover; }
+        .status-plate { display: none; align-items: center; padding: 0 15px; z-index: 5; }
+        
+        .loader-box { width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px; }
+        .player-portrait { width: 100%; height: 100%; object-fit: cover; }
 
-        .swgoh-spinner {
-            width: 20px; height: 20px; border: 2px solid rgba(79, 172, 254, 0.1);
-            border-top: 2px solid var(--accent-blue); border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .swgoh-spinner {
+            width: 20px; height: 20px; border: 2px solid rgba(79, 172, 254, 0.1);
+            border-top: 2px solid var(--accent-blue); border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .status-info-wrapper {
-            flex-grow: 1; display: flex; flex-direction: column; 
-            overflow: hidden; padding: 0 12px;
-            align-items: center;
-            text-align: center;
-        }
-        
-        .status-info-wrapper.align-left { align-items: flex-start; text-align: left; }
+        .status-info-wrapper {
+            flex-grow: 1; display: flex; flex-direction: column; 
+            overflow: hidden; padding: 0 12px;
+            align-items: center; 
+            text-align: center;
+        }
+        
+        .status-info-wrapper.align-left { align-items: flex-start; text-align: left; }
 
-        .player-rank-title { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-bottom: 1px; text-transform: uppercase; font-weight: 400; }
-        .player-name-success { color: var(--accent-blue); font-weight: 400; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
-        .player-gp-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: 400; margin-top: 2px; }
+        .player-rank-title { 
+            font-size: 0.65rem; 
+            color: rgba(255,255,255,0.6); 
+            margin-bottom: 1px; 
+            text-transform: uppercase; 
+            font-weight: 400;
+        }
+        
+        .player-name-success { 
+            color: var(--accent-blue); font-weight: 400; font-size: 0.95rem; 
+            text-transform: uppercase; letter-spacing: 0.5px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;
+        }
 
-        .reset-icon {
-            width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            opacity: 0.6; flex-shrink: 0; filter: invert(47%) sepia(17%) saturate(1295%) hue-rotate(174deg) brightness(95%) contrast(92%);
-        }
+        .player-gp-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: 400; margin-top: 2px; }
 
-        .submit-btn {
-            position: relative; width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif;
-            font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
-            cursor: not-allowed; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05); transition: background 0.3s ease; letter-spacing: 2px;
-        }
+        .reset-icon {
+            width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            opacity: 0.6; transition: opacity 0.2s; flex-shrink: 0;
+            filter: invert(47%) sepia(17%) saturate(1295%) hue-rotate(174deg) brightness(95%) contrast(92%);
+        }
+        .reset-icon img { width: 20px; height: 20px; }
 
-        .submit-btn.active {
-            background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%);
-            border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
-        }
+        .submit-btn {
+            position: relative; width: 100%; padding: 20px; 
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05); transition: background 0.3s ease; letter-spacing: 2px;
+            overflow: hidden;
+            -webkit-appearance: none;
+        }
 
-        .submit-btn.active:active { filter: brightness(1.1); }
+        .submit-btn.active {
+            background: linear-gradient(to top, var(--swgoh-green-bright) 0%, var(--swgoh-green-dark) 100%);
+            border: 1px solid #45f53d !important; color: #ffffff !important; cursor: pointer;
+        }
 
-        .credits { font-size: 0.72rem; margin-top: 25px; color: rgba(255,255,255,0.4); font-weight: 400; line-height: 1.4; }
-        .credits b { font-weight: 700; }
-        .credits a { color: var(--accent-blue); text-decoration: none; }
-    </style>
+        /* Сохраняем поведение кнопки согласно вашим требованиям */
+        .submit-btn.active:active {
+            filter: brightness(1.1);
+        }
+
+        .credits { 
+            font-size: 0.75rem; 
+            margin-top: 25px; 
+            color: rgba(255,255,255,0.4); 
+            font-weight: 400;
+            line-height: 1.4;
+        }
+        .credits b { font-weight: 700; }
+        .credits a { color: var(--accent-blue); text-decoration: none; }
+    </style>
 </head>
 <body>
 
 <div class="main-content">
-    <img src="Logos/Logo.png" alt="Logo" class="logo">
-    <h1>Добро пожаловать!</h1>
-    <p class="description">Введи свой <b>код союзника</b> для авторизации.</p>
+    <img src="Logos/Logo.png" alt="Logo" class="logo">
+    <h1>Добро пожаловать!</h1>
+    <p class="description">Введи свой <b>код союзника</b> для авторизации.</p>
 
-    <div class="interactive-area">
-        <div id="inputContainer">
-            <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11" inputmode="numeric">
-            <div class="paste-icon" id="pasteBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
-            </div>
-        </div>
+    <div class="interactive-area">
+        <div id="inputContainer">
+            <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11" inputmode="numeric" autocomplete="off">
+            <div class="paste-icon" id="pasteBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
+            </div>
+        </div>
 
-        <div id="statusPlate" class="status-plate">
-            <div id="statusVisual" class="loader-box">
-                <div class="swgoh-spinner"></div>
-            </div>
-            
-            <div id="infoWrapper" class="status-info-wrapper">
-                <span id="playerRank" class="player-rank-title"></span>
-                <span id="statusText" class="player-name-success">Загрузка...</span>
-                <span id="subText" class="player-gp-sub"></span>
-            </div>
+        <div id="statusPlate" class="status-plate">
+            <div id="statusVisual" class="loader-box">
+                <div class="swgoh-spinner"></div>
+            </div>
+            
+            <div id="infoWrapper" class="status-info-wrapper">
+                <span id="playerRank" class="player-rank-title"></span>
+                <span id="statusText" class="player-name-success">Загрузка...</span>
+                <span id="subText" class="player-gp-sub"></span>
+            </div>
 
-            <div class="reset-icon" id="resetBtn">
-                <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" alt="reset" width="20">
-            </div>
-        </div>
-    </div>
+            <div class="reset-icon" id="resetBtn">
+                <img src="https://img.icons8.com/?size=100&id=95867&format=png&color=000000" alt="reset">
+            </div>
+        </div>
+    </div>
 
-    <button id="submitBtn" class="submit-btn">Продолжить</button>
+    <button id="submitBtn" class="submit-btn">Продолжить</button>
 
-    <div class="credits">
-        Это приложение создано специально по заказу гильдии <b>Те, кто в тени</b>. By <a href="https://t.me/tz_projects" target="_blank">@tz_projects</a>
-    </div>
+    <div class="credits">
+        Это приложение создано специально по заказу гильдии <b>Те, кто в тени</b>. By <a href="https://t.me/tz_projects" target="_blank">@tz_projects</a>
+    </div>
 </div>
 
 <script>
-    const input = document.getElementById('allyCode');
-    const inputContainer = document.getElementById('inputContainer');
-    const statusPlate = document.getElementById('statusPlate');
-    const statusText = document.getElementById('statusText');
-    const playerRank = document.getElementById('playerRank');
-    const statusVisual = document.getElementById('statusVisual');
-    const infoWrapper = document.getElementById('infoWrapper');
-    const subText = document.getElementById('subText');
-    const btn = document.getElementById('submitBtn');
-    const pasteBtn = document.getElementById('pasteBtn');
-    const resetBtn = document.getElementById('resetBtn');
+    const input = document.getElementById('allyCode');
+    const inputContainer = document.getElementById('inputContainer');
+    const statusPlate = document.getElementById('statusPlate');
+    const statusText = document.getElementById('statusText');
+    const playerRank = document.getElementById('playerRank');
+    const statusVisual = document.getElementById('statusVisual');
+    const infoWrapper = document.getElementById('infoWrapper');
+    const subText = document.getElementById('subText');
+    const btn = document.getElementById('submitBtn');
+    const pasteBtn = document.getElementById('pasteBtn');
+    const resetBtn = document.getElementById('resetBtn');
 
-    function formatValue(val) {
-        let digits = val.replace(/\D/g, '').substring(0, 9);
-        let formatted = "";
-        for (let i = 0; i < digits.length; i++) {
-            if (i > 0 && i % 3 === 0) formatted += "-";
-            formatted += digits[i];
-        }
-        return formatted;
-    }
+    function formatValue(val) {
+        let digits = val.replace(/\D/g, '').substring(0, 9);
+        let formatted = "";
+        for (let i = 0; i < digits.length; i++) {
+            if (i > 0 && i % 3 === 0) formatted += "-";
+            formatted += digits[i];
+        }
+        return formatted;
+    }
 
-    function resetUI() {
-        statusPlate.style.display = 'none';
-        inputContainer.style.display = 'block';
-        input.value = '';
-        btn.classList.remove('active');
-        infoWrapper.classList.remove('align-left');
-        subText.innerText = '';
-        playerRank.innerText = '';
-        statusText.innerText = 'Загрузка...';
-        statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
-    }
+    function resetUI() {
+        statusPlate.style.display = 'none';
+        inputContainer.style.display = 'block';
+        input.value = '';
+        btn.classList.remove('active');
+        infoWrapper.classList.remove('align-left');
+        subText.innerText = '';
+        playerRank.innerText = '';
+        statusText.innerText = 'Загрузка...';
+        statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
+    }
 
-    async function smartFetch(targetUrl) {
-        // Добавлен каскад из 3 прокси для мобильной версии
-        const proxies = [
-            `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`,
-            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-            `https://thingproxy.freeboard.io/fetch/${targetUrl}`
-        ];
+    // Улучшенная функция запроса для мобильных устройств
+    async function smartFetch(pureDigits) {
+        const targetUrl = `https://swgoh.gg/api/player/${pureDigits}/`;
+        
+        // Массив прокси. Сначала используем те, что лучше работают с мобильными заголовками
+        const proxies = [
+            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+            `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`
+        ];
 
-        for (let proxyUrl of proxies) {
-            try {
-                const response = await fetch(proxyUrl, { method: 'GET' });
-                if (!response.ok) continue;
-                
-                const result = await response.json();
-                // Обработка специфического формата AllOrigins
-                let cleanData = proxyUrl.includes('allorigins') ? JSON.parse(result.contents) : result;
-                
-                if (cleanData && (cleanData.data || cleanData.name)) return cleanData;
-            } catch (err) {
-                console.error("Proxy error:", err);
-            }
-        }
-        return null;
-    }
+        for (let proxyUrl of proxies) {
+            try {
+                const response = await fetch(proxyUrl, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                if (!response.ok) continue;
 
-    async function startSearch() {
-        const pureDigits = input.value.replace(/\D/g, '');
-        if (pureDigits.length !== 9) return;
+                const result = await response.json();
+                
+                // Обработка разных форматов ответа прокси
+                let cleanData = null;
+                if (proxyUrl.includes('allorigins')) {
+                    cleanData = typeof result.contents === 'string' ? JSON.parse(result.contents) : result.contents;
+                } else {
+                    cleanData = result;
+                }
 
-        inputContainer.style.display = 'none';
-        statusPlate.style.display = 'flex';
-        infoWrapper.classList.remove('align-left');
-        statusText.innerText = 'Загрузка...';
-        playerRank.innerText = '';
-        statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
+                if (cleanData && (cleanData.data || cleanData.name)) return cleanData;
+            } catch (err) {
+                console.error("Proxy error:", err);
+            }
+        }
+        return null;
+    }
 
-        try {
-            const data = await smartFetch(`https://swgoh.gg/api/player/${pureDigits}/`);
-            const p = data?.data || data;
+    async function startSearch() {
+        const pureDigits = input.value.replace(/\D/g, '');
+        if (pureDigits.length !== 9) return;
 
-            if (p && p.name) {
-                const portrait = p.portrait_image || 'https://game-assets.swgoh.gg/textures/tex.vanity_stormtrooper.png';
-                statusVisual.innerHTML = `<img src="${portrait}" class="player-portrait" onerror="this.src='Logos/NoShield.png'">`;
-                
-                infoWrapper.classList.add('align-left');
-                statusText.innerText = p.name;
-                
-                let rank = p.title || "ИГРОК SWGOH";
-                if (p.guild_rank === 4) rank = "[ЛИДЕР]";
-                else if (p.guild_rank === 3) rank = "[ОФИЦЕР]";
-                else if (p.guild_rank === 2) rank = "[УЧАСТНИК]";
+        // Скрываем клавиатуру на мобилках
+        input.blur();
 
-                playerRank.innerText = rank;
-                const gp = (p.galactic_power / 1000000).toFixed(2);
-                subText.innerText = `ГМ: ${gp}M • ${p.level} LVL`;
-                btn.classList.add('active');
-            } else {
-                showError("Игрок не найден");
-            }
-        } catch (e) {
-            showError("Проверь код");
-        }
-    }
+        inputContainer.style.display = 'none';
+        statusPlate.style.display = 'flex';
+        infoWrapper.classList.remove('align-left');
+        statusText.innerText = 'Загрузка...';
+        playerRank.innerText = '';
+        statusVisual.innerHTML = '<div class="swgoh-spinner"></div>';
 
-    function showError(msg) {
-        statusVisual.innerHTML = '<img src="Logos/NoShield.png" class="player-portrait">';
-        infoWrapper.classList.add('align-left');
-        playerRank.innerText = "ОШИБКА";
-        statusText.innerText = msg;
-        subText.innerText = '';
-        btn.classList.remove('active');
-    }
+        try {
+            const data = await smartFetch(pureDigits);
+            const p = data?.data || data;
 
-    input.addEventListener('input', () => {
-        input.value = formatValue(input.value);
-        if (input.value.replace(/\D/g, '').length === 9) startSearch();
-    });
+            if (p && p.name) {
+                const portrait = p.portrait_image || 'https://game-assets.swgoh.gg/textures/tex.vanity_stormtrooper.png';
+                statusVisual.innerHTML = `<img src="${portrait}" class="player-portrait" onerror="this.src='Logos/NoShield.png'">`;
+                
+                infoWrapper.classList.add('align-left');
+                statusText.innerText = p.name;
+                
+                let rank = p.title || "ИГРОК SWGOH";
+                if (p.guild_rank === 4) rank = "[ЛИДЕР]";
+                else if (p.guild_rank === 3) rank = "[ОФИЦЕР]";
+                else if (p.guild_rank === 2) rank = "[УЧАСТНИК]";
 
-    pasteBtn.addEventListener('click', async () => {
-        try {
-            const text = await navigator.clipboard.readText();
-            input.value = formatValue(text);
-            if (input.value.replace(/\D/g, '').length === 9) startSearch();
-        } catch (err) { input.focus(); }
-    });
+                playerRank.innerText = rank;
+                
+                const gp = (p.galactic_power / 1000000).toFixed(2);
+                subText.innerText = `ГМ: ${gp}M • ${p.level} LVL`;
+                btn.classList.add('active');
+            } else {
+                showError("Не найден");
+            }
+        } catch (e) {
+            showError("Ошибка сети");
+        }
+    }
 
-    resetBtn.addEventListener('click', resetUI);
+    function showError(msg) {
+        statusVisual.innerHTML = '<img src="Logos/NoShield.png" class="player-portrait">';
+        infoWrapper.classList.add('align-left');
+        playerRank.innerText = "ОШИБКА";
+        statusText.innerText = msg;
+        subText.innerText = '';
+        btn.classList.remove('active');
+    }
+
+    // Слушатель для форматирования и триггера поиска
+    input.addEventListener('input', (e) => {
+        const val = input.value;
+        input.value = formatValue(val);
+        if (input.value.replace(/\D/g, '').length === 9) {
+            startSearch();
+        }
+    });
+
+    // Специально для вставки на мобильных
+    pasteBtn.addEventListener('click', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text) {
+                input.value = formatValue(text);
+                if (input.value.replace(/\D/g, '').length === 9) {
+                    startSearch();
+                }
+            }
+        } catch (err) { 
+            // Если доступ к буферу запрещен, просто фокусируемся
+            input.focus(); 
+        }
+    });
+
+    resetBtn.addEventListener('click', resetUI);
+
+    // Дополнительная проверка: если пользователь нажал "Go" или "Enter" на мобильной клавиатуре
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            if (input.value.replace(/\D/g, '').length === 9) {
+                startSearch();
+            }
+        }
+    });
 </script>
 </body>
 </html>
