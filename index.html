@@ -7,85 +7,105 @@
     <style>
         body { font-family: sans-serif; background: #121212; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         .search-box { margin-bottom: 20px; }
-        input { padding: 10px; border-radius: 5px; border: none; }
-        button { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        input { padding: 10px; border-radius: 5px; border: none; outline: none; width: 200px; }
+        button { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; transition: 0.3s; }
         button:hover { background: #0056b3; }
         
         #player-card { 
-            background: #1e1e1e; padding: 20px; border-radius: 10px; 
-            display: none; border: 1px solid #333; max-width: 400px; text-align: center;
+            background: #1e1e1e; padding: 25px; border-radius: 15px; 
+            display: none; border: 1px solid #333; max-width: 350px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .avatar { width: 100px; height: 100px; border-radius: 50%; border: 2px solid #edb219; }
-        .guild-logo { width: 50px; vertical-align: middle; }
-        .info-row { margin: 10px 0; }
-        .label { color: #888; font-size: 0.9em; }
-        /* Сохраняем стиль кнопки Share по вашему запросу */
-        .share-btn { background: #28a745; margin-top: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #edb219; margin-bottom: 15px; }
+        .guild-logo { width: 40px; vertical-align: middle; margin-right: 10px; }
+        .info-row { margin: 12px 0; line-height: 1.4; }
+        .label { color: #888; font-size: 0.85em; display: block; margin-bottom: 2px; }
+        .value { font-weight: bold; font-size: 1.1em; }
+        
+        hr { border: 0; border-top: 1px solid #333; margin: 20px 0; }
+        
+        /* Кнопка Share: не затемняется при наведении по твоей просьбе */
+        .share-btn { background: #28a745; margin-top: 15px; width: 100%; font-weight: bold; }
         .share-btn:hover { background: #28a745 !important; opacity: 0.9; }
+
+        #loading { margin-top: 20px; color: #edb219; display: none; }
     </style>
 </head>
 <body>
 
-    <h2>Поиск игрока SWGOH</h2>
+    <h2>SWGOH ИНФО</h2>
     
     <div class="search-box">
-        <input type="text" id="allyCode" placeholder="Введите код (например, 123456789)">
+        <input type="text" id="allyCode" placeholder="Код (9 цифр)">
         <button onclick="fetchPlayer()">Найти</button>
     </div>
 
-    <div id="loading" style="display: none;">Загрузка...</div>
+    <div id="loading">Загрузка данных из Голонета...</div>
 
     <div id="player-card">
         <img id="p-avatar" class="avatar" src="" alt="Avatar">
-        <h3 id="p-name"></h3>
         <div class="info-row">
-            <span class="label">Звание:</span> <span id="p-title"></span>
+            <span id="p-name" style="font-size: 1.5em; font-weight: bold; color: #fff;"></span>
         </div>
+        <div class="info-row">
+            <span class="label">Звание</span>
+            <span id="p-title" class="value"></span>
+        </div>
+        
         <hr>
-        <div class="info-row">
+        
+        <div class="info-row" style="display: flex; align-items: center; justify-content: center;">
             <img id="g-logo" class="guild-logo" src="" alt="Guild">
-            <span id="g-name" style="font-weight: bold; font-size: 1.2em;"></span>
+            <span id="g-name" style="font-weight: bold; font-size: 1.2em; color: #4db8ff;"></span>
         </div>
         <div class="info-row">
-            <span class="label">Роль в гильдии:</span> <span id="g-role"></span>
+            <span class="label">Должность</span>
+            <span id="g-role" class="value"></span>
         </div>
-        <button class="share-btn">Поделиться</button>
+
+        <button class="share-btn">ПОДЕЛИТЬСЯ</button>
     </div>
 
     <script>
         async function fetchPlayer() {
-            const allyCode = document.getElementById('allyCode').value.replace(/-/g, '');
+            const input = document.getElementById('allyCode').value;
+            const allyCode = input.replace(/-/g, '');
             const card = document.getElementById('player-card');
             const loader = document.getElementById('loading');
             
-            if (!allyCode) return alert('Введите код союзника');
+            // ВСТАВЬ СЮДА СВОЮ ССЫЛКУ ИЗ CLOUDFLARE
+            const workerUrl = `https://твой-воркер.workers.dev/?allyCode=${allyCode}`;
+            
+            if (!allyCode || allyCode.length < 9) {
+                return alert('Введите корректный код союзника (9 цифр)');
+            }
 
             loader.style.display = 'block';
             card.style.display = 'none';
 
             try {
-                // Вызываем нашу Vercel функцию
-                const response = await fetch(`/api?allyCode=${allyCode}`);
-                const data = await response.json();
+                const response = await fetch(workerUrl);
+                const result = await response.json();
 
-                if (data.error) throw new Error(data.error);
+                if (result.error) throw new Error(result.error);
 
-                const p = data.data;
+                const p = result.data;
                 
-                // Заполнение данных
+                // Наполнение данными
                 document.getElementById('p-name').textContent = p.name;
-                document.getElementById('p-title').textContent = p.title || 'Нет звания';
+                document.getElementById('p-title').textContent = p.title || 'Гений тактики';
                 document.getElementById('p-avatar').src = `https://game-assets.swgoh.gg/tex.charui_portrait_${p.portrait_id}.png`;
                 
                 document.getElementById('g-name').textContent = p.guild_name;
                 document.getElementById('g-role').textContent = getRoleName(p.guild_member_level);
                 
-                // Логотип гильдии (заглушка, так как API отдает ID баннера, а не прямую ссылку)
+                // Стандартное лого гильдии
                 document.getElementById('g-logo').src = `https://game-assets.swgoh.gg/static/assets/textures/gui/guild/guild_logo_white.png`;
 
                 card.style.display = 'block';
             } catch (err) {
-                alert('Ошибка: ' + err.message);
+                console.error(err);
+                alert('Ошибка: Игрок не найден или сервис временно недоступен');
             } finally {
                 loader.style.display = 'none';
             }
