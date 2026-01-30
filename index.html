@@ -1,61 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guild Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #050b14; --blue: #4facfe; --green: #26b31e; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        .container { width: 90%; max-width: 360px; text-align: center; }
+        .logo { width: 170px; margin-bottom: 25px; }
+        .input-box { position: relative; height: 62px; margin-bottom: 20px; }
+        input, .plate { width: 100%; height: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(79,172,254,0.3); border-radius: 8px; color: white; text-align: center; font-size: 1.2rem; position: absolute; top: 0; left: 0; }
+        .plate { display: none; align-items: center; padding: 0 12px; text-align: left; background: #0a1626; z-index: 5; }
+        .avatar { width: 42px; height: 42px; border-radius: 4px; object-fit: cover; margin-right: 12px; }
+        .info { flex-grow: 1; overflow: hidden; }
+        .info b { display: block; color: var(--blue); text-transform: uppercase; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .info span { font-size: 0.75rem; opacity: 0.5; }
+        .reset { cursor: pointer; width: 20px; filter: invert(1); opacity: 0.6; }
+        .btn { width: 100%; padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); font-family: 'Montserrat'; font-weight: 700; text-transform: uppercase; cursor: not-allowed; transition: 0.3s; }
+        .btn.active { background: linear-gradient(to top, var(--green), #0f400b); color: white; cursor: pointer; border-color: #45f53d; }
+        .btn.active:hover { filter: none !important; opacity: 1 !important; }
+        .loader { width: 20px; height: 20px; border: 2px solid rgba(79,172,254,0.1); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <img src="Logos/Logo.png" class="logo">
+    <div class="input-box">
+        <input type="text" id="code" placeholder="000-000-000" maxlength="11" inputmode="numeric">
+        <div id="plate" class="plate">
+            <div id="v-box"><div class="loader"></div></div>
+            <div class="info"><b id="p-name">Загрузка...</b><span id="p-desc">Синхронизация</span></div>
+            <img src="https://img.icons8.com/?size=100&id=95867&format=png" class="reset" id="reset">
+        </div>
+    </div>
+    <button id="btn" class="btn">Продолжить</button>
+</div>
+
 <script>
-    // Поменяли путь на этот — он работает на Vercel без конфигов
-    const PROXY = window.location.origin + '/api?url='; 
+    const PROXY = window.location.origin + '/api?url=';
     const input = document.getElementById('code');
-    const plate = document.getElementById('statusPlate');
-    const btn = document.getElementById('submitBtn');
-    let playerData = null;
+    const plate = document.getElementById('plate');
+    const btn = document.getElementById('btn');
+    let savedData = null;
 
     input.oninput = (e) => {
         let v = e.target.value.replace(/\D/g, '').substring(0, 9);
         e.target.value = v.replace(/(\d{3})(\d{3})(\d{3})/, '$1-$2-$3').replace(/-$/, '');
-        if (v.length === 9) { input.blur(); load(v); }
+        if (v.length === 9) { input.blur(); fetchPlayer(v); }
     };
 
-    async function load(code) {
+    async function fetchPlayer(code) {
         input.style.display = 'none';
         plate.style.display = 'flex';
-        document.getElementById('p-name').innerText = "Поиск...";
-        document.getElementById('v-box').innerHTML = '<div class="loader"></div>';
         
         try {
-            const api = `https://swgoh.gg/api/player/${code}/`;
-            // Кодируем URL, чтобы Vercel его правильно проглотил
-            const res = await fetch(`${PROXY}${encodeURIComponent(api)}`);
-            
-            if (!res.ok) throw new Error("Server error");
-            
-            const data = await res.json();
-            const p = data.data || data;
+            const target = encodeURIComponent(`https://swgoh.gg/api/player/${code}/`);
+            const response = await fetch(PROXY + target);
+            const result = await response.json();
+            const p = result.data || result;
 
             if (p && p.name) {
-                playerData = p;
+                savedData = p;
                 document.getElementById('v-box').innerHTML = `<img src="${p.portrait_image}" class="avatar" onerror="this.src='Logos/NoShield.png'">`;
                 document.getElementById('p-name').innerText = p.name;
                 document.getElementById('p-desc').innerText = `ГМ: ${(p.galactic_power/1000000).toFixed(2)}M • ${p.level} LVL`;
                 btn.classList.add('active');
                 btn.disabled = false;
-            } else { throw "NotFound"; }
+            } else { throw "err"; }
         } catch (e) {
-            console.error(e);
             document.getElementById('v-box').innerHTML = `<img src="Logos/NoShield.png" class="avatar">`;
             document.getElementById('p-name').innerText = "Не найден";
-            document.getElementById('p-desc').innerText = "Попробуйте позже";
+            document.getElementById('p-desc').innerText = "Ошибка данных";
         }
     }
 
     btn.onclick = () => {
-        if (playerData) {
-            localStorage.setItem('swgoh_player_data', JSON.stringify(playerData));
+        if (savedData) {
+            localStorage.setItem('swgoh_player_data', JSON.stringify(savedData));
             window.location.href = 'profile.html';
         }
     };
 
-    document.getElementById('resetBtn').onclick = () => {
+    document.getElementById('reset').onclick = () => {
         plate.style.display = 'none';
         input.style.display = 'block';
         input.value = '';
         btn.classList.remove('active');
         btn.disabled = true;
+        savedData = null;
     };
 </script>
+</body>
+</html>
