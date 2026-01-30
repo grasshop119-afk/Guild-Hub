@@ -2,97 +2,99 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Guild Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWGOH Player Info</title>
     <style>
-        :root { --bg: #050b14; --blue: #4facfe; --green: #26b31e; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        .container { width: 90%; max-width: 360px; text-align: center; }
-        .logo { width: 170px; margin-bottom: 25px; }
-        .input-box { position: relative; height: 62px; margin-bottom: 20px; }
-        input, .plate { width: 100%; height: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(79,172,254,0.3); border-radius: 8px; color: white; text-align: center; font-size: 1.2rem; position: absolute; top: 0; left: 0; }
-        .plate { display: none; align-items: center; padding: 0 12px; text-align: left; background: #0a1626; z-index: 5; }
-        .avatar { width: 42px; height: 42px; border-radius: 4px; object-fit: cover; margin-right: 12px; }
-        .info { flex-grow: 1; overflow: hidden; }
-        .info b { display: block; color: var(--blue); text-transform: uppercase; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .info span { font-size: 0.75rem; opacity: 0.5; }
-        .reset { cursor: pointer; width: 20px; filter: invert(1); opacity: 0.6; }
-        .btn { width: 100%; padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); font-family: 'Montserrat'; font-weight: 700; text-transform: uppercase; cursor: not-allowed; transition: 0.3s; }
-        .btn.active { background: linear-gradient(to top, var(--green), #0f400b); color: white; cursor: pointer; border-color: #45f53d; }
-        .btn.active:hover { filter: none !important; opacity: 1 !important; }
-        .loader { width: 20px; height: 20px; border: 2px solid rgba(79,172,254,0.1); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        body { font-family: sans-serif; background: #121212; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .search-box { margin-bottom: 20px; }
+        input { padding: 10px; border-radius: 5px; border: none; }
+        button { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        button:hover { background: #0056b3; }
+        
+        #player-card { 
+            background: #1e1e1e; padding: 20px; border-radius: 10px; 
+            display: none; border: 1px solid #333; max-width: 400px; text-align: center;
+        }
+        .avatar { width: 100px; height: 100px; border-radius: 50%; border: 2px solid #edb219; }
+        .guild-logo { width: 50px; vertical-align: middle; }
+        .info-row { margin: 10px 0; }
+        .label { color: #888; font-size: 0.9em; }
+        /* Сохраняем стиль кнопки Share по вашему запросу */
+        .share-btn { background: #28a745; margin-top: 15px; }
+        .share-btn:hover { background: #28a745 !important; opacity: 0.9; }
     </style>
 </head>
 <body>
-<div class="container">
-    <img src="Logos/Logo.png" class="logo">
-    <div class="input-box">
-        <input type="text" id="code" placeholder="000-000-000" maxlength="11" inputmode="numeric">
-        <div id="plate" class="plate">
-            <div id="v-box"><div class="loader"></div></div>
-            <div class="info"><b id="p-name">Загрузка...</b><span id="p-desc">Синхронизация</span></div>
-            <img src="https://img.icons8.com/?size=100&id=95867&format=png" class="reset" id="reset">
-        </div>
+
+    <h2>Поиск игрока SWGOH</h2>
+    
+    <div class="search-box">
+        <input type="text" id="allyCode" placeholder="Введите код (например, 123456789)">
+        <button onclick="fetchPlayer()">Найти</button>
     </div>
-    <button id="btn" class="btn">Продолжить</button>
-</div>
 
-<script>
-    const PROXY = window.location.origin + '/api?url=';
-    const input = document.getElementById('code');
-    const plate = document.getElementById('plate');
-    const btn = document.getElementById('btn');
-    let savedData = null;
+    <div id="loading" style="display: none;">Загрузка...</div>
 
-    input.oninput = (e) => {
-        let v = e.target.value.replace(/\D/g, '').substring(0, 9);
-        e.target.value = v.replace(/(\d{3})(\d{3})(\d{3})/, '$1-$2-$3').replace(/-$/, '');
-        if (v.length === 9) { input.blur(); fetchPlayer(v); }
-    };
+    <div id="player-card">
+        <img id="p-avatar" class="avatar" src="" alt="Avatar">
+        <h3 id="p-name"></h3>
+        <div class="info-row">
+            <span class="label">Звание:</span> <span id="p-title"></span>
+        </div>
+        <hr>
+        <div class="info-row">
+            <img id="g-logo" class="guild-logo" src="" alt="Guild">
+            <span id="g-name" style="font-weight: bold; font-size: 1.2em;"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Роль в гильдии:</span> <span id="g-role"></span>
+        </div>
+        <button class="share-btn">Поделиться</button>
+    </div>
 
-    async function fetchPlayer(code) {
-        input.style.display = 'none';
-        plate.style.display = 'flex';
-        
-        try {
-            const target = encodeURIComponent(`https://swgoh.gg/api/player/${code}/`);
-            const response = await fetch(PROXY + target);
-            const result = await response.json();
-            const p = result.data || result;
+    <script>
+        async function fetchPlayer() {
+            const allyCode = document.getElementById('allyCode').value.replace(/-/g, '');
+            const card = document.getElementById('player-card');
+            const loader = document.getElementById('loading');
+            
+            if (!allyCode) return alert('Введите код союзника');
 
-            if (p && p.name) {
-                savedData = p;
-                document.getElementById('v-box').innerHTML = `<img src="${p.portrait_image}" class="avatar" onerror="this.src='Logos/NoShield.png'">`;
-                document.getElementById('p-name').innerText = p.name;
-                document.getElementById('p-desc').innerText = `ГМ: ${(p.galactic_power/1000000).toFixed(2)}M • ${p.level} LVL`;
-                btn.classList.add('active');
-                btn.disabled = false;
-            } else { throw "err"; }
-        } catch (e) {
-            document.getElementById('v-box').innerHTML = `<img src="Logos/NoShield.png" class="avatar">`;
-            document.getElementById('p-name').innerText = "Не найден";
-            document.getElementById('p-desc').innerText = "Ошибка данных";
+            loader.style.display = 'block';
+            card.style.display = 'none';
+
+            try {
+                // Вызываем нашу Vercel функцию
+                const response = await fetch(`/api?allyCode=${allyCode}`);
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error);
+
+                const p = data.data;
+                
+                // Заполнение данных
+                document.getElementById('p-name').textContent = p.name;
+                document.getElementById('p-title').textContent = p.title || 'Нет звания';
+                document.getElementById('p-avatar').src = `https://game-assets.swgoh.gg/tex.charui_portrait_${p.portrait_id}.png`;
+                
+                document.getElementById('g-name').textContent = p.guild_name;
+                document.getElementById('g-role').textContent = getRoleName(p.guild_member_level);
+                
+                // Логотип гильдии (заглушка, так как API отдает ID баннера, а не прямую ссылку)
+                document.getElementById('g-logo').src = `https://game-assets.swgoh.gg/static/assets/textures/gui/guild/guild_logo_white.png`;
+
+                card.style.display = 'block';
+            } catch (err) {
+                alert('Ошибка: ' + err.message);
+            } finally {
+                loader.style.display = 'none';
+            }
         }
-    }
 
-    btn.onclick = () => {
-        if (savedData) {
-            localStorage.setItem('swgoh_player_data', JSON.stringify(savedData));
-            window.location.href = 'profile.html';
+        function getRoleName(level) {
+            const roles = { 2: 'Участник', 3: 'Офицер', 4: 'Лидер' };
+            return roles[level] || 'Гость';
         }
-    };
-
-    document.getElementById('reset').onclick = () => {
-        plate.style.display = 'none';
-        input.style.display = 'block';
-        input.value = '';
-        btn.classList.remove('active');
-        btn.disabled = true;
-        savedData = null;
-    };
-</script>
+    </script>
 </body>
 </html>
