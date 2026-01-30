@@ -1,13 +1,12 @@
 export default async function handler(req, res) {
-    // Разрешаем запросы с любого домена
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', '*');
 
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     const { url } = req.query;
-    if (!url) return res.status(400).send('Missing URL');
+    if (!url) return res.status(400).send('No URL');
 
     try {
         const response = await fetch(decodeURIComponent(url), {
@@ -16,11 +15,9 @@ export default async function handler(req, res) {
                 "Accept": "application/json"
             }
         });
-
-        if (!response.ok) throw new Error('SWGOH Error');
         const data = await response.json();
         res.status(200).json(data);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        res.status(500).json({ error: "API_ERROR" });
     }
 }
