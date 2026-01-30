@@ -3,108 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SWGOH Info</title>
+    <title>SWGOH Scanner</title>
     <style>
-        body { font-family: -apple-system, system-ui, sans-serif; background: #121212; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .search-box { margin-bottom: 20px; display: flex; gap: 8px; }
-        input { padding: 12px; border-radius: 8px; border: 1px solid #333; background: #1e1e1e; color: white; width: 160px; outline: none; }
-        button { padding: 12px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; }
-        
+        body { font-family: sans-serif; background: #121212; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        input { padding: 12px; border-radius: 8px; border: 1px solid #333; background: #1e1e1e; color: white; width: 160px; margin-bottom: 10px; font-size: 16px; }
+        button { padding: 12px 25px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; }
         #player-card { 
-            background: #1e1e1e; padding: 25px; border-radius: 20px; 
-            display: none; border: 1px solid #333; width: 100%; max-width: 350px; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: #1e1e1e; padding: 25px; border-radius: 20px; display: none; 
+            border: 1px solid #333; width: 100%; max-width: 350px; text-align: center; margin-top: 20px;
         }
-        .avatar { width: 110px; height: 110px; border-radius: 50%; border: 3px solid #edb219; margin-bottom: 10px; }
-        .p-name { font-size: 1.6em; font-weight: bold; margin: 5px 0; }
-        .p-gm { color: #edb219; font-size: 1.1em; margin-bottom: 15px; }
-        
-        .guild-info { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-top: 10px; }
-        .guild-name { color: #4db8ff; font-weight: bold; display: block; }
-        
-        /* Твоя кнопка Share - без затемнения */
-        .share-btn { background: #28a745; width: 100%; margin-top: 20px; padding: 12px; border-radius: 8px; color: white; border: none; font-weight: bold; cursor: pointer; }
+        .avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #edb219; }
+        .share-btn { background: #28a745; width: 100%; margin-top: 20px; padding: 10px; border-radius: 8px; color: white; border: none; font-weight: bold; }
         .share-btn:hover { background: #28a745 !important; opacity: 0.9; }
-
-        #status { margin-top: 15px; font-size: 0.9em; color: #888; }
-        #error-display { color: #ff4d4d; background: rgba(255, 77, 77, 0.1); padding: 10px; border-radius: 8px; margin-top: 10px; display: none; width: 100%; max-width: 350px; text-align: center; }
+        #log { font-size: 10px; color: #555; margin-top: 10px; max-width: 300px; text-align: center; }
     </style>
 </head>
 <body>
 
     <h2>SWGOH SCANNER</h2>
     
-    <div class="search-box">
-        <input type="tel" id="allyCode" placeholder="Код (9 цифр)" maxlength="9">
-        <button onclick="fetchPlayer()">ПОИСК</button>
-    </div>
+    <input type="tel" id="allyCode" placeholder="Код союзника" maxlength="9">
+    <button onclick="fetchPlayer()">НАЙТИ</button>
 
-    <div id="status"></div>
-    <div id="error-display"></div>
+    <div id="status" style="margin-top: 15px; color: #edb219;"></div>
+    <div id="log"></div>
 
     <div id="player-card">
         <img id="p-avatar" class="avatar" src="">
-        <div id="p-name" class="p-name"></div>
-        <div id="p-title" style="color: #aaa; margin-bottom: 5px; font-size: 0.9em;"></div>
-        <div class="p-gm">ГМ: <span id="p-gm-val"></span></div>
-
-        <div class="guild-info">
-            <span class="guild-name" id="g-name"></span>
-            <span id="g-role" style="font-size: 0.8em; color: #888;"></span>
-        </div>
-
+        <h2 id="p-name"></h2>
+        <div id="p-gm" style="color: #edb219; font-weight: bold; margin-bottom: 10px;"></div>
+        <div id="g-name" style="color: #4db8ff;"></div>
         <button class="share-btn">ПОДЕЛИТЬСЯ</button>
     </div>
 
     <script>
         async function fetchPlayer() {
-            const code = document.getElementById('allyCode').value.replace(/-/g, '');
+            const code = document.getElementById('allyCode').value.replace(/\D/g, '');
             const card = document.getElementById('player-card');
             const status = document.getElementById('status');
-            const errBox = document.getElementById('error-display');
-            
-            // Твой рабочий URL (убедись, что https везде!)
-            const workerUrl = `https://swgoh-auth.grasshop119.workers.dev/?allyCode=${code}`;
+            const log = document.getElementById('log');
 
-            if (code.length < 9) return alert('Введите 9 цифр');
+            if (code.length < 9) return alert('9 цифр!');
 
-            status.textContent = "📡 Подключение к Воркеру...";
-            errBox.style.display = 'none';
             card.style.display = 'none';
+            status.textContent = "Поиск в Голонете...";
+            log.textContent = "";
 
-            try {
-                // Добавляем mode: 'cors' для мобильных браузеров
-                const response = await fetch(workerUrl, {
-                    method: 'GET',
-                    mode: 'cors',
-                    headers: { 'Accept': 'application/json' }
-                });
+            // Список прокси (твой воркер + публичный)
+            const targets = [
+                `https://swgoh-auth.grasshop119.workers.dev/?allyCode=${code}`,
+                `https://api.allorigins.win/get?url=${encodeURIComponent('https://swgoh.gg/api/player/' + code + '/')}`
+            ];
 
-                if (!response.ok) throw new Error('Игрок не найден или ошибка Воркера');
+            for (let url of targets) {
+                try {
+                    log.textContent += `Пробую: ${url.split('/')[2]}... `;
+                    const response = await fetch(url);
+                    if (!response.ok) continue;
 
-                const result = await response.json();
-                const p = result.data;
+                    let result = await response.json();
+                    
+                    // Если используем allorigins, данные лежат в .contents
+                    if (result.contents) {
+                        result = JSON.parse(result.contents);
+                    }
 
-                document.getElementById('p-avatar').src = `https://game-assets.swgoh.gg/tex.charui_portrait_${p.portrait_id}.png`;
-                document.getElementById('p-name').textContent = p.name;
-                document.getElementById('p-title').textContent = p.title || 'Ветеран';
-                document.getElementById('p-gm-val').textContent = p.galactic_power.toLocaleString();
-                document.getElementById('g-name').textContent = p.guild_name;
-                document.getElementById('g-role').textContent = getRoleName(p.guild_member_level);
+                    const p = result.data || result;
+                    if (!p.name) continue;
 
-                card.style.display = 'block';
-                status.textContent = "";
-            } catch (err) {
-                status.textContent = "";
-                errBox.style.display = 'block';
-                errBox.textContent = "Ошибка: " + err.message;
-                console.error(err);
+                    // Отрисовка
+                    document.getElementById('p-avatar').src = `https://game-assets.swgoh.gg/tex.charui_portrait_${p.portrait_id}.png`;
+                    document.getElementById('p-name').textContent = p.name;
+                    document.getElementById('p-gm').textContent = `ГМ: ${p.galactic_power.toLocaleString()}`;
+                    document.getElementById('g-name').textContent = p.guild_name;
+
+                    card.style.display = 'block';
+                    status.textContent = "";
+                    return; // Успех! Выходим из цикла.
+                } catch (e) {
+                    log.textContent += "ошибка. ";
+                }
             }
-        }
-
-        function getRoleName(l) {
-            const r = { 4: 'Лидер', 3: 'Офицер' };
-            return r[l] || 'Участник';
+            status.textContent = "Все прокси заблокированы. Попробуй сменить сеть.";
         }
     </script>
 </body>
