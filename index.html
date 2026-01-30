@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SWGOH Hub - Mobile</title>
+    <title>SWGOH Guild Hub</title>
     <style>
         body { 
             font-family: -apple-system, system-ui, sans-serif; 
@@ -19,85 +19,98 @@
         }
         button#main-btn { 
             width: 100%; padding: 15px; margin-top: 10px; border-radius: 12px; border: none; 
-            background: #007bff; color: white; font-weight: bold; font-size: 16px;
+            background: #007bff; color: white; font-weight: bold; font-size: 16px; cursor: pointer;
         }
 
-        /* Карточка игрока */
         #player-card { 
             display: none; width: 100%; max-width: 380px; 
-            background: #111; border-radius: 24px; padding: 20px; 
+            background: #111; border-radius: 24px; padding: 25px; 
             border: 1px solid #222; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             box-sizing: border-box;
         }
 
-        .header-info { text-align: center; position: relative; }
+        .header-info { text-align: center; }
+        .avatar-container { position: relative; display: inline-block; }
         .p-avatar { 
             width: 100px; height: 100px; border-radius: 50%; 
             border: 3px solid #edb219; background: #000;
         }
-        .p-name { font-size: 24px; font-weight: bold; margin: 10px 0 0 0; }
+        .p-level {
+            position: absolute; bottom: 5px; right: 0; background: #edb219;
+            color: black; font-weight: bold; padding: 2px 6px; border-radius: 6px; font-size: 12px;
+        }
+        .p-name { font-size: 26px; font-weight: bold; margin: 10px 0 0 0; }
         .p-title { color: #888; font-size: 13px; margin-bottom: 15px; display: block; }
 
-        /* Гильдия */
+        .gm-box {
+            background: rgba(237, 178, 25, 0.1); padding: 15px; border-radius: 15px;
+            margin-bottom: 20px; border: 1px solid rgba(237, 178, 25, 0.2);
+        }
+
         .guild-card { 
             background: rgba(255,255,255,0.03); border-radius: 15px; 
             padding: 15px; display: flex; align-items: center; gap: 15px; margin-bottom: 20px;
         }
-        .g-logo { width: 50px; height: 50px; }
-        .g-name { color: #4db8ff; font-weight: bold; font-size: 18px; }
+        .g-logo { width: 45px; height: 45px; }
 
-        /* Склад (Юниты) */
+        /* Склад */
         .units-grid { margin-top: 20px; text-align: left; }
         .unit-row { 
-            display: flex; align-items: center; gap: 10px; 
-            background: #1a1a1a; padding: 10px; border-radius: 10px; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 12px; 
+            background: #1a1a1a; padding: 10px; border-radius: 12px; margin-bottom: 8px;
         }
-        .unit-img { width: 45px; height: 45px; border-radius: 5px; border: 1px solid #444; }
+        .unit-img { width: 45px; height: 45px; border-radius: 8px; border: 1px solid #333; }
         .unit-info { flex-grow: 1; }
         .unit-name { font-size: 14px; font-weight: bold; display: block; }
         .unit-gm { font-size: 12px; color: #edb219; }
-        .gear-badge { background: #333; padding: 2px 6px; border-radius: 4px; font-size: 11px; float: right; }
 
-        /* Кнопка Share (твое условие: не темнеет) */
+        /* Share Button - не темнеет */
         .share-btn { 
             background: #28a745 !important; width: 100%; padding: 15px; 
             border: none; border-radius: 12px; color: white; font-weight: bold; margin-top: 15px;
         }
         .share-btn:hover { background: #28a745 !important; opacity: 0.9; }
 
-        #status { color: #edb219; font-size: 14px; margin: 10px; }
+        #status { color: #edb219; font-size: 14px; margin: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
     <div class="search-section">
-        <input type="tel" id="allyCode" placeholder="Код союзника (9 цифр)" maxlength="9">
-        <button id="main-btn" onclick="fetchPlayer()">ЗАГРУЗИТЬ ДАННЫЕ</button>
+        <input type="tel" id="allyCode" placeholder="Код союзника" maxlength="9">
+        <button id="main-btn" onclick="fetchPlayer()">ПОИСК</button>
         <div id="status"></div>
     </div>
 
     <div id="player-card">
         <div class="header-info">
-            <img id="p-avatar" class="p-avatar" src="">
+            <div class="avatar-container">
+                <img id="p-avatar" class="p-avatar" src="">
+                <div id="p-level" class="p-level"></div>
+            </div>
             <div class="p-name" id="p-name"></div>
             <span class="p-title" id="p-title"></span>
-            <div style="color:#edb219; font-weight:bold; margin-bottom:15px;" id="p-gm"></div>
+            
+            <div class="gm-box">
+                <div style="font-size: 11px; color: #edb219; text-transform: uppercase;">Галактическая мощь</div>
+                <div style="font-size: 20px; font-weight: bold;" id="p-gm"></div>
+            </div>
         </div>
 
         <div class="guild-card">
             <img class="g-logo" src="https://game-assets.swgoh.gg/static/assets/textures/gui/guild/guild_logo_white.png">
             <div>
-                <div class="g-name" id="g-name"></div>
-                <div style="font-size:12px; color:#777;" id="g-role"></div>
+                <div style="color: #4db8ff; font-weight: bold;" id="g-name"></div>
+                <div style="font-size: 12px; color: #777;" id="g-role"></div>
             </div>
         </div>
 
         <div class="units-grid">
-            <div style="font-size: 14px; color: #888; margin-bottom: 10px; text-transform: uppercase;">Топ юнитов склада:</div>
+            <div style="font-size: 12px; color: #555; margin-bottom: 10px;">СИЛЬНЕЙШИЕ ЮНИТЫ:</div>
             <div id="units-container"></div>
         </div>
 
-        <button class="share-btn">ПОДЕЛИТЬСЯ КАРТОЧКОЙ</button>
+        <button class="share-btn">ПОДЕЛИТЬСЯ</button>
     </div>
 
     <script>
@@ -109,54 +122,63 @@
 
             if (code.length < 9) return alert('Введите 9 цифр');
 
-            status.textContent = "⌛ Получение данных из Внешнего Кольца...";
+            status.textContent = "📡 Загрузка данных...";
             card.style.display = 'none';
             unitsContainer.innerHTML = '';
 
-            // Используем corsproxy.io для работы на мобильных устройствах
             const url = `https://corsproxy.io/?${encodeURIComponent('https://swgoh.gg/api/player/' + code + '/')}`;
 
             try {
                 const response = await fetch(url);
                 const result = await response.json();
-                const p = result.data;
+
+                // ПРОВЕРКА СТРУКТУРЫ (защита от undefined)
+                if (!result || (!result.data && !result.name)) {
+                    throw new Error("Игрок не найден");
+                }
+
+                // В некоторых ответах данные в .data, в некоторых напрямую в корне
+                const p = result.data ? result.data : result;
+                const units = result.units ? result.units : [];
 
                 // Основная инфа
                 document.getElementById('p-avatar').src = `https://game-assets.swgoh.gg/tex.charui_portrait_${p.portrait_id}.png`;
                 document.getElementById('p-name').textContent = p.name;
-                document.getElementById('p-title').textContent = p.title || 'Ветеран Голонета';
-                document.getElementById('p-gm').textContent = p.galactic_power.toLocaleString() + ' ГМ';
+                document.getElementById('p-level').textContent = p.level;
+                document.getElementById('p-title').textContent = p.title || 'Новобранец';
+                document.getElementById('p-gm').textContent = p.galactic_power.toLocaleString();
                 
                 // Гильдия
-                document.getElementById('g-name').textContent = p.guild_name;
+                document.getElementById('g-name').textContent = p.guild_name || 'Вне гильдии';
                 document.getElementById('g-role').textContent = p.guild_member_level === 4 ? 'Лидер' : (p.guild_member_level === 3 ? 'Офицер' : 'Участник');
 
-                // Склад (Берем топ-5 юнитов по ГМ из массива юнитов)
-                // В твоем JSON юниты лежат в result.units
-                const topUnits = result.units
-                    .sort((a, b) => b.data.galactic_power - a.data.galactic_power)
-                    .slice(0, 5);
+                // Юниты (Топ-3 для красоты)
+                if (units.length > 0) {
+                    const topUnits = units
+                        .sort((a, b) => b.data.galactic_power - a.data.galactic_power)
+                        .slice(0, 3);
 
-                topUnits.forEach(u => {
-                    const unitHtml = `
-                        <div class="unit-row">
-                            <img class="unit-img" src="https://game-assets.swgoh.gg/tex.charui_${u.data.base_id.toLowerCase()}.png" onerror="this.src='https://game-assets.swgoh.gg/tex.charui_jedi_consular.png'">
-                            <div class="unit-info">
-                                <span class="unit-name">${u.data.name}</span>
-                                <span class="unit-gm">${u.data.galactic_power.toLocaleString()} ГМ</span>
+                    topUnits.forEach(u => {
+                        const unitHtml = `
+                            <div class="unit-row">
+                                <img class="unit-img" src="https://game-assets.swgoh.gg/tex.charui_${u.data.base_id.toLowerCase()}.png" onerror="this.src='https://game-assets.swgoh.gg/tex.charui_jedi_consular.png'">
+                                <div class="unit-info">
+                                    <span class="unit-name">${u.data.name}</span>
+                                    <span class="unit-gm">${u.data.galactic_power.toLocaleString()} GM</span>
+                                </div>
+                                <div style="color: #888; font-size: 12px;">R${u.data.relic_tier - 2 > 0 ? u.data.relic_tier - 2 : 0}</div>
                             </div>
-                            <span class="gear-badge">G${u.data.gear_level}</span>
-                        </div>
-                    `;
-                    unitsContainer.innerHTML += unitHtml;
-                });
+                        `;
+                        unitsContainer.innerHTML += unitHtml;
+                    });
+                }
 
                 card.style.display = 'block';
                 status.textContent = "";
 
             } catch (e) {
-                console.error(e);
-                status.textContent = "❌ Ошибка загрузки. Проверьте код союзника.";
+                console.error("Ошибка:", e);
+                status.textContent = "❌ Игрок не найден или ошибка сети.";
             }
         }
     </script>
