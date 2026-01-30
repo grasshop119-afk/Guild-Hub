@@ -3,154 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Guild Hub - Elite Interface</title>
-    
-    <link rel="icon" type="image/jpeg" href="Guild_WEB_Logo.jpg">
+    <title>Guild Hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    
     <style>
-        :root {
-            --bg-dark: #050b14;
-            --accent-blue: #4facfe;
-            --swgoh-green: #26b31e;
-            --text-white: #ffffff;
-        }
-
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-
-        body {
-            margin: 0; font-family: 'Roboto', sans-serif;
-            background: var(--bg-dark); color: var(--text-white);
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; overflow: hidden; position: fixed; width: 100%;
-        }
-
-        .container { text-align: center; width: 90%; max-width: 360px; }
+        :root { --bg: #050b14; --blue: #4facfe; --green: #26b31e; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; position: fixed; width: 100%; }
+        .container { width: 90%; max-width: 360px; text-align: center; }
         .logo { width: 170px; margin-bottom: 25px; }
-        
-        .interactive-area { position: relative; width: 100%; height: 62px; margin-bottom: 20px; }
-
-        input, .plate {
-            width: 100%; height: 100%; background: rgba(255,255,255,0.05); 
-            border: 1px solid rgba(79,172,254,0.3); border-radius: 8px;
-            position: absolute; top: 0; left: 0;
-        }
-
-        input {
-            padding: 0 15px; color: #fff; font-size: 1.2rem;
-            outline: none; text-align: center; letter-spacing: 3px;
-        }
-
-        .plate { display: none; align-items: center; padding: 0 12px; background: #0a1626; z-index: 5; }
-        .avatar { width: 42px; height: 42px; border-radius: 4px; object-fit: cover; background: #1a2a3a; margin-right: 12px; }
-
-        .info { flex-grow: 1; text-align: left; overflow: hidden; }
-        .info b { display: block; color: var(--accent-blue); font-size: 0.95rem; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .input-box { position: relative; height: 62px; margin-bottom: 20px; }
+        input, .plate { width: 100%; height: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(79,172,254,0.3); border-radius: 8px; color: white; text-align: center; font-size: 1.2rem; outline: none; position: absolute; top: 0; left: 0; }
+        .plate { display: none; align-items: center; padding: 0 12px; text-align: left; background: #0a1626; z-index: 5; }
+        .avatar { width: 42px; height: 42px; border-radius: 4px; object-fit: cover; margin-right: 12px; background: #1a2a3a; }
+        .info { flex-grow: 1; overflow: hidden; }
+        .info b { display: block; color: var(--blue); text-transform: uppercase; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .info span { font-size: 0.75rem; opacity: 0.5; }
-
-        .reset-btn { cursor: pointer; opacity: 0.6; filter: invert(1); width: 20px; padding: 5px; box-sizing: content-box; }
-
-        .submit-btn {
-            width: 100%; padding: 20px; font-family: 'Montserrat', sans-serif; font-weight: 700;
-            text-transform: uppercase; color: rgba(255,255,255,0.3); border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
-            cursor: not-allowed; transition: 0.3s;
-        }
-
-        .submit-btn.active {
-            background: linear-gradient(to top, var(--swgoh-green), #0f400b);
-            border: 1px solid #45f53d; color: #fff; cursor: pointer;
-        }
-
-        /* Условие: кнопка не темнеет при наведении и нажатии */
-        .submit-btn.active:hover, .submit-btn.active:active { 
-            filter: none !important; 
-            opacity: 1 !important; 
-            background: linear-gradient(to top, var(--swgoh-green), #0f400b) !important;
-        }
-
-        .loader { width: 20px; height: 20px; border: 2px solid rgba(79,172,254,0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .reset { cursor: pointer; opacity: 0.6; filter: invert(1); width: 20px; padding: 5px; box-sizing: content-box; }
+        .btn { width: 100%; padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); font-family: 'Montserrat'; font-weight: 700; text-transform: uppercase; cursor: not-allowed; transition: 0.3s; }
+        .btn.active { background: linear-gradient(to top, var(--green), #0f400b); color: white; cursor: pointer; border-color: #45f53d; }
+        .btn.active:hover, .btn.active:active { filter: none !important; opacity: 1 !important; }
+        .loader { width: 20px; height: 20px; border: 2px solid rgba(79,172,254,0.1); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-
 <div class="container">
     <img src="Logos/Logo.png" class="logo">
-    
-    <div class="interactive-area">
-        <input type="text" id="allyCode" placeholder="000-000-000" maxlength="11" inputmode="numeric">
-        
-        <div id="statusPlate" class="plate">
+    <div class="input-box">
+        <input type="text" id="code" placeholder="Код союзника" maxlength="11" inputmode="numeric">
+        <div id="plate" class="plate">
             <div id="v-box"><div class="loader"></div></div>
-            <div class="info">
-                <b id="p-name">Загрузка...</b>
-                <span id="p-desc">Синхронизация</span>
-            </div>
-            <img src="https://img.icons8.com/?size=100&id=95867&format=png" class="reset-btn" id="resetBtn">
+            <div class="info"><b id="p-name">Загрузка...</b><span id="p-desc">Синхронизация</span></div>
+            <img src="https://img.icons8.com/?size=100&id=95867&format=png" class="reset" id="reset">
         </div>
     </div>
-
-    <button id="submitBtn" class="submit-btn">Продолжить</button>
+    <button id="btn" class="btn">Продолжить</button>
 </div>
 
 <script>
-    // Путь к твоему новому прокси на Vercel
+    // Путь должен быть таким для Vercel
     const PROXY = '/api?url=';
-    const input = document.getElementById('allyCode');
-    const plate = document.getElementById('statusPlate');
-    const btn = document.getElementById('submitBtn');
+    const input = document.getElementById('code');
+    const plate = document.getElementById('plate');
+    const btn = document.getElementById('btn');
+    let playerData = null;
 
     input.oninput = (e) => {
         let v = e.target.value.replace(/\D/g, '').substring(0, 9);
         e.target.value = v.replace(/(\d{3})(\d{3})(\d{3})/, '$1-$2-$3').replace(/-$/, '');
-        if (v.length === 9) {
-            input.blur();
-            loadPlayer(v);
-        }
+        if (v.length === 9) { input.blur(); load(v); }
     };
 
-    async function loadPlayer(code) {
+    async function load(code) {
         input.style.display = 'none';
         plate.style.display = 'flex';
         document.getElementById('p-name').innerText = "Поиск...";
-        document.getElementById('v-box').innerHTML = '<div class="loader"></div>';
         
         try {
-            const target = `https://swgoh.gg/api/player/${code}/`;
-            // Запрос через твой локальный /api с анти-кэшем
-            const response = await fetch(`${PROXY}${encodeURIComponent(target)}&_=${Date.now()}`);
-            
-            if (!response.ok) throw "Error";
-            
-            const data = await response.json();
+            const api = `https://swgoh.gg/api/player/${code}/`;
+            const res = await fetch(`${PROXY}${encodeURIComponent(api)}`);
+            const data = await res.json();
             const p = data.data || data;
 
             if (p && p.name) {
+                playerData = p; // Сохраняем для кнопки
                 document.getElementById('v-box').innerHTML = `<img src="${p.portrait_image}" class="avatar" onerror="this.src='Logos/NoShield.png'">`;
                 document.getElementById('p-name').innerText = p.name;
                 document.getElementById('p-desc').innerText = `ГМ: ${(p.galactic_power/1000000).toFixed(2)}M • ${p.level} LVL`;
-                
                 btn.classList.add('active');
                 btn.disabled = false;
-            } else { throw "NotFound"; }
+            } else { throw "err"; }
         } catch (e) {
             document.getElementById('v-box').innerHTML = `<img src="Logos/NoShield.png" class="avatar">`;
             document.getElementById('p-name').innerText = "Не найден";
-            document.getElementById('p-desc').innerText = "Профиль не активен";
-            btn.classList.remove('active');
-            btn.disabled = true;
+            document.getElementById('p-desc').innerText = "Ошибка данных";
         }
     }
 
-    document.getElementById('resetBtn').onclick = () => {
+    btn.onclick = () => {
+        if (playerData) {
+            localStorage.setItem('swgoh_player_data', JSON.stringify(playerData));
+            window.location.href = 'profile.html';
+        }
+    };
+
+    document.getElementById('reset').onclick = () => {
         plate.style.display = 'none';
         input.style.display = 'block';
         input.value = '';
         btn.classList.remove('active');
         btn.disabled = true;
+        playerData = null;
     };
 </script>
-
 </body>
 </html>
