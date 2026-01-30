@@ -3,88 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Guild Hub - Elite Interface</title>
-    
-    <link rel="icon" type="image/jpeg" href="Guild_WEB_Logo.jpg">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    
+    <title>Guild Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #050b14; --blue: #4facfe; --green: #26b31e; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            margin: 0; background: var(--bg); color: white; 
-            font-family: 'Roboto', sans-serif; 
-            display: flex; justify-content: center; align-items: center; 
-            height: 100vh; overflow: hidden; position: fixed; width: 100%;
-        }
-
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
         .container { width: 90%; max-width: 360px; text-align: center; }
-        .logo { width: 180px; margin-bottom: 25px; }
-
-        .input-box { position: relative; height: 62px; margin-bottom: 20px; }
-        
-        input, .plate { 
-            width: 100%; height: 100%; background: rgba(255,255,255,0.05); 
-            border: 1px solid rgba(79,172,254,0.3); border-radius: 8px; 
-            color: white; text-align: center; font-size: 1.2rem; outline: none; 
-        }
-
-        .plate { 
-            display: none; align-items: center; padding: 0 12px; 
-            text-align: left; position: absolute; top: 0; left: 0; 
-            background: #0a1626; z-index: 5; 
-        }
-
-        .avatar { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; margin-right: 12px; }
-        
+        .logo { width: 160px; margin-bottom: 20px; }
+        .input-box { position: relative; height: 60px; margin-bottom: 15px; }
+        input, .plate { width: 100%; height: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(79,172,254,0.3); border-radius: 8px; color: white; text-align: center; font-size: 1.1rem; outline: none; }
+        .plate { display: none; align-items: center; padding: 0 10px; text-align: left; position: absolute; top: 0; left: 0; background: #0a1626; }
+        .avatar { width: 40px; height: 40px; border-radius: 4px; margin-right: 10px; }
         .info { flex-grow: 1; overflow: hidden; }
-        .info b { display: block; color: var(--blue); text-transform: uppercase; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .info span { font-size: 0.75rem; opacity: 0.5; }
-
-        .reset { cursor: pointer; opacity: 0.5; filter: invert(1); width: 20px; padding: 5px; box-sizing: content-box; }
-
-        .btn { 
-            width: 100%; padding: 20px; border-radius: 8px; 
-            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); 
-            color: rgba(255,255,255,0.3); font-family: 'Montserrat'; font-weight: 700; 
-            text-transform: uppercase; cursor: not-allowed; transition: 0.3s; 
-        }
-
-        .btn.active { 
-            background: linear-gradient(to top, var(--green), #0f400b); 
-            color: white; cursor: pointer; border-color: #45f53d; 
-        }
-
-        /* Защита от затемнения Share/Submit */
-        .btn.active:hover, .btn.active:active { filter: none !important; opacity: 1 !important; background: linear-gradient(to top, var(--green), #0f400b) !important; }
-
-        .loader { 
-            width: 20px; height: 20px; border: 2px solid rgba(79,172,254,0.1); 
-            border-top-color: var(--blue); border-radius: 50%; 
-            animation: spin 0.8s linear infinite; 
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .info b { display: block; color: var(--blue); font-size: 0.9rem; text-transform: uppercase; }
+        .info span { font-size: 0.7rem; opacity: 0.6; }
+        .reset { cursor: pointer; padding: 10px; opacity: 0.5; filter: invert(1); width: 15px; }
+        .btn { width: 100%; padding: 18px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); font-family: 'Montserrat'; font-weight: 700; text-transform: uppercase; cursor: not-allowed; transition: 0.2s; }
+        .btn.active { background: linear-gradient(to top, var(--green), #0f400b); color: white; cursor: pointer; border-color: #45f53d; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <img src="Logos/Logo.png" class="logo">
     <div class="input-box">
         <input type="text" id="code" placeholder="Код союзника" maxlength="11" inputmode="numeric">
         <div id="plate" class="plate">
-            <div id="v-box" style="margin-right:12px"><div class="loader"></div></div>
-            <div class="info">
-                <b id="p-name">Загрузка...</b>
-                <span id="p-desc">Синхронизация</span>
-            </div>
+            <img id="p-img" class="avatar" src="">
+            <div class="info"><b id="p-name">Загрузка...</b><span id="p-desc">Синхронизация</span></div>
             <img src="https://img.icons8.com/?size=100&id=95867&format=png" class="reset" id="reset">
         </div>
     </div>
     <button id="btn" class="btn">Продолжить</button>
 </div>
-
 <script>
     const WORKER = 'https://swgoh-auth.grasshop119.workers.dev/';
     const input = document.getElementById('code');
@@ -96,49 +47,33 @@
         e.target.value = v.replace(/(\d{3})(\d{3})(\d{3})/, '$1-$2-$3').replace(/-$/, '');
         if (v.length === 9) {
             input.blur();
-            loadPlayer(v);
+            setTimeout(() => load(v), 300); // Небольшая задержка для мобилок
         }
     };
 
-    async function loadPlayer(code) {
+    async function load(code) {
         input.style.display = 'none';
         plate.style.display = 'flex';
+        document.getElementById('p-name').innerText = "Поиск...";
         
-        // Сброс состояния перед запросом
-        document.getElementById('p-name').innerText = "Загрузка...";
-        document.getElementById('p-desc').innerText = "Синхронизация";
-        document.getElementById('v-box').innerHTML = '<div class="loader"></div>';
-
         try {
-            // Двойной кэш-бастер для пробития мобильных браузеров
-            const target = `https://swgoh.gg/api/player/${code}/?nc=${Date.now()}`;
-            const finalUrl = `${WORKER}?url=${encodeURIComponent(target)}&_=${Date.now()}`;
+            const api = `https://swgoh.gg/api/player/${code}/`;
+            // Используем только один кэш-бастер
+            const res = await fetch(`${WORKER}?url=${encodeURIComponent(api)}&ts=${Date.now()}`);
+            const json = await res.json();
+            const p = json.data || json;
 
-            const response = await fetch(finalUrl, { 
-                method: 'GET',
-                cache: 'no-store'
-            });
-            
-            const result = await response.json();
-            // Ищем данные в объекте 'data', как на твоем скриншоте
-            const p = result.data || result;
-
-            if (p && (p.name || p.username)) {
-                document.getElementById('v-box').innerHTML = `<img src="${p.portrait_image}" class="avatar" onerror="this.src='Logos/NoShield.png'">`;
-                document.getElementById('p-name').innerText = p.name || p.username;
-                document.getElementById('p-desc').innerText = `ГМ: ${(p.galactic_power/1000000).toFixed(2)}M • ${p.level || 85} LVL`;
-                
+            if (p && p.name) {
+                document.getElementById('p-img').src = p.portrait_image || 'Logos/NoShield.png';
+                document.getElementById('p-name').innerText = p.name;
+                document.getElementById('p-desc').innerText = `ГМ: ${(p.galactic_power/1000000).toFixed(2)}M • ${p.level} LVL`;
                 btn.classList.add('active');
                 btn.disabled = false;
-            } else {
-                throw "empty";
-            }
-        } catch (err) {
-            document.getElementById('v-box').innerHTML = `<img src="Logos/NoShield.png" class="avatar">`;
+            } else { throw "err"; }
+        } catch (e) {
+            document.getElementById('p-img').src = 'Logos/NoShield.png';
             document.getElementById('p-name').innerText = "Не найден";
-            document.getElementById('p-desc').innerText = "";
-            btn.classList.remove('active');
-            btn.disabled = true;
+            document.getElementById('p-desc').innerText = "Попробуй еще раз";
         }
     }
 
@@ -150,6 +85,5 @@
         btn.disabled = true;
     };
 </script>
-
 </body>
 </html>
