@@ -4,71 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Guild Hub - Elite Inventory</title>
+    
+    <link rel="icon" type="image/jpeg" href="Guild_WEB_Logo.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --bg-dark: #050b14; --accent-blue: #4facfe; --swgoh-green: #26b31e;
             --text-white: #ffffff; --gear-gold: #f8b700; --gear-purple: #bc63ff; --gear-red: #ff4d4d;
         }
+
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+
         body {
-            margin: 0; font-family: 'Roboto', sans-serif; background: var(--bg-dark); color: var(--text-white);
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 60px;
+            margin: 0; font-family: 'Roboto', sans-serif;
+            background: var(--bg-dark); color: var(--text-white);
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; overflow-x: hidden; padding-bottom: 120px;
         }
+
+        /* Консоль отладки */
+        #debugConsole {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 130px;
+            background: rgba(0,0,0,0.95); color: #00ff00; font-family: monospace;
+            font-size: 10px; padding: 10px; overflow-y: auto; z-index: 9999;
+            border-top: 2px solid var(--accent-blue);
+        }
+        .log-error { color: #ff4d4d; }
+        .log-warn { color: #f8b700; }
+
         .main-ui { text-align: center; width: 90%; max-width: 360px; margin-top: 40px; }
         .logo { width: 180px; margin-bottom: 25px; }
+        
         .interactive-area { position: relative; width: 100%; height: 75px; margin-bottom: 20px; }
+
         .swgoh-input, .status-plate {
             width: 100%; height: 100%; background: rgba(255,255,255,0.05); 
-            border: 1px solid rgba(79,172,254,0.3); border-radius: 8px; position: absolute; top: 0; left: 0;
+            border: 1px solid rgba(79,172,254,0.3); border-radius: 8px;
+            position: absolute; top: 0; left: 0;
         }
+
         .swgoh-input { padding: 0 15px; color: #fff; font-size: 1.2rem; outline: none; text-align: center; letter-spacing: 3px; }
+
         .status-plate { display: none; align-items: center; padding: 0 12px; background: #0a1626; z-index: 5; }
         .avatar-box { width: 50px; height: 50px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
         .avatar { width: 100%; height: 100%; border-radius: 4px; border: 1px solid var(--accent-blue); object-fit: cover; }
+
         .info { flex-grow: 1; text-align: left; padding: 0 12px; overflow: hidden; }
         .info b { display: block; color: var(--accent-blue); font-size: 0.95rem; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .info span { font-size: 0.75rem; opacity: 0.7; display: block; }
         .guild-name { color: var(--swgoh-green) !important; font-weight: bold; }
-        .reset-btn { cursor: pointer; opacity: 0.6; filter: invert(1); width: 18px; }
+
+        .reset-btn { cursor: pointer; opacity: 0.6; filter: invert(1); width: 18px; transition: 0.2s; }
 
         .submit-btn {
-            width: 100%; padding: 18px; font-family: 'Montserrat'; font-weight: 700;
+            width: 100%; padding: 18px; font-family: 'Montserrat', sans-serif; font-weight: 700;
             text-transform: uppercase; color: rgba(255,255,255,0.3); border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); cursor: not-allowed; transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
+            cursor: not-allowed; transition: 0.3s;
         }
-        .submit-btn.active { 
-            background: linear-gradient(to top, var(--swgoh-green), #0f400b) !important; 
-            color: #fff !important; cursor: pointer; border: 1px solid #45f53d !important; 
+
+        /* Активная кнопка: не меняет яркость при наведении */
+        .submit-btn.active {
+            background: linear-gradient(to top, var(--swgoh-green), #0f400b) !important;
+            border: 1px solid #45f53d !important; color: #fff !important; cursor: pointer;
+            filter: none !important; opacity: 1 !important;
         }
-        /* Не затемнять кнопку Share */
         .submit-btn.active:hover, .submit-btn.active:active { filter: none !important; opacity: 1 !important; }
 
-        .section-header { width: 90%; max-width: 1000px; text-align: left; margin: 40px 0 15px; color: var(--accent-blue); border-left: 4px solid var(--accent-blue); padding-left: 12px; display: none; }
-        .grid-container { width: 95%; max-width: 1000px; display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 15px; display: none; }
-        .card { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .section-header { 
+            width: 90%; max-width: 1000px; text-align: left; 
+            margin: 40px 0 15px; color: var(--accent-blue); 
+            border-left: 4px solid var(--accent-blue); padding-left: 12px; display: none; 
+        }
+        
+        .grid-container {
+            width: 95%; max-width: 1000px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+            gap: 15px; display: none;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.03); border-radius: 10px; padding: 12px;
+            border: 1px solid rgba(255,255,255,0.05); text-align: center;
+        }
+
         .unit-portrait { position: relative; width: 68px; height: 68px; margin: 0 auto 10px; }
         .unit-img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #3d444d; object-fit: cover; }
-        .relic-tag { position: absolute; bottom: -2px; right: -2px; background: var(--gear-red); color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; border: 1px solid white; font-weight: bold; }
-        .name-label { font-size: 0.75rem; font-weight: 700; height: 2.6em; overflow: hidden; }
-        .stars-row { color: var(--gear-gold); font-size: 0.65rem; }
+        
+        .relic-tag {
+            position: absolute; bottom: -2px; right: -2px;
+            background: var(--gear-red); color: white; font-size: 0.7rem;
+            padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid white;
+        }
+
+        .name-label { font-size: 0.75rem; font-weight: 700; height: 2.6em; overflow: hidden; margin-bottom: 6px; line-height: 1.3; }
+        .stars-row { color: var(--gear-gold); font-size: 0.65rem; margin-bottom: 5px; }
         .stats-label { font-size: 0.8rem; font-weight: 800; }
+
         .loader { width: 24px; height: 24px; border: 2px solid rgba(79,172,254,0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
+<div id="debugConsole"><div>[SYSTEM] Console ready.</div></div>
+
 <div class="main-ui">
     <img src="Logos/Logo.png" class="logo" onerror="this.src='https://img.icons8.com/color/144/star-wars.png'">
+    
     <div class="interactive-area">
         <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11">
+        
         <div id="statusPlate" class="status-plate">
             <div id="avatarBox" class="avatar-box"><div class="loader"></div></div>
-            <div class="info"><b id="pName">Загрузка...</b><span id="pDesc">Синхронизация...</span><span id="pGuild" class="guild-name"></span></div>
+            <div class="info">
+                <b id="pName">Загрузка...</b>
+                <span id="pDesc">Синхронизация...</span>
+                <span id="pGuild" class="guild-name"></span>
+            </div>
             <img src="https://img.icons8.com/?size=100&id=95867&format=png" class="reset-btn" id="resetBtn">
         </div>
     </div>
+
     <button id="submitBtn" class="submit-btn" disabled>Продолжить</button>
 </div>
 
@@ -78,8 +136,19 @@
 <div id="shipsGrid" class="grid-container"></div>
 
 <script>
-    // ВСТАВЬ СВОЙ URL ОТ CLOUDFLARE WORKER
-    const WORKER_URL = 'https://swgoh-auth.grasshop119.workers.dev/'; 
+    const WORKER_URL = 'https://swgoh-auth.grasshop119.workers.dev/';
+    const debug = document.getElementById('debugConsole');
+
+    function log(msg, type = '') {
+        const div = document.createElement('div');
+        if(type) div.className = `log-${type}`;
+        div.innerText = `[${new Date().toLocaleTimeString().split(' ')[0]}] ${msg}`;
+        debug.appendChild(div);
+        debug.scrollTop = debug.scrollHeight;
+    }
+
+    // Ловим глобальные ошибки (важно для iOS)
+    window.onerror = (m, s, l, c, e) => log(`GLOBAL ERR: ${m} at ${l}:${c}`, 'error');
 
     const input = document.getElementById('allyCode');
     const plate = document.getElementById('statusPlate');
@@ -95,14 +164,30 @@
         input.style.display = 'none';
         plate.style.display = 'flex';
         resetGrids();
+        log(`Начинаю поиск: ${code}`);
 
         try {
-            const api = `https://swgoh.gg/api/player/${code}/`;
-            const response = await fetch(`${WORKER_URL}?url=${encodeURIComponent(api)}`);
+            const apiTarget = `https://swgoh.gg/api/player/${code}/`;
+            const fetchUrl = `${WORKER_URL}?url=${encodeURIComponent(apiTarget)}`;
             
-            if (!response.ok) throw "Ошибка сервера";
+            log(`Запрос к воркеру...`);
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 сек таймаут
+
+            const response = await fetch(fetchUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            log(`Статус ответа: ${response.status}`);
+            
+            if (!response.ok) {
+                const errText = await response.text();
+                throw `Worker Error: ${response.status} - ${errText.substring(0, 20)}`;
+            }
 
             const json = await response.json();
+            log(`Данные получены успешно!`);
+            
             const p = json.data || json;
 
             if (p && p.name) {
@@ -110,30 +195,61 @@
                 document.getElementById('pName').innerText = p.name;
                 document.getElementById('pDesc').innerText = `ГМ: ${(p.galactic_power/1000000).toFixed(2)}M • ${p.level} LVL`;
                 document.getElementById('pGuild').innerText = p.guild_name || "Без гильдии";
+
                 if (json.units) renderInventory(json.units);
+                
                 submitBtn.classList.add('active');
                 submitBtn.disabled = false;
+            } else {
+                throw "JSON не содержит данных игрока";
             }
+
         } catch (e) {
+            const msg = e.name === 'AbortError' ? 'Таймаут 15 сек (Воркер спит)' : e;
+            log(msg, 'error');
+            document.getElementById('avatarBox').innerHTML = `❌`;
             document.getElementById('pName').innerText = "Ошибка";
-            document.getElementById('pDesc').innerText = "Попробуйте позже";
+            document.getElementById('pDesc').innerText = "См. консоль внизу";
         }
     }
 
     function renderInventory(units) {
+        log(`Отрисовка юнитов: ${units.length}`);
         const chars = units.filter(u => u.data.combat_type === 1).sort((a,b) => b.data.power - a.data.power);
         const ships = units.filter(u => u.data.combat_type === 2).sort((a,b) => b.data.power - a.data.power);
+
         const buildHTML = (list) => {
             return list.map(u => {
                 const d = u.data;
                 const relic = d.relic_tier > 2 ? d.relic_tier - 2 : null;
                 const stars = '★'.repeat(d.star_level) + '<span style="opacity:0.15">' + '★'.repeat(7 - d.star_level) + '</span>';
                 let gearCol = d.gear_level >= 13 ? 'var(--gear-red)' : (d.gear_level >= 12 ? 'var(--gear-gold)' : (d.gear_level >= 7 ? 'var(--gear-purple)' : 'var(--accent-blue)'));
-                return `<div class="card"><div class="unit-portrait"><img class="unit-img" src="https://game-assets.swgoh.gg/tex.${d.image}.png" loading="lazy" onerror="this.src='Logos/NoShield.png'">${relic ? `<div class="relic-tag">R${relic}</div>` : ''}</div><div class="name-label">${d.name}</div><div class="stars-row">${stars}</div><div class="stats-label" style="color:${gearCol}">${d.combat_type === 1 ? 'Gear ' + d.gear_level : d.power.toLocaleString() + ' GP'}</div></div>`;
+
+                return `
+                    <div class="card">
+                        <div class="unit-portrait">
+                            <img class="unit-img" src="https://game-assets.swgoh.gg/tex.${d.image}.png" loading="lazy" onerror="this.src='Logos/NoShield.png'">
+                            ${relic ? `<div class="relic-tag">R${relic}</div>` : ''}
+                        </div>
+                        <div class="name-label">${d.name}</div>
+                        <div class="stars-row">${stars}</div>
+                        <div class="stats-label" style="color:${gearCol}">
+                            ${d.combat_type === 1 ? 'Gear ' + d.gear_level : d.power.toLocaleString() + ' GP'}
+                        </div>
+                    </div>`;
             }).join('');
         };
-        if (chars.length) { document.getElementById('charsTitle').style.display = 'block'; document.getElementById('charsGrid').innerHTML = buildHTML(chars); document.getElementById('charsGrid').style.display = 'grid'; }
-        if (ships.length) { document.getElementById('shipsTitle').style.display = 'block'; document.getElementById('shipsGrid').innerHTML = buildHTML(ships); document.getElementById('shipsGrid').style.display = 'grid'; }
+
+        if (chars.length) {
+            document.getElementById('charsTitle').style.display = 'block';
+            document.getElementById('charsGrid').innerHTML = buildHTML(chars);
+            document.getElementById('charsGrid').style.display = 'grid';
+        }
+        if (ships.length) {
+            document.getElementById('shipsTitle').style.display = 'block';
+            document.getElementById('shipsGrid').innerHTML = buildHTML(ships);
+            document.getElementById('shipsGrid').style.display = 'grid';
+        }
     }
 
     function resetGrids() {
@@ -142,9 +258,15 @@
     }
 
     document.getElementById('resetBtn').onclick = () => {
-        plate.style.display = 'none'; input.style.display = 'block'; input.value = '';
-        submitBtn.classList.remove('active'); submitBtn.disabled = true; resetGrids();
+        plate.style.display = 'none';
+        input.style.display = 'block';
+        input.value = '';
+        submitBtn.classList.remove('active');
+        submitBtn.disabled = true;
+        resetGrids();
+        log("Сброс формы");
     };
 </script>
+
 </body>
 </html>
