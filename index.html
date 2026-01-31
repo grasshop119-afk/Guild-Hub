@@ -28,7 +28,6 @@
             min-height: 100vh; overflow-x: hidden; padding-bottom: 60px;
         }
 
-        /* Шапка и ввод кода */
         .main-ui { text-align: center; width: 90%; max-width: 360px; margin-top: 40px; }
         .logo { width: 180px; margin-bottom: 25px; }
         
@@ -46,7 +45,7 @@
         }
 
         .status-plate { display: none; align-items: center; padding: 0 12px; background: #0a1626; z-index: 5; }
-        .avatar-box { width: 50px; height: 50px; flex-shrink: 0; position: relative; }
+        .avatar-box { width: 50px; height: 50px; flex-shrink: 0; position: relative; display: flex; align-items: center; justify-content: center; }
         .avatar { width: 100%; height: 100%; border-radius: 4px; border: 1px solid var(--accent-blue); object-fit: cover; }
 
         .info { flex-grow: 1; text-align: left; padding: 0 12px; overflow: hidden; }
@@ -69,10 +68,9 @@
             border: 1px solid #45f53d; color: #fff; cursor: pointer;
         }
 
-        /* Дизайнерское требование: не затемнять Share при наведении */
+        /* Дизайнерское требование: не затемнять Share (submit) при наведении */
         .submit-btn.active:hover { filter: none !important; opacity: 1 !important; }
 
-        /* Секции Склада */
         .section-header { 
             width: 90%; max-width: 1000px; text-align: left; 
             margin: 40px 0 15px; color: var(--accent-blue); 
@@ -86,7 +84,6 @@
             gap: 15px; display: none;
         }
 
-        /* Карточка юнита */
         .card {
             background: rgba(255,255,255,0.03); border-radius: 10px; padding: 12px;
             border: 1px solid rgba(255,255,255,0.05); position: relative; text-align: center;
@@ -106,14 +103,14 @@
         .stars-row { color: var(--gear-gold); font-size: 0.65rem; margin-bottom: 5px; letter-spacing: -1px; }
         .stats-label { font-size: 0.8rem; font-weight: 800; }
 
-        .loader { width: 24px; height: 24px; border: 2px solid rgba(79,172,254,0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 13px; }
+        .loader { width: 24px; height: 24px; border: 2px solid rgba(79,172,254,0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div class="main-ui">
-    <img src="Logos/Logo.png" class="logo">
+    <img src="Logos/Logo.png" class="logo" onerror="this.style.display='none'">
     
     <div class="interactive-area">
         <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11">
@@ -129,7 +126,7 @@
         </div>
     </div>
 
-    <button id="submitBtn" class="submit-btn">Продолжить</button>
+    <button id="submitBtn" class="submit-btn" disabled>Продолжить</button>
 </div>
 
 <div id="charsTitle" class="section-header">ПЕРСОНАЖИ</div>
@@ -139,7 +136,9 @@
 <div id="shipsGrid" class="grid-container"></div>
 
 <script>
+    // ЗАМЕНИ НА СВОЙ URL ПОСЛЕ ДЕПЛОЯ ВОРКЕРА
     const WORKER_URL = 'https://swgoh-auth.grasshop119.workers.dev/';
+    
     const input = document.getElementById('allyCode');
     const plate = document.getElementById('statusPlate');
     const submitBtn = document.getElementById('submitBtn');
@@ -156,33 +155,42 @@
         resetGrids();
 
         try {
-            const api = `https://swgoh.gg/api/player/${code}/`;
-            const response = await fetch(`${WORKER_URL}?url=${encodeURIComponent(api)}`);
+            const apiUrl = `https://swgoh.gg/api/player/${code}/`;
+            const proxyUrl = `${WORKER_URL}?url=${encodeURIComponent(apiUrl)}`;
+            
+            const response = await fetch(proxyUrl, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+            
             const json = await response.json();
+            // API swgoh.gg возвращает данные либо в корне, либо в объекте .data
             const p = json.data || json;
 
             if (p && p.name) {
-                // Основная информация профиля
                 document.getElementById('avatarBox').innerHTML = `<img src="${p.portrait_image}" class="avatar" onerror="this.src='Logos/NoShield.png'">`;
                 document.getElementById('pName').innerText = p.name;
                 document.getElementById('pDesc').innerText = `ГМ: ${(p.galactic_power/1000000).toFixed(2)}M • ${p.level} LVL`;
                 document.getElementById('pGuild').innerText = p.guild_name || "Без гильдии";
 
-                // Отрисовка склада из массива units
                 if (json.units) renderInventory(json.units);
                 
                 submitBtn.classList.add('active');
                 submitBtn.disabled = false;
-            } else { throw "empty"; }
+            } else { 
+                throw new Error("Empty player data"); 
+            }
         } catch (e) {
+            console.error("Fetch error:", e);
             document.getElementById('avatarBox').innerHTML = `<img src="Logos/NoShield.png" class="avatar">`;
             document.getElementById('pName').innerText = "Не найден";
-            document.getElementById('pDesc').innerText = "Ошибка загрузки данных";
+            document.getElementById('pDesc').innerText = "Ошибка доступа или кода";
         }
     }
 
     function renderInventory(units) {
-        // Делим юнитов: combat_type 1 (персонажи), 2 (корабли)
         const chars = units.filter(u => u.data.combat_type === 1).sort((a,b) => b.data.power - a.data.power);
         const ships = units.filter(u => u.data.combat_type === 2).sort((a,b) => b.data.power - a.data.power);
 
@@ -192,7 +200,6 @@
                 const relic = d.relic_tier > 2 ? d.relic_tier - 2 : null;
                 const stars = '★'.repeat(d.star_level) + '<span style="opacity:0.15">' + '★'.repeat(7 - d.star_level) + '</span>';
                 
-                // Цвет в зависимости от Gear Level
                 let gearCol = 'var(--accent-blue)';
                 if (d.gear_level >= 13) gearCol = 'var(--gear-red)';
                 else if (d.gear_level >= 12) gearCol = 'var(--gear-gold)';
