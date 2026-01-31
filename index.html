@@ -22,6 +22,15 @@
             display: flex; flex-direction: column; align-items: center;
             min-height: 100vh; padding-bottom: 60px;
         }
+
+        /* Консоль отладки */
+        #debugConsole {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 150px;
+            background: rgba(0,0,0,0.9); color: #00ff00; font-family: monospace;
+            font-size: 10px; padding: 10px; overflow-y: auto; z-index: 9999;
+            border-top: 1px solid var(--accent-blue); display: none;
+        }
+
         .main-ui { text-align: center; width: 90%; max-width: 360px; margin-top: 40px; }
         .logo { width: 180px; margin-bottom: 25px; }
         .interactive-area { position: relative; width: 100%; height: 75px; margin-bottom: 20px; }
@@ -38,6 +47,7 @@
         .info b { display: block; color: var(--accent-blue); font-size: 0.95rem; text-transform: uppercase; }
         .guild-name { color: var(--swgoh-green) !important; font-weight: bold; }
         .reset-btn { cursor: pointer; opacity: 0.6; filter: invert(1); width: 18px; }
+        
         .submit-btn {
             width: 100%; padding: 18px; font-family: 'Montserrat'; font-weight: 700;
             text-transform: uppercase; color: rgba(255,255,255,0.3); border-radius: 8px;
@@ -45,8 +55,9 @@
             cursor: not-allowed; transition: 0.3s;
         }
         .submit-btn.active { background: linear-gradient(to top, var(--swgoh-green), #0f400b); border: 1px solid #45f53d; color: #fff; cursor: pointer; }
-        /* Сохраняем требование: не затемнять Share */
+        /* Не затемнять Share */
         .submit-btn.active:hover { filter: none !important; opacity: 1 !important; }
+
         .section-header { width: 90%; max-width: 1000px; text-align: left; margin: 40px 0 15px; color: var(--accent-blue); border-left: 4px solid var(--accent-blue); padding-left: 12px; display: none; }
         .grid-container { width: 95%; max-width: 1000px; display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 15px; display: none; }
         .card { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
@@ -60,6 +71,8 @@
     </style>
 </head>
 <body>
+
+<div id="debugConsole"></div>
 
 <div class="main-ui">
     <img src="Logos/Logo.png" class="logo" onerror="this.src='https://img.icons8.com/color/144/star-wars.png'">
@@ -88,6 +101,14 @@
     const input = document.getElementById('allyCode');
     const plate = document.getElementById('statusPlate');
     const submitBtn = document.getElementById('submitBtn');
+    const debug = document.getElementById('debugConsole');
+
+    function log(msg) {
+        debug.style.display = 'block';
+        const time = new Date().toLocaleTimeString().split(' ')[0];
+        debug.innerHTML += `<div>[${time}] ${msg}</div>`;
+        debug.scrollTop = debug.scrollHeight;
+    }
 
     input.oninput = (e) => {
         let val = e.target.value.replace(/\D/g, '').substring(0, 9);
@@ -99,16 +120,33 @@
         input.style.display = 'none';
         plate.style.display = 'flex';
         resetGrids();
+        log(`Начинаю поиск: ${code}`);
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 секунд таймаут
+        const timeoutId = setTimeout(() => {
+            controller.abort();
+            log('ОШИБКА: Таймаут запроса (15с)');
+        }, 15000);
 
         try {
             const api = `https://swgoh.gg/api/player/${code}/`;
-            const response = await fetch(`${WORKER_URL}?url=${encodeURIComponent(api)}`, { signal: controller.signal });
+            log(`Запрос к воркеру...`);
             
-            if (!response.ok) throw "error";
+            const response = await fetch(`${WORKER_URL}?url=${encodeURIComponent(api)}`, { 
+                signal: controller.signal,
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            log(`Статус ответа: ${response.status} ${response.statusText}`);
+            
+            if (!response.ok) {
+                const errText = await response.text();
+                log(`Ошибка сервера: ${errText.substring(0, 50)}`);
+                throw "server_error";
+            }
+
             const json = await response.json();
+            log(`JSON получен успешно`);
             const p = json.data || json;
 
             if (p && p.name) {
@@ -120,10 +158,12 @@
                 if (json.units) renderInventory(json.units);
                 submitBtn.classList.add('active');
                 submitBtn.disabled = false;
+                log(`Данные отрисованы`);
             } else { throw "empty"; }
         } catch (e) {
+            log(`Критическая ошибка: ${e}`);
             document.getElementById('pName').innerText = "Ошибка";
-            document.getElementById('pDesc').innerText = e === "error" ? "Блокировка API" : "Превышено время";
+            document.getElementById('pDesc').innerText = "См. консоль внизу";
             document.getElementById('avatarBox').innerHTML = `❌`;
         }
     }
@@ -168,6 +208,8 @@
         submitBtn.classList.remove('active');
         submitBtn.disabled = true;
         resetGrids();
+        debug.innerHTML = '';
+        debug.style.display = 'none';
     };
 </script>
 </body>
