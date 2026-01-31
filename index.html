@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Guild Hub - Elite Inventory</title>
-    
-    <link rel="icon" type="image/jpeg" href="Guild_WEB_Logo.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    
     <style>
         :root {
             --bg-dark: #050b14;
@@ -18,98 +15,46 @@
             --gear-purple: #bc63ff;
             --gear-red: #ff4d4d;
         }
-
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-
         body {
             margin: 0; font-family: 'Roboto', sans-serif;
             background: var(--bg-dark); color: var(--text-white);
             display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; overflow-x: hidden; padding-bottom: 60px;
+            min-height: 100vh; padding-bottom: 60px;
         }
-
-        /* Шапка и ввод кода */
         .main-ui { text-align: center; width: 90%; max-width: 360px; margin-top: 40px; }
         .logo { width: 180px; margin-bottom: 25px; }
-        
         .interactive-area { position: relative; width: 100%; height: 75px; margin-bottom: 20px; }
-
         .swgoh-input, .status-plate {
             width: 100%; height: 100%; background: rgba(255,255,255,0.05); 
             border: 1px solid rgba(79,172,254,0.3); border-radius: 8px;
             position: absolute; top: 0; left: 0;
         }
-
-        .swgoh-input {
-            padding: 0 15px; color: #fff; font-size: 1.2rem;
-            outline: none; text-align: center; letter-spacing: 3px;
-        }
-
+        .swgoh-input { padding: 0 15px; color: #fff; font-size: 1.2rem; outline: none; text-align: center; letter-spacing: 3px; }
         .status-plate { display: none; align-items: center; padding: 0 12px; background: #0a1626; z-index: 5; }
-        .avatar-box { width: 50px; height: 50px; flex-shrink: 0; position: relative; }
+        .avatar-box { width: 50px; height: 50px; flex-shrink: 0; }
         .avatar { width: 100%; height: 100%; border-radius: 4px; border: 1px solid var(--accent-blue); object-fit: cover; }
-
         .info { flex-grow: 1; text-align: left; padding: 0 12px; overflow: hidden; }
-        .info b { display: block; color: var(--accent-blue); font-size: 0.95rem; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .info span { font-size: 0.75rem; opacity: 0.7; display: block; }
+        .info b { display: block; color: var(--accent-blue); font-size: 0.95rem; text-transform: uppercase; }
         .guild-name { color: var(--swgoh-green) !important; font-weight: bold; }
-
-        .reset-btn { cursor: pointer; opacity: 0.6; filter: invert(1); width: 18px; transition: 0.2s; }
-        .reset-btn:hover { opacity: 1; }
-
+        .reset-btn { cursor: pointer; opacity: 0.6; filter: invert(1); width: 18px; }
         .submit-btn {
-            width: 100%; padding: 18px; font-family: 'Montserrat', sans-serif; font-weight: 700;
+            width: 100%; padding: 18px; font-family: 'Montserrat'; font-weight: 700;
             text-transform: uppercase; color: rgba(255,255,255,0.3); border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
             cursor: not-allowed; transition: 0.3s;
         }
-
-        .submit-btn.active {
-            background: linear-gradient(to top, var(--swgoh-green), #0f400b);
-            border: 1px solid #45f53d; color: #fff; cursor: pointer;
-        }
-
-        /* Дизайнерское требование: не затемнять Share при наведении */
-        .submit-btn.active:hover { 
-            filter: none !important; 
-            opacity: 1 !important; 
-            background: linear-gradient(to top, var(--swgoh-green), #0f400b) !important;
-        }
-
-        /* Секции Склада */
-        .section-header { 
-            width: 90%; max-width: 1000px; text-align: left; 
-            margin: 40px 0 15px; color: var(--accent-blue); 
-            font-family: 'Montserrat'; font-size: 1.1rem; 
-            border-left: 4px solid var(--accent-blue); padding-left: 12px; display: none; 
-        }
-        
-        .grid-container {
-            width: 95%; max-width: 1000px;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
-            gap: 15px; display: none;
-        }
-
-        /* Карточка юнита */
-        .card {
-            background: rgba(255,255,255,0.03); border-radius: 10px; padding: 12px;
-            border: 1px solid rgba(255,255,255,0.05); position: relative; text-align: center;
-        }
-
+        .submit-btn.active { background: linear-gradient(to top, var(--swgoh-green), #0f400b); border: 1px solid #45f53d; color: #fff; cursor: pointer; }
+        /* Сохраняем требование: не затемнять Share */
+        .submit-btn.active:hover { filter: none !important; opacity: 1 !important; }
+        .section-header { width: 90%; max-width: 1000px; text-align: left; margin: 40px 0 15px; color: var(--accent-blue); border-left: 4px solid var(--accent-blue); padding-left: 12px; display: none; }
+        .grid-container { width: 95%; max-width: 1000px; display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 15px; display: none; }
+        .card { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
         .unit-portrait { position: relative; width: 68px; height: 68px; margin: 0 auto 10px; }
-        .unit-img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #3d444d; object-fit: cover; background: #1a1a1a; }
-        
-        .relic-tag {
-            position: absolute; bottom: -2px; right: -2px;
-            background: var(--gear-red); color: white; font-size: 0.7rem;
-            padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .name-label { font-size: 0.75rem; font-weight: 700; height: 2.6em; overflow: hidden; margin-bottom: 6px; line-height: 1.3; }
-        .stars-row { color: var(--gear-gold); font-size: 0.65rem; margin-bottom: 5px; letter-spacing: -1px; }
-        .stats-label { font-size: 0.8rem; font-weight: 800; }
-
+        .unit-img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #3d444d; object-fit: cover; }
+        .relic-tag { position: absolute; bottom: -2px; right: -2px; background: var(--gear-red); color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; border: 1px solid white; }
+        .name-label { font-size: 0.75rem; font-weight: 700; height: 2.6em; overflow: hidden; }
+        .stars-row { color: var(--gear-gold); font-size: 0.65rem; }
         .loader { width: 24px; height: 24px; border: 2px solid rgba(79,172,254,0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 13px; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
@@ -118,10 +63,8 @@
 
 <div class="main-ui">
     <img src="Logos/Logo.png" class="logo" onerror="this.src='https://img.icons8.com/color/144/star-wars.png'">
-    
     <div class="interactive-area">
         <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11">
-        
         <div id="statusPlate" class="status-plate">
             <div id="avatarBox" class="avatar-box"><div class="loader"></div></div>
             <div class="info">
@@ -132,18 +75,15 @@
             <img src="https://img.icons8.com/?size=100&id=95867&format=png" class="reset-btn" id="resetBtn">
         </div>
     </div>
-
     <button id="submitBtn" class="submit-btn">Продолжить</button>
 </div>
 
 <div id="charsTitle" class="section-header">ПЕРСОНАЖИ</div>
 <div id="charsGrid" class="grid-container"></div>
-
 <div id="shipsTitle" class="section-header">ФЛОТ</div>
 <div id="shipsGrid" class="grid-container"></div>
 
 <script>
-    // Используй URL своего обновленного воркера
     const WORKER_URL = 'https://swgoh-auth.grasshop119.workers.dev/'; 
     const input = document.getElementById('allyCode');
     const plate = document.getElementById('statusPlate');
@@ -160,33 +100,31 @@
         plate.style.display = 'flex';
         resetGrids();
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 секунд таймаут
+
         try {
             const api = `https://swgoh.gg/api/player/${code}/`;
-            const response = await fetch(`${WORKER_URL}?url=${encodeURIComponent(api)}`);
+            const response = await fetch(`${WORKER_URL}?url=${encodeURIComponent(api)}`, { signal: controller.signal });
             
-            if (!response.ok) throw new Error("Server response was not ok");
-            
+            if (!response.ok) throw "error";
             const json = await response.json();
             const p = json.data || json;
 
             if (p && p.name) {
-                // Основная информация профиля
+                clearTimeout(timeoutId);
                 document.getElementById('avatarBox').innerHTML = `<img src="${p.portrait_image}" class="avatar" onerror="this.src='Logos/NoShield.png'">`;
                 document.getElementById('pName').innerText = p.name;
                 document.getElementById('pDesc').innerText = `ГМ: ${(p.galactic_power/1000000).toFixed(2)}M • ${p.level} LVL`;
                 document.getElementById('pGuild').innerText = p.guild_name || "Без гильдии";
-
-                // Отрисовка склада из массива units
                 if (json.units) renderInventory(json.units);
-                
                 submitBtn.classList.add('active');
                 submitBtn.disabled = false;
             } else { throw "empty"; }
         } catch (e) {
-            console.error("Fetch error:", e);
-            document.getElementById('avatarBox').innerHTML = `<img src="Logos/NoShield.png" class="avatar">`;
-            document.getElementById('pName').innerText = "Не найден";
-            document.getElementById('pDesc').innerText = "Ошибка доступа или кода";
+            document.getElementById('pName').innerText = "Ошибка";
+            document.getElementById('pDesc').innerText = e === "error" ? "Блокировка API" : "Превышено время";
+            document.getElementById('avatarBox').innerHTML = `❌`;
         }
     }
 
@@ -199,16 +137,11 @@
                 const d = u.data;
                 const relic = d.relic_tier > 2 ? d.relic_tier - 2 : null;
                 const stars = '★'.repeat(d.star_level) + '<span style="opacity:0.15">' + '★'.repeat(7 - d.star_level) + '</span>';
-                
-                let gearCol = 'var(--accent-blue)';
-                if (d.gear_level >= 13) gearCol = 'var(--gear-red)';
-                else if (d.gear_level >= 12) gearCol = 'var(--gear-gold)';
-                else if (d.gear_level >= 7) gearCol = 'var(--gear-purple)';
-
+                let gearCol = d.gear_level >= 13 ? 'var(--gear-red)' : (d.gear_level >= 12 ? 'var(--gear-gold)' : 'var(--accent-blue)');
                 return `
                     <div class="card">
                         <div class="unit-portrait">
-                            <img class="unit-img" src="https://game-assets.swgoh.gg/tex.${d.image}.png" onerror="this.src='Logos/NoShield.png'">
+                            <img class="unit-img" src="https://game-assets.swgoh.gg/tex.${d.image}.png" loading="lazy">
                             ${relic ? `<div class="relic-tag">R${relic}</div>` : ''}
                         </div>
                         <div class="name-label">${d.name}</div>
@@ -216,30 +149,16 @@
                         <div class="stats-label" style="color:${gearCol}">
                             ${d.combat_type === 1 ? 'Gear ' + d.gear_level : d.power.toLocaleString() + ' GP'}
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }).join('');
         };
-
-        if (chars.length) {
-            document.getElementById('charsTitle').style.display = 'block';
-            document.getElementById('charsGrid').innerHTML = buildHTML(chars);
-            document.getElementById('charsGrid').style.display = 'grid';
-        }
-        if (ships.length) {
-            document.getElementById('shipsTitle').style.display = 'block';
-            document.getElementById('shipsGrid').innerHTML = buildHTML(ships);
-            document.getElementById('shipsGrid').style.display = 'grid';
-        }
+        if (chars.length) { document.getElementById('charsTitle').style.display = 'block'; document.getElementById('charsGrid').innerHTML = buildHTML(chars); document.getElementById('charsGrid').style.display = 'grid'; }
+        if (ships.length) { document.getElementById('shipsTitle').style.display = 'block'; document.getElementById('shipsGrid').innerHTML = buildHTML(ships); document.getElementById('shipsGrid').style.display = 'grid'; }
     }
 
     function resetGrids() {
-        document.getElementById('charsGrid').innerHTML = '';
-        document.getElementById('shipsGrid').innerHTML = '';
-        document.getElementById('charsGrid').style.display = 'none';
-        document.getElementById('shipsGrid').style.display = 'none';
-        document.getElementById('charsTitle').style.display = 'none';
-        document.getElementById('shipsTitle').style.display = 'none';
+        ['charsGrid', 'shipsGrid'].forEach(id => document.getElementById(id).innerHTML = '');
+        ['charsGrid', 'shipsGrid', 'charsTitle', 'shipsTitle'].forEach(id => document.getElementById(id).style.display = 'none');
     }
 
     document.getElementById('resetBtn').onclick = () => {
@@ -251,6 +170,5 @@
         resetGrids();
     };
 </script>
-
 </body>
 </html>
