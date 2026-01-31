@@ -28,7 +28,6 @@
             min-height: 100vh; overflow-x: hidden; padding-bottom: 50px;
         }
 
-        /* Шапка */
         .header-section { text-align: center; width: 90%; max-width: 360px; margin-top: 40px; }
         .logo { width: 180px; margin-bottom: 25px; }
         
@@ -50,11 +49,12 @@
         .avatar { width: 100%; height: 100%; border-radius: 4px; border: 1px solid var(--accent-blue); object-fit: cover; }
 
         .info { flex-grow: 1; text-align: left; padding: 0 12px; overflow: hidden; }
-        .info b { display: block; color: var(--accent-blue); font-size: 0.95rem; text-transform: uppercase; }
+        .info b { display: block; color: var(--accent-blue); font-size: 0.95rem; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .info span { font-size: 0.75rem; opacity: 0.7; display: block; }
         .guild-line { color: var(--swgoh-green) !important; font-weight: bold; }
 
-        .reset-btn { cursor: pointer; opacity: 0.6; filter: invert(1); width: 18px; }
+        .reset-btn { cursor: pointer; opacity: 0.6; filter: invert(1); width: 18px; transition: 0.2s; }
+        .reset-btn:hover { opacity: 1; }
 
         .submit-btn {
             width: 100%; padding: 18px; font-family: 'Montserrat', sans-serif; font-weight: 700;
@@ -62,35 +62,46 @@
             border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
             cursor: not-allowed; transition: 0.3s;
         }
-        .submit-btn.active { background: linear-gradient(to top, var(--swgoh-green), #0f400b); color: #fff; cursor: pointer; border: 1px solid #45f53d; }
+
+        .submit-btn.active {
+            background: linear-gradient(to top, var(--swgoh-green), #0f400b);
+            border: 1px solid #45f53d; color: #fff; cursor: pointer;
+        }
+
+        /* Защита Share-кнопки */
         .submit-btn.active:hover { filter: none !important; opacity: 1 !important; }
 
-        /* Склад */
-        .section-title { width: 90%; max-width: 1000px; text-align: left; margin: 30px 0 15px; color: var(--accent-blue); font-family: 'Montserrat'; font-size: 1rem; border-left: 3px solid var(--accent-blue); padding-left: 10px; display: none; }
+        /* Сетка Склада */
+        .section-title { 
+            width: 90%; max-width: 1000px; text-align: left; 
+            margin: 30px 0 15px; color: var(--accent-blue); 
+            font-family: 'Montserrat'; font-size: 1rem; 
+            border-left: 3px solid var(--accent-blue); padding-left: 10px; display: none; 
+        }
         
         .inventory-grid {
             width: 95%; max-width: 1000px;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
             gap: 12px; display: none;
         }
 
         .unit-card {
-            background: rgba(255,255,255,0.03); border-radius: 6px; padding: 8px;
+            background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px;
             border: 1px solid rgba(255,255,255,0.05); position: relative; text-align: center;
         }
 
-        .unit-img-wrapper { position: relative; width: 60px; height: 60px; margin: 0 auto 8px; }
-        .unit-img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #444; object-fit: cover; }
+        .unit-img-wrapper { position: relative; width: 64px; height: 64px; margin: 0 auto 10px; }
+        .unit-img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #444; object-fit: cover; background: #1a1a1a; }
         
         .relic-badge {
             position: absolute; bottom: -2px; right: -2px;
-            background: #ff4d4d; color: white; font-size: 0.65rem;
+            background: var(--gear-red); color: white; font-size: 0.65rem;
             padding: 2px 5px; border-radius: 4px; font-weight: bold; border: 1px solid white;
         }
 
-        .unit-name { font-size: 0.65rem; font-weight: bold; height: 2.4em; overflow: hidden; margin-bottom: 4px; line-height: 1.2; }
-        .unit-stars { color: var(--gear-gold); font-size: 0.6rem; letter-spacing: -1px; margin-bottom: 2px; }
-        .unit-gear { font-size: 0.7rem; font-weight: bold; }
+        .unit-name { font-size: 0.7rem; font-weight: bold; height: 2.6em; overflow: hidden; margin-bottom: 5px; line-height: 1.3; }
+        .unit-stars { color: var(--gear-gold); font-size: 0.6rem; letter-spacing: -1px; margin-bottom: 4px; }
+        .unit-gear { font-size: 0.75rem; font-weight: bold; }
 
         .loader { width: 24px; height: 24px; border: 2px solid rgba(79,172,254,0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 13px; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -100,8 +111,10 @@
 
 <div class="header-section">
     <img src="Logos/Logo.png" class="logo">
+    
     <div class="interactive-area">
         <input type="text" id="allyCode" class="swgoh-input" placeholder="000-000-000" maxlength="11">
+        
         <div id="statusPlate" class="status-plate">
             <div id="avatarBox" class="avatar-container"><div class="loader"></div></div>
             <div class="info">
@@ -112,6 +125,7 @@
             <img src="https://img.icons8.com/?size=100&id=95867&format=png" class="reset-btn" id="resetBtn">
         </div>
     </div>
+
     <button id="submitBtn" class="submit-btn">Продолжить</button>
 </div>
 
@@ -136,7 +150,7 @@
     async function performSearch(code) {
         input.style.display = 'none';
         plate.style.display = 'flex';
-        resetGrids();
+        resetUI();
 
         try {
             const api = `https://swgoh.gg/api/player/${code}/`;
@@ -145,37 +159,39 @@
             const p = json.data || json;
 
             if (p && p.name) {
+                // Основная инфо
                 document.getElementById('avatarBox').innerHTML = `<img src="${p.portrait_image}" class="avatar" onerror="this.src='Logos/NoShield.png'">`;
                 document.getElementById('pName').innerText = p.name;
                 document.getElementById('pDesc').innerText = `ГМ: ${(p.galactic_power/1000000).toFixed(2)}M • ${p.level} LVL`;
-                document.getElementById('pGuild').innerText = p.guild_name || "";
+                document.getElementById('pGuild').innerText = p.guild_name || "Без гильдии";
 
-                renderUnits(json.units);
+                // Отрисовка склада
+                if (json.units) renderInventory(json.units);
                 
                 submitBtn.classList.add('active');
                 submitBtn.disabled = false;
-            }
+            } else { throw "empty"; }
         } catch (e) {
-            document.getElementById('pName').innerText = "Ошибка";
-            document.getElementById('pDesc').innerText = "Игрок не найден";
+            document.getElementById('avatarBox').innerHTML = `<img src="Logos/NoShield.png" class="avatar">`;
+            document.getElementById('pName').innerText = "Не найден";
+            document.getElementById('pDesc').innerText = "Проверьте код";
         }
     }
 
-    function renderUnits(units) {
+    function renderInventory(units) {
         const chars = units.filter(u => u.data.combat_type === 1).sort((a,b) => b.data.power - a.data.power);
         const ships = units.filter(u => u.data.combat_type === 2).sort((a,b) => b.data.power - a.data.power);
 
-        const draw = (list, containerId) => {
-            const container = document.getElementById(containerId);
-            container.innerHTML = list.map(u => {
+        const buildHTML = (list) => {
+            return list.map(u => {
                 const d = u.data;
                 const relic = d.relic_tier > 2 ? d.relic_tier - 2 : null;
                 const stars = '★'.repeat(d.star_level) + '<span style="opacity:0.2">' + '★'.repeat(7 - d.star_level) + '</span>';
                 
-                let gColor = 'var(--accent-blue)';
-                if (d.gear_level >= 13) gColor = 'var(--gear-red)';
-                else if (d.gear_level >= 12) gColor = 'var(--gear-gold)';
-                else if (d.gear_level >= 7) gColor = 'var(--gear-purple)';
+                let gearColor = 'var(--accent-blue)';
+                if (d.gear_level >= 13) gearColor = 'var(--gear-red)';
+                else if (d.gear_level >= 12) gearColor = 'var(--gear-gold)';
+                else if (d.gear_level >= 7) gearColor = 'var(--gear-purple)';
 
                 return `
                     <div class="unit-card">
@@ -185,23 +201,31 @@
                         </div>
                         <div class="unit-name">${d.name}</div>
                         <div class="unit-stars">${stars}</div>
-                        <div class="unit-gear" style="color:${gColor}">${d.combat_type === 1 ? 'Gear ' + d.gear_level : d.power.toLocaleString()}</div>
+                        <div class="unit-gear" style="color:${gearColor}">${d.combat_type === 1 ? 'Gear ' + d.gear_level : d.power.toLocaleString()}</div>
                     </div>
                 `;
             }).join('');
-            container.style.display = 'grid';
         };
 
-        if(chars.length) { document.getElementById('charsTitle').style.display = 'block'; draw(chars, 'charsGrid'); }
-        if(ships.length) { document.getElementById('shipsTitle').style.display = 'block'; draw(ships, 'shipsGrid'); }
+        if (chars.length) {
+            document.getElementById('charsTitle').style.display = 'block';
+            document.getElementById('charsGrid').innerHTML = buildHTML(chars);
+            document.getElementById('charsGrid').style.display = 'grid';
+        }
+        if (ships.length) {
+            document.getElementById('shipsTitle').style.display = 'block';
+            document.getElementById('shipsGrid').innerHTML = buildHTML(ships);
+            document.getElementById('shipsGrid').style.display = 'grid';
+        }
     }
 
-    function resetGrids() {
-        ['charsGrid', 'shipsGrid'].forEach(id => {
-            document.getElementById(id).innerHTML = '';
-            document.getElementById(id).style.display = 'none';
-        });
-        ['charsTitle', 'shipsTitle'].forEach(id => document.getElementById(id).style.display = 'none');
+    function resetUI() {
+        document.getElementById('charsGrid').innerHTML = '';
+        document.getElementById('shipsGrid').innerHTML = '';
+        document.getElementById('charsGrid').style.display = 'none';
+        document.getElementById('shipsGrid').style.display = 'none';
+        document.getElementById('charsTitle').style.display = 'none';
+        document.getElementById('shipsTitle').style.display = 'none';
     }
 
     document.getElementById('resetBtn').onclick = () => {
@@ -210,7 +234,7 @@
         input.value = '';
         submitBtn.classList.remove('active');
         submitBtn.disabled = true;
-        resetGrids();
+        resetUI();
     };
 </script>
 
