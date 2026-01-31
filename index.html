@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Guild Hub - Elite</title>
+    <title>Guild Hub - Elite Inventory</title>
     
     <link rel="icon" type="image/jpeg" href="Guild_WEB_Logo.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -28,7 +28,8 @@
             min-height: 100vh; overflow-x: hidden; padding-bottom: 60px;
         }
 
-        .main-container { text-align: center; width: 90%; max-width: 360px; margin-top: 40px; }
+        /* Шапка и ввод кода */
+        .main-ui { text-align: center; width: 90%; max-width: 360px; margin-top: 40px; }
         .logo { width: 180px; margin-bottom: 25px; }
         
         .interactive-area { position: relative; width: 100%; height: 75px; margin-bottom: 20px; }
@@ -62,8 +63,13 @@
             border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
             cursor: not-allowed; transition: 0.3s;
         }
-        .submit-btn.active { background: linear-gradient(to top, var(--swgoh-green), #0f400b); color: #fff; cursor: pointer; border: 1px solid #45f53d; }
-        /* Защита от затемнения по вашему правилу */
+
+        .submit-btn.active {
+            background: linear-gradient(to top, var(--swgoh-green), #0f400b);
+            border: 1px solid #45f53d; color: #fff; cursor: pointer;
+        }
+
+        /* Дизайнерское требование: не затемнять Share при наведении */
         .submit-btn.active:hover { filter: none !important; opacity: 1 !important; }
 
         /* Секции Склада */
@@ -80,12 +86,11 @@
             gap: 15px; display: none;
         }
 
+        /* Карточка юнита */
         .card {
             background: rgba(255,255,255,0.03); border-radius: 10px; padding: 12px;
             border: 1px solid rgba(255,255,255,0.05); position: relative; text-align: center;
-            transition: 0.2s;
         }
-        .card:hover { background: rgba(255,255,255,0.07); }
 
         .unit-portrait { position: relative; width: 68px; height: 68px; margin: 0 auto 10px; }
         .unit-img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #3d444d; object-fit: cover; background: #1a1a1a; }
@@ -107,7 +112,7 @@
 </head>
 <body>
 
-<div class="main-container">
+<div class="main-ui">
     <img src="Logos/Logo.png" class="logo">
     
     <div class="interactive-area">
@@ -117,7 +122,7 @@
             <div id="avatarBox" class="avatar-box"><div class="loader"></div></div>
             <div class="info">
                 <b id="pName">Загрузка...</b>
-                <span id="pDesc">Синхронизация аккаунта</span>
+                <span id="pDesc">Синхронизация данных</span>
                 <span id="pGuild" class="guild-name"></span>
             </div>
             <img src="https://img.icons8.com/?size=100&id=95867&format=png" class="reset-btn" id="resetBtn">
@@ -148,7 +153,7 @@
     async function performSearch(code) {
         input.style.display = 'none';
         plate.style.display = 'flex';
-        clearGrids();
+        resetGrids();
 
         try {
             const api = `https://swgoh.gg/api/player/${code}/`;
@@ -157,37 +162,37 @@
             const p = json.data || json;
 
             if (p && p.name) {
-                // Данные игрока
+                // Основная информация профиля
                 document.getElementById('avatarBox').innerHTML = `<img src="${p.portrait_image}" class="avatar" onerror="this.src='Logos/NoShield.png'">`;
                 document.getElementById('pName').innerText = p.name;
                 document.getElementById('pDesc').innerText = `ГМ: ${(p.galactic_power/1000000).toFixed(2)}M • ${p.level} LVL`;
-                document.getElementById('pGuild').innerText = p.guild_name || "Нет гильдии";
+                document.getElementById('pGuild').innerText = p.guild_name || "Без гильдии";
 
-                // Обработка юнитов
-                if (json.units) renderUnits(json.units);
+                // Отрисовка склада из массива units
+                if (json.units) renderInventory(json.units);
                 
                 submitBtn.classList.add('active');
                 submitBtn.disabled = false;
-            } else { throw "error"; }
+            } else { throw "empty"; }
         } catch (e) {
             document.getElementById('avatarBox').innerHTML = `<img src="Logos/NoShield.png" class="avatar">`;
             document.getElementById('pName').innerText = "Не найден";
-            document.getElementById('pDesc').innerText = "Проверьте код союзника";
+            document.getElementById('pDesc').innerText = "Ошибка загрузки данных";
         }
     }
 
-    function renderUnits(units) {
-        // Разделяем по типу (1 - персы, 2 - корабли) и сортируем по мощи
+    function renderInventory(units) {
+        // Делим юнитов: combat_type 1 (персонажи), 2 (корабли)
         const chars = units.filter(u => u.data.combat_type === 1).sort((a,b) => b.data.power - a.data.power);
         const ships = units.filter(u => u.data.combat_type === 2).sort((a,b) => b.data.power - a.data.power);
 
-        const generateCards = (list) => {
+        const buildHTML = (list) => {
             return list.map(u => {
                 const d = u.data;
                 const relic = d.relic_tier > 2 ? d.relic_tier - 2 : null;
                 const stars = '★'.repeat(d.star_level) + '<span style="opacity:0.15">' + '★'.repeat(7 - d.star_level) + '</span>';
                 
-                // Цвет снаряжения
+                // Цвет в зависимости от Gear Level
                 let gearCol = 'var(--accent-blue)';
                 if (d.gear_level >= 13) gearCol = 'var(--gear-red)';
                 else if (d.gear_level >= 12) gearCol = 'var(--gear-gold)';
@@ -201,7 +206,9 @@
                         </div>
                         <div class="name-label">${d.name}</div>
                         <div class="stars-row">${stars}</div>
-                        <div class="stats-label" style="color:${gearCol}">${d.combat_type === 1 ? 'Gear ' + d.gear_level : d.power.toLocaleString()}</div>
+                        <div class="stats-label" style="color:${gearCol}">
+                            ${d.combat_type === 1 ? 'Gear ' + d.gear_level : d.power.toLocaleString() + ' GP'}
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -209,22 +216,23 @@
 
         if (chars.length) {
             document.getElementById('charsTitle').style.display = 'block';
-            document.getElementById('charsGrid').innerHTML = generateCards(chars);
+            document.getElementById('charsGrid').innerHTML = buildHTML(chars);
             document.getElementById('charsGrid').style.display = 'grid';
         }
         if (ships.length) {
             document.getElementById('shipsTitle').style.display = 'block';
-            document.getElementById('shipsGrid').innerHTML = generateCards(ships);
+            document.getElementById('shipsGrid').innerHTML = buildHTML(ships);
             document.getElementById('shipsGrid').style.display = 'grid';
         }
     }
 
-    function clearGrids() {
-        ['charsGrid', 'shipsGrid'].forEach(id => {
-            document.getElementById(id).innerHTML = '';
-            document.getElementById(id).style.display = 'none';
-        });
-        ['charsTitle', 'shipsTitle'].forEach(id => document.getElementById(id).style.display = 'none');
+    function resetGrids() {
+        document.getElementById('charsGrid').innerHTML = '';
+        document.getElementById('shipsGrid').innerHTML = '';
+        document.getElementById('charsGrid').style.display = 'none';
+        document.getElementById('shipsGrid').style.display = 'none';
+        document.getElementById('charsTitle').style.display = 'none';
+        document.getElementById('shipsTitle').style.display = 'none';
     }
 
     document.getElementById('resetBtn').onclick = () => {
@@ -233,7 +241,7 @@
         input.value = '';
         submitBtn.classList.remove('active');
         submitBtn.disabled = true;
-        clearGrids();
+        resetGrids();
     };
 </script>
 
