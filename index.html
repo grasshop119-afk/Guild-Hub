@@ -108,7 +108,7 @@
 </head>
 <body>
 
-<div id="debugConsole"><div>[SYSTEM] Console ready.</div></div>
+<div id="debugConsole"><div>[SYSTEM] Ready via AllOrigins.</div></div>
 
 <div class="main-ui">
     <img src="Logos/Logo.png" class="logo" onerror="this.src='https://img.icons8.com/color/144/star-wars.png'">
@@ -136,7 +136,6 @@
 <div id="shipsGrid" class="grid-container"></div>
 
 <script>
-    const WORKER_URL = 'https://swgoh-auth.grasshop119.workers.dev/';
     const debug = document.getElementById('debugConsole');
 
     function log(msg, type = '') {
@@ -147,8 +146,8 @@
         debug.scrollTop = debug.scrollHeight;
     }
 
-    // Ловим глобальные ошибки (важно для iOS)
-    window.onerror = (m, s, l, c, e) => log(`GLOBAL ERR: ${m} at ${l}:${c}`, 'error');
+    // Ловим глобальные ошибки
+    window.onerror = (m, s, l, c, e) => log(`GLOBAL ERR: ${m}`, 'error');
 
     const input = document.getElementById('allyCode');
     const plate = document.getElementById('statusPlate');
@@ -164,30 +163,35 @@
         input.style.display = 'none';
         plate.style.display = 'flex';
         resetGrids();
-        log(`Начинаю поиск: ${code}`);
+        log(`Поиск: ${code} через AllOrigins`);
 
         try {
             const apiTarget = `https://swgoh.gg/api/player/${code}/`;
-            const fetchUrl = `${WORKER_URL}?url=${encodeURIComponent(apiTarget)}`;
+            // Добавляем timestamp, чтобы избежать кеширования
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiTarget)}&t=${Date.now()}`;
             
-            log(`Запрос к воркеру...`);
+            log(`Запрос ушел...`);
             
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 сек таймаут
+            const response = await fetch(proxyUrl);
+            
+            if (!response.ok) throw `Proxy Error: ${response.status}`;
 
-            const response = await fetch(fetchUrl, { signal: controller.signal });
-            clearTimeout(timeoutId);
-
-            log(`Статус ответа: ${response.status}`);
+            const wrapper = await response.json();
             
-            if (!response.ok) {
-                const errText = await response.text();
-                throw `Worker Error: ${response.status} - ${errText.substring(0, 20)}`;
+            // AllOrigins возвращает данные внутри поля .contents как строку
+            if (!wrapper.contents) throw "Пустой ответ от прокси";
+            
+            log(`Данные получены, парсинг...`);
+            
+            let json;
+            try {
+                json = JSON.parse(wrapper.contents);
+            } catch (parseErr) {
+                // Если парсинг упал, значит пришел HTML (ошибка swgoh)
+                log(`Пришел не JSON. Начало ответа: ${wrapper.contents.substring(0, 50)}`, 'error');
+                throw "Сайт SWGOH вернул ошибку (возможно, техработы)";
             }
 
-            const json = await response.json();
-            log(`Данные получены успешно!`);
-            
             const p = json.data || json;
 
             if (p && p.name) {
@@ -200,21 +204,20 @@
                 
                 submitBtn.classList.add('active');
                 submitBtn.disabled = false;
+                log("Успех!");
             } else {
-                throw "JSON не содержит данных игрока";
+                throw "Неверная структура JSON";
             }
 
         } catch (e) {
-            const msg = e.name === 'AbortError' ? 'Таймаут 15 сек (Воркер спит)' : e;
-            log(msg, 'error');
+            log(e, 'error');
             document.getElementById('avatarBox').innerHTML = `❌`;
             document.getElementById('pName').innerText = "Ошибка";
-            document.getElementById('pDesc').innerText = "См. консоль внизу";
+            document.getElementById('pDesc').innerText = "См. лог";
         }
     }
 
     function renderInventory(units) {
-        log(`Отрисовка юнитов: ${units.length}`);
         const chars = units.filter(u => u.data.combat_type === 1).sort((a,b) => b.data.power - a.data.power);
         const ships = units.filter(u => u.data.combat_type === 2).sort((a,b) => b.data.power - a.data.power);
 
@@ -264,7 +267,7 @@
         submitBtn.classList.remove('active');
         submitBtn.disabled = true;
         resetGrids();
-        log("Сброс формы");
+        log("Сброс");
     };
 </script>
 
